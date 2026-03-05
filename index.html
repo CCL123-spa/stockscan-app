@@ -1014,6 +1014,25 @@ html, body {
 .tpb-price { font-family:'DM Mono',monospace; font-size:1.3rem; font-weight:500; color:var(--red); }
 .tpb-reason { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--text2); margin-top:4px; line-height:1.6; }
 .btn-remove-pos { width:100%; padding:12px; background:transparent; border:1px solid rgba(245,86,74,0.3); border-radius:10px; color:var(--red); font-family:'Outfit',monospace; font-size:0.85rem; font-weight:600; cursor:pointer; margin-top:8px; }
+
+.pt-preset { padding:5px 10px; background:var(--card); border:1px solid var(--border); border-radius:20px; font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all 0.15s; }
+.pt-preset:hover { border-color:var(--accent); color:var(--accent); }
+.pt-preset:active { transform:scale(0.96); }
+
+.pt-card { background:var(--card2); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:12px; }
+.pt-card-header { padding:14px 16px 10px; border-bottom:1px solid var(--border); }
+.pt-decision-row { display:flex; gap:8px; padding:14px 16px; }
+.pt-btn { flex:1; padding:12px 8px; border-radius:10px; border:1px solid var(--border); background:var(--card); cursor:pointer; font-family:'Outfit',sans-serif; font-size:0.78rem; font-weight:600; transition:all 0.15s; text-align:center; }
+.pt-btn:active { transform:scale(0.97); }
+.pt-btn.buy  { color:var(--green); border-color:rgba(34,211,160,0.3); }
+.pt-btn.wait { color:var(--orange); border-color:rgba(245,158,42,0.3); }
+.pt-btn.sell { color:var(--red); border-color:rgba(245,86,74,0.3); }
+.pt-btn.selected-buy  { background:rgba(34,211,160,0.15); border-color:var(--green); }
+.pt-btn.selected-wait { background:rgba(245,158,42,0.15); border-color:var(--orange); }
+.pt-btn.selected-sell { background:rgba(245,86,74,0.15); border-color:var(--red); }
+.pt-outcome { padding:14px 16px; border-top:1px solid var(--border); }
+.pt-outcome-correct { background:rgba(34,211,160,0.07); }
+.pt-outcome-wrong   { background:rgba(245,86,74,0.07); }
 .train-stats-bar {
   display: flex;
   align-items: center;
@@ -1382,7 +1401,7 @@ html, body {
     <div class="topbar-right">
       <div class="live-pill">
         <div class="live-dot"></div>
-        DEMO
+        LIVE
       </div>
     </div>
   </div>
@@ -1612,39 +1631,86 @@ html, body {
     <!-- ── ENTRENAMIENTO ── -->
     <div class="page" id="page-train">
 
-      <div class="train-stats-bar">
-        <div class="tstat">
-          <div class="tstat-val" id="tr-total">0</div>
-          <div class="tstat-lbl">CASOS</div>
+      <!-- Tabs: Casos clásicos / Paper trading -->
+      <div style="display:flex;gap:0;margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px">
+        <button id="tab-classic" onclick="switchTrainTab('classic')" style="flex:1;padding:8px;border:none;border-radius:9px;background:var(--accent);color:var(--bg);font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:600;cursor:pointer">🎯 Casos clásicos</button>
+        <button id="tab-paper" onclick="switchTrainTab('paper')" style="flex:1;padding:8px;border:none;border-radius:9px;background:transparent;color:var(--text2);font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer">📅 Paper trading real</button>
+      </div>
+
+      <!-- PANEL CASOS CLÁSICOS -->
+      <div id="panel-classic">
+        <div class="train-stats-bar">
+          <div class="tstat">
+            <div class="tstat-val" id="tr-total">0</div>
+            <div class="tstat-lbl">CASOS</div>
+          </div>
+          <div class="tstat-div"></div>
+          <div class="tstat">
+            <div class="tstat-val" id="tr-correct" style="color:var(--green)">0</div>
+            <div class="tstat-lbl">ACIERTOS</div>
+          </div>
+          <div class="tstat-div"></div>
+          <div class="tstat">
+            <div class="tstat-val" id="tr-pct">—</div>
+            <div class="tstat-lbl">PRECISIÓN</div>
+          </div>
+          <div class="tstat-div"></div>
+          <div class="tstat">
+            <div class="tstat-val" id="tr-pnl" style="color:var(--accent)">+0%</div>
+            <div class="tstat-lbl">P&L ACUM.</div>
+          </div>
         </div>
-        <div class="tstat-div"></div>
-        <div class="tstat">
-          <div class="tstat-val" id="tr-correct" style="color:var(--green)">0</div>
-          <div class="tstat-lbl">ACIERTOS</div>
-        </div>
-        <div class="tstat-div"></div>
-        <div class="tstat">
-          <div class="tstat-val" id="tr-pct">—</div>
-          <div class="tstat-lbl">PRECISIÓN</div>
-        </div>
-        <div class="tstat-div"></div>
-        <div class="tstat">
-          <div class="tstat-val" id="tr-pnl" style="color:var(--accent)">+0%</div>
-          <div class="tstat-lbl">P&L ACUM.</div>
+        <div id="train-area">
+          <div class="train-welcome">
+            <div class="tw-icon">🎯</div>
+            <h2>Modo Entrenamiento</h2>
+            <p>Casos reales del pasado. Tú decides qué habrías hecho. Descubre qué pasó realmente.</p>
+            <button class="btn-scan" style="margin-top:20px;max-width:300px;margin-left:auto;margin-right:auto" onclick="loadCase()">▶ Empezar primer caso</button>
+            <div class="tw-hint">35 situaciones reales · 2020–2024</div>
+          </div>
         </div>
       </div>
 
-      <div id="train-area">
-        <div class="train-welcome">
-          <div class="tw-icon">🎯</div>
-          <h2>Modo Entrenamiento</h2>
-          <p>Casos reales del pasado. Tú decides qué habrías hecho. Descubre qué pasó realmente.</p>
-          <button class="btn-scan" style="margin-top:20px;max-width:300px;margin-left:auto;margin-right:auto" onclick="loadCase()">▶ Empezar primer caso</button>
-          <div class="tw-hint">35 situaciones reales · 2020–2024</div>
-        </div>
-      </div>
+      <!-- PANEL PAPER TRADING HISTÓRICO -->
+      <div id="panel-paper" style="display:none">
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Configura tu sesión</div>
 
-    </div>
+          <div style="margin-bottom:12px">
+            <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-bottom:6px">FECHA DE ANÁLISIS</div>
+            <input id="pt-date" type="date" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none">
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+              <button onclick="setPTDate(1)" class="pt-preset">Hace 1 mes</button>
+              <button onclick="setPTDate(3)" class="pt-preset">Hace 3 meses</button>
+              <button onclick="setPTDate(6)" class="pt-preset">Hace 6 meses</button>
+              <button onclick="setPTDate(12)" class="pt-preset">Hace 1 año</button>
+              <button onclick="setPTDate(24)" class="pt-preset">Hace 2 años</button>
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px">
+            <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-bottom:6px">ACCIÓN A ANALIZAR</div>
+            <input id="pt-ticker" type="text" placeholder="Ej: AAPL, SAN.MC, ASML.AS…" autocapitalize="characters" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none" oninput="this.value=this.value.toUpperCase()">
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+              <button onclick="setPTTicker('AAPL')" class="pt-preset">AAPL</button>
+              <button onclick="setPTTicker('NVDA')" class="pt-preset">NVDA</button>
+              <button onclick="setPTTicker('MSFT')" class="pt-preset">MSFT</button>
+              <button onclick="setPTTicker('SAN.MC')" class="pt-preset">SAN</button>
+              <button onclick="setPTTicker('ITX.MC')" class="pt-preset">ITX</button>
+              <button onclick="setPTTicker('ASML.AS')" class="pt-preset">ASML</button>
+              <button onclick="setPTTicker('META')" class="pt-preset">META</button>
+              <button onclick="setPTTicker('TSLA')" class="pt-preset">TSLA</button>
+            </div>
+          </div>
+
+          <button onclick="runPaperTrade()" style="width:100%;padding:13px;background:var(--accent);color:var(--bg);border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer">
+            📅 Analizar en esa fecha
+          </button>
+        </div>
+
+        <!-- Resultado del análisis histórico -->
+        <div id="pt-result" style="display:none"></div>
+      </div>
 
     </div><!-- /page-train -->
 
@@ -1981,17 +2047,15 @@ function calcIndicators(candles) {
 }
 
 // ── Fetch datos reales desde el proxy ────────────────────────────────────────
-async function fetchRealData(ticker, range = '1y') {
-  const cacheKey = `${ticker}_${range}`;
+async function fetchRealData(ticker, range = '1y', yahooTickerOverride) {
+  const cacheKey = yahooTickerOverride ? `${ticker}_${range}` : `${ticker}_${range}`;
   const cached   = realDataCache[cacheKey];
   if (cached && Date.now() < cached.expiry) return cached.data;
-
-  const yahooTicker = YAHOO_TICKERS[ticker] || ticker;
+  const yahooTicker = yahooTickerOverride || YAHOO_TICKERS[ticker] || ticker;
   const proxyBase   = localStorage.getItem('stockscan_proxy_url') || PROXY_URL;
   const url = `${proxyBase}/quote?ticker=${encodeURIComponent(yahooTicker)}&range=${range}&interval=1d`;
-
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
+  const timer = setTimeout(() => controller.abort(), 20000);
   try {
     const res  = await fetch(url, { signal: controller.signal });
     clearTimeout(timer);
@@ -2000,10 +2064,7 @@ async function fetchRealData(ticker, range = '1y') {
     if (data.error) throw new Error(data.error);
     realDataCache[cacheKey] = { data, expiry: Date.now() + CACHE_TTL };
     return data;
-  } catch(e) {
-    clearTimeout(timer);
-    throw e;
-  }
+  } catch(e) { clearTimeout(timer); throw e; }
 }
 
 // Mapa de tickers internos → Yahoo Finance tickers
@@ -2153,6 +2214,319 @@ function closeSheet() {
   document.getElementById('overlay').classList.remove('open');
   document.getElementById('sheet').classList.remove('open');
   document.body.style.overflow='';
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// PAPER TRADING HISTÓRICO — datos reales de Yahoo Finance hasta fecha elegida
+// ════════════════════════════════════════════════════════════════════════════
+
+let ptSession = null; // sesión activa de paper trading
+
+function switchTrainTab(tab) {
+  const classic = document.getElementById('panel-classic');
+  const paper   = document.getElementById('panel-paper');
+  const tabC    = document.getElementById('tab-classic');
+  const tabP    = document.getElementById('tab-paper');
+  if (tab === 'classic') {
+    classic.style.display = 'block'; paper.style.display = 'none';
+    tabC.style.background = 'var(--accent)'; tabC.style.color = 'var(--bg)';
+    tabP.style.background = 'transparent'; tabP.style.color = 'var(--text2)';
+  } else {
+    classic.style.display = 'none'; paper.style.display = 'block';
+    tabP.style.background = 'var(--accent)'; tabP.style.color = 'var(--bg)';
+    tabC.style.background = 'transparent'; tabC.style.color = 'var(--text2)';
+    // Fecha por defecto: hace 6 meses
+    if (!document.getElementById('pt-date').value) setPTDate(6);
+  }
+}
+
+function setPTDate(monthsAgo) {
+  const d = new Date();
+  d.setMonth(d.getMonth() - monthsAgo);
+  document.getElementById('pt-date').value = d.toISOString().slice(0, 10);
+}
+
+function setPTTicker(ticker) {
+  document.getElementById('pt-ticker').value = ticker;
+}
+
+async function runPaperTrade() {
+  const dateStr = document.getElementById('pt-date').value;
+  const ticker  = document.getElementById('pt-ticker').value.trim().toUpperCase();
+  const result  = document.getElementById('pt-result');
+
+  if (!dateStr || !ticker) {
+    alert('Elige una fecha y un ticker');
+    return;
+  }
+
+  const chosenDate = new Date(dateStr);
+  const now = new Date();
+  const daysAgo = Math.round((now - chosenDate) / 86400000);
+
+  if (daysAgo < 30) { alert('Elige una fecha de hace al menos 30 días'); return; }
+  if (daysAgo > 730) { alert('Máximo 2 años atrás'); return; }
+
+  // Loading
+  result.style.display = 'block';
+  result.innerHTML = `<div style="text-align:center;padding:40px 20px">
+    <div style="font-size:2rem;margin-bottom:12px">📡</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">Descargando datos históricos de ${ticker}…</div>
+  </div>`;
+
+  try {
+    // Necesitamos datos desde mucho antes de la fecha elegida (para calcular MA200)
+    // y también datos DESPUÉS (para saber qué pasó)
+    const range = daysAgo > 365 ? '2y' : '1y';
+    const data  = await fetchRealData(ticker, range, ticker);
+
+    if (!data.candles || data.candles.length < 50) {
+      throw new Error('Datos insuficientes para este ticker');
+    }
+
+    // Filtrar velas hasta la fecha elegida (inclusive)
+    const cutoffTs  = chosenDate.getTime() / 1000;
+    const pastCandles   = data.candles.filter(c => c.t <= cutoffTs);
+    const futureCandles = data.candles.filter(c => c.t > cutoffTs).slice(0, 90); // hasta 90 días después
+
+    if (pastCandles.length < 30) {
+      throw new Error('No hay suficientes datos antes de esa fecha para este ticker');
+    }
+
+    // Calcular indicadores en la fecha elegida (solo con datos del pasado)
+    const indicators = calcIndicators(pastCandles);
+    const lastCandle = pastCandles[pastCandles.length - 1];
+    const actualDate = new Date(lastCandle.t * 1000).toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' });
+
+    // Calcular lo que pasó después
+    let result30 = null, result90 = null, result30pct = null, result90pct = null;
+    if (futureCandles.length >= 20) {
+      result30 = futureCandles[Math.min(19, futureCandles.length-1)].c;
+      result30pct = +((result30 - indicators.price) / indicators.price * 100).toFixed(1);
+    }
+    if (futureCandles.length >= 60) {
+      result90 = futureCandles[Math.min(59, futureCandles.length-1)].c;
+      result90pct = +((result90 - indicators.price) / indicators.price * 100).toFixed(1);
+    }
+
+    ptSession = { ticker, indicators, pastCandles, futureCandles, result30pct, result90pct, actualDate, decided: false };
+
+    renderPaperTradeCard(ptSession);
+
+  } catch(err) {
+    result.innerHTML = `<div style="background:rgba(245,86,74,0.08);border:1px solid rgba(245,86,74,0.2);border-radius:12px;padding:20px;text-align:center">
+      <div style="font-size:1.5rem;margin-bottom:8px">❌</div>
+      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--red)">${err.message}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-top:6px">Prueba con otro ticker o fecha diferente</div>
+    </div>`;
+  }
+}
+
+
+function renderPaperTradeCard(session) {
+  const { ticker, indicators: ind, pastCandles, actualDate, result30pct, result90pct } = session;
+  const rsiColor = ind.rsi < 30 ? 'var(--green)' : ind.rsi > 70 ? 'var(--red)' : 'var(--orange)';
+  const macdBull = ind.mv > ind.ms;
+  const sigLabels = { 'strong-buy':'COMPRA FUERTE ✦', buy:'COMPRA', neutral:'NEUTRAL', sell:'VENTA' };
+  const sigColors = { 'strong-buy':'var(--green)', buy:'#7ef5c8', neutral:'var(--orange)', sell:'var(--red)' };
+  const chgUp = ind.chg >= 0;
+
+  document.getElementById('pt-result').innerHTML = `
+    <div class="pt-card">
+      <div class="pt-card-header">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div>
+            <span style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent)">${ticker}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);margin-left:8px">📅 ${actualDate}</span>
+          </div>
+          <div class="change-pill ${chgUp?'up':'dn'}" style="font-size:0.65rem">${chgUp?'▲':'▼'} ${Math.abs(ind.chg).toFixed(2)}%</div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <div style="font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:500">${ind.price.toFixed(2)}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.75rem;font-weight:700;color:${sigColors[ind.sig]}">${sigLabels[ind.sig]}</div>
+        </div>
+      </div>
+
+      <!-- Gráfico hasta la fecha elegida -->
+      <div style="background:var(--card);padding:8px 12px 0">
+        <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:2px">ÚLTIMOS ${Math.min(pastCandles.length, 90)} DÍAS ANTES DE LA FECHA · DATOS REALES</div>
+        <canvas id="chart-pt" style="width:100%;height:150px;display:block"></canvas>
+      </div>
+
+      <!-- Indicadores -->
+      <div style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--border)">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3)">RSI (14)</div>
+          <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:${rsiColor}">${ind.rsi}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:${rsiColor}">${ind.rsi<30?'Sobreventa':ind.rsi>70?'Sobrecompra':'Neutral'}</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3)">MACD</div>
+          <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:${macdBull?'var(--green)':'var(--red)'}">${macdBull?'ALCISTA':'BAJISTA'}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text2)">hist: ${ind.hist > 0 ? '+' : ''}${ind.hist}</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3)">MEDIAS</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:500;color:${ind.golden?'var(--orange)':'var(--red)'}">${ind.golden?'✦ GOLDEN':'☠ DEATH'}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text2)">MA50: ${ind.ma50} · MA200: ${ind.ma200}</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3)">SCORE</div>
+          <div style="display:flex;gap:4px;margin:6px 0 4px">
+            ${[1,2,3,4,5].map(n=>`<div style="flex:1;height:6px;border-radius:3px;background:${n<=ind.score?(ind.score>=3?'var(--green)':'var(--red)'):'var(--border)'}"></div>`).join('')}
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text2)">${ind.score}/5 señales</div>
+        </div>
+      </div>
+
+      <!-- Decisión -->
+      <div style="padding:12px 14px;border-top:1px solid var(--border)">
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);margin-bottom:10px;text-align:center">Con esta información, ¿qué habrías hecho el ${actualDate}?</div>
+        <div class="pt-decision-row" style="padding:0">
+          <button class="pt-btn buy"  onclick="decidePT('buy')"  id="pt-btn-buy">📈 Comprar</button>
+          <button class="pt-btn wait" onclick="decidePT('wait')" id="pt-btn-wait">⏳ Esperar</button>
+          <button class="pt-btn sell" onclick="decidePT('sell')" id="pt-btn-sell">🚫 No entrar</button>
+        </div>
+      </div>
+
+      <!-- Resultado (oculto hasta decidir) -->
+      <div id="pt-outcome" style="display:none"></div>
+    </div>
+  `;
+
+  // Dibujar gráfico con datos reales (últimos 90 días antes de la fecha)
+  requestAnimationFrame(() => {
+    const slice = pastCandles.slice(-90);
+    const closes = slice.map(c => c.c);
+    const ma50arr  = calcSMA(closes, Math.min(50,  closes.length));
+    const ma200arr = calcSMA(closes, Math.min(200, closes.length));
+    drawChart('chart-pt', { candles: slice, ma50: ma50arr, ma200: ma200arr, days: slice.length });
+  });
+}
+
+function decidePT(decision) {
+  if (!ptSession || ptSession.decided) return;
+  ptSession.decided = true;
+
+  // Resaltar botón elegido
+  ['buy','wait','sell'].forEach(d => {
+    const btn = document.getElementById('pt-btn-' + d);
+    if (btn) { btn.disabled = true; if (d === decision) btn.classList.add('selected-' + d); }
+  });
+
+  const { result30pct, result90pct, indicators: ind, futureCandles, ticker } = ptSession;
+  const price = ind.price;
+
+  // Evaluar si la decisión fue buena
+  const went30Up = result30pct !== null && result30pct > 3;
+  const went30Dn = result30pct !== null && result30pct < -3;
+  let correct = false;
+  let pnl = 0;
+  if (decision === 'buy')  { correct = went30Up; pnl = result30pct || 0; }
+  if (decision === 'sell') { correct = went30Dn; pnl = result30pct ? -result30pct : 0; }
+  if (decision === 'wait') { correct = !went30Up && !went30Dn; pnl = 0; }
+
+  const pnlCol  = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  const outcomeClass = correct ? 'pt-outcome-correct' : 'pt-outcome-wrong';
+  const outcomeIcon  = correct ? '✅' : '❌';
+  const outcomeText  = correct ? 'Decisión correcta' : 'Decisión subóptima';
+
+  // Generar línea de lo que pasó después
+  const futureSlice = futureCandles.slice(0, 90);
+  const allCandles  = [...ptSession.pastCandles.slice(-60), ...futureSlice];
+  const splitIdx    = ptSession.pastCandles.slice(-60).length;
+
+  const r30str = result30pct !== null ? `${result30pct >= 0 ? '+' : ''}${result30pct}%` : 'N/D';
+  const r90str = result90pct !== null ? `${result90pct >= 0 ? '+' : ''}${result90pct}%` : 'N/D';
+  const r30col = result30pct >= 0 ? 'var(--green)' : 'var(--red)';
+  const r90col = result90pct >= 0 ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('pt-outcome').style.display = 'block';
+  document.getElementById('pt-outcome').className = `pt-outcome ${outcomeClass}`;
+  document.getElementById('pt-outcome').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-size:1.4rem">${outcomeIcon}</span>
+      <div>
+        <div style="font-weight:700;font-size:0.9rem">${outcomeText}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);margin-top:2px">
+          ${decision==='buy'?`Compraste a ${price.toFixed(2)}`:decision==='sell'?'Decidiste no entrar':'Esperaste sin posición'}
+        </div>
+      </div>
+      ${decision==='buy' ? `<div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:${pnlCol}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</div>` : ''}
+    </div>
+
+    <!-- Lo que pasó después -->
+    <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.07em">Lo que pasó después</div>
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      <div style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:${r30col}">${r30str}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text3);margin-top:3px">30 DÍAS</div>
+      </div>
+      <div style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:${r90col}">${r90str}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text3);margin-top:3px">90 DÍAS</div>
+      </div>
+    </div>
+
+    <!-- Gráfico completo: pasado + futuro -->
+    ${futureSlice.length > 5 ? `
+    <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:4px">PRECIO REAL ANTES Y DESPUÉS · LÍNEA BLANCA = TU FECHA DE DECISIÓN</div>
+    <canvas id="chart-pt-full" style="width:100%;height:130px;display:block;border-radius:8px;overflow:hidden"></canvas>` : ''}
+
+    <button onclick="resetPaperTrade()" style="width:100%;margin-top:12px;padding:11px;background:var(--card2);border:1px solid var(--border);border-radius:10px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2);cursor:pointer">
+      ↺ Nuevo análisis
+    </button>
+  `;
+
+  // Gráfico completo con línea divisoria en la fecha de decisión
+  if (futureSlice.length > 5) {
+    requestAnimationFrame(() => {
+      const closes = allCandles.map(c => c.c);
+      const ma50arr  = calcSMA(closes, Math.min(50, closes.length));
+      const ma200arr = calcSMA(closes, Math.min(200, closes.length));
+      drawChartWithSplit('chart-pt-full', { candles: allCandles, ma50: ma50arr, ma200: ma200arr }, splitIdx);
+    });
+  }
+}
+
+function drawChartWithSplit(canvasId, series, splitIdx) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  // Primero dibujar el gráfico normal
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width  = canvas.offsetWidth  * (window.devicePixelRatio || 1);
+  const H = canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
+  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  const w = canvas.offsetWidth, h = canvas.offsetHeight;
+
+  drawChart(canvasId, series);
+
+  // Luego superponer la línea de decisión
+  const n = series.candles.length;
+  const padL = 0, padR = 8, padT = 12, padB = 28;
+  const chartW = w - padL - padR;
+  const xSplit = padL + (splitIdx / (n - 1)) * chartW;
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(xSplit, padT);
+  ctx.lineTo(xSplit, h - padB);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Etiqueta
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '8px "DM Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('DECISIÓN', xSplit, padT + 8);
+}
+
+function resetPaperTrade() {
+  ptSession = null;
+  document.getElementById('pt-result').style.display = 'none';
+  document.getElementById('pt-result').innerHTML = '';
 }
 
 // ── PROXY SETTINGS ───────────────────────────────────────────────────────────
