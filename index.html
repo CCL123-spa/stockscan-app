@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
+<html lang="es"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1410,7 +1408,7 @@ html, body {
   <div class="pages">
 
     <!-- ── SCREENER ── -->
-    <div class="page active" id="page-scan">
+    <div class="page" id="page-scan">
 
       <div class="install-banner" id="installBanner">
         <h3>📲 Instalar en tu móvil</h3>
@@ -1422,7 +1420,7 @@ html, body {
       <div class="market-row">
         <div class="mchip on" data-m="ibex">🇪🇸 IBEX</div>
         <div class="mchip on" data-m="eurostoxx">🇪🇺 Euro</div>
-        <div class="mchip on" data-m="sp500">🇺🇸 S&P</div>
+        <div class="mchip on" data-m="sp500">🇺🇸 S&amp;P</div>
         <div class="mchip on" data-m="nasdaq">⚡ NDX</div>
       </div>
 
@@ -1524,7 +1522,7 @@ html, body {
             <b>MA50</b> = precio promedio últimos 50 días → tendencia corto plazo<br>
             <b>MA200</b> = precio promedio últimos 200 días → tendencia largo plazo<br><br>
             <b>✦ Golden Cross</b> → MA50 cruza por encima de MA200. Señal alcista histórica. Seguida por grandes instituciones.<br><br>
-            <b>☠ Death Cross</b> → MA50 cruza por debajo de MA200. Señal bajista de largo plazo. Ocurrió en S&P 2020 y 2022.
+            <b>☠ Death Cross</b> → MA50 cruza por debajo de MA200. Señal bajista de largo plazo. Ocurrió en S&amp;P 2020 y 2022.
             <div class="edu-zone">
               <span class="zone-tag" style="color:var(--orange);border-color:rgba(245,158,42,0.3);background:rgba(245,158,42,0.08)">✦ GOLDEN CROSS</span>
               <span class="zone-tag" style="color:var(--red);border-color:rgba(245,86,74,0.3);background:rgba(245,86,74,0.08)">☠ DEATH CROSS</span>
@@ -1556,7 +1554,7 @@ html, body {
     </div>
 
     <!-- ── SETTINGS ── -->
-    <div class="page" id="page-set">
+    <div class="page active" id="page-set">
 
       <div class="section-label">Fuente de datos</div>
       <div class="card" style="margin-bottom:12px">
@@ -1564,9 +1562,9 @@ html, body {
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
             <div>
               <div style="font-size:0.88rem;font-weight:600">Proxy Yahoo Finance</div>
-              <div id="proxy-status-text" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);margin-top:2px">Verificando…</div>
+              <div id="proxy-status-text" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);margin-top:2px">✅ Conectado · StockScan Proxy</div>
             </div>
-            <div id="proxy-status-dot" style="width:10px;height:10px;border-radius:50%;background:var(--text3)"></div>
+            <div id="proxy-status-dot" style="width: 10px; height: 10px; border-radius: 50%; background: var(--green);"></div>
           </div>
           <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text3);margin-bottom:5px">POLYGON.IO API KEY</div>
           <input id="polygon-key" type="password" placeholder="Tu API key de polygon.io" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text);outline:none;margin-bottom:10px">
@@ -1624,11 +1622,11 @@ html, body {
 
           <button onclick="saveGHSettings()" style="width:100%;padding:9px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2);cursor:pointer;margin-bottom:10px">💾 Guardar configuración</button>
 
-          <button onclick="publishToGitHub()" id="btn-publish" style="width:100%;padding:13px;background:var(--green);color:var(--bg);border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer">
+          <button onclick="publishToGitHub()" id="btn-publish" style="width:100%;padding:13px;background:var(--green);color:var(--bg);border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer" disabled="">
             🚀 Publicar actualización
           </button>
 
-          <div id="publish-status" style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2);text-align:center;margin-top:10px;min-height:18px"></div>
+          <div id="publish-status" style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2);text-align:center;margin-top:10px;min-height:18px">⏳ Subiendo nueva versión…</div>
         </div>
       </div>
       <div class="card">
@@ -1684,7 +1682,7 @@ html, body {
           <div class="tstat-div"></div>
           <div class="tstat">
             <div class="tstat-val" id="tr-pnl" style="color:var(--accent)">+0%</div>
-            <div class="tstat-lbl">P&L ACUM.</div>
+            <div class="tstat-lbl">P&amp;L ACUM.</div>
           </div>
         </div>
         <div id="train-area">
@@ -1721,49 +1719,49 @@ html, body {
             <div style="margin-top:8px">
               <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">🇪🇸 IBEX</div>
               <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
-                <button onclick="setPTTicker('SAN.MC')"  class="pt-preset">SAN</button>
-                <button onclick="setPTTicker('ITX.MC')"  class="pt-preset">ITX</button>
+                <button onclick="setPTTicker('SAN.MC')" class="pt-preset">SAN</button>
+                <button onclick="setPTTicker('ITX.MC')" class="pt-preset">ITX</button>
                 <button onclick="setPTTicker('BBVA.MC')" class="pt-preset">BBVA</button>
-                <button onclick="setPTTicker('IBE.MC')"  class="pt-preset">IBE</button>
-                <button onclick="setPTTicker('TEF.MC')"  class="pt-preset">TEF</button>
-                <button onclick="setPTTicker('REP.MC')"  class="pt-preset">REP</button>
+                <button onclick="setPTTicker('IBE.MC')" class="pt-preset">IBE</button>
+                <button onclick="setPTTicker('TEF.MC')" class="pt-preset">TEF</button>
+                <button onclick="setPTTicker('REP.MC')" class="pt-preset">REP</button>
                 <button onclick="setPTTicker('CABK.MC')" class="pt-preset">CABK</button>
-                <button onclick="setPTTicker('AMS.MC')"  class="pt-preset">AMS</button>
+                <button onclick="setPTTicker('AMS.MC')" class="pt-preset">AMS</button>
               </div>
               <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">🇪🇺 EUROPA</div>
               <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
                 <button onclick="setPTTicker('ASML.AS')" class="pt-preset">ASML</button>
-                <button onclick="setPTTicker('MC.PA')"   class="pt-preset">LVMH</button>
-                <button onclick="setPTTicker('SAP.DE')"  class="pt-preset">SAP</button>
-                <button onclick="setPTTicker('SIE.DE')"  class="pt-preset">Siemens</button>
-                <button onclick="setPTTicker('ALV.DE')"  class="pt-preset">Allianz</button>
-                <button onclick="setPTTicker('BAS.DE')"  class="pt-preset">BASF</button>
+                <button onclick="setPTTicker('MC.PA')" class="pt-preset">LVMH</button>
+                <button onclick="setPTTicker('SAP.DE')" class="pt-preset">SAP</button>
+                <button onclick="setPTTicker('SIE.DE')" class="pt-preset">Siemens</button>
+                <button onclick="setPTTicker('ALV.DE')" class="pt-preset">Allianz</button>
+                <button onclick="setPTTicker('BAS.DE')" class="pt-preset">BASF</button>
                 <button onclick="setPTTicker('VOW3.DE')" class="pt-preset">VW</button>
-                <button onclick="setPTTicker('AIR.PA')"  class="pt-preset">Airbus</button>
+                <button onclick="setPTTicker('AIR.PA')" class="pt-preset">Airbus</button>
               </div>
-              <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">🇺🇸 S&P 500</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">🇺🇸 S&amp;P 500</div>
               <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
-                <button onclick="setPTTicker('AAPL')"  class="pt-preset">AAPL</button>
-                <button onclick="setPTTicker('MSFT')"  class="pt-preset">MSFT</button>
-                <button onclick="setPTTicker('JPM')"   class="pt-preset">JPM</button>
-                <button onclick="setPTTicker('JNJ')"   class="pt-preset">JNJ</button>
-                <button onclick="setPTTicker('XOM')"   class="pt-preset">XOM</button>
-                <button onclick="setPTTicker('WMT')"   class="pt-preset">WMT</button>
-                <button onclick="setPTTicker('BAC')"   class="pt-preset">BAC</button>
-                <button onclick="setPTTicker('KO')"    class="pt-preset">KO</button>
-                <button onclick="setPTTicker('DIS')"   class="pt-preset">DIS</button>
-                <button onclick="setPTTicker('GS')"    class="pt-preset">GS</button>
+                <button onclick="setPTTicker('AAPL')" class="pt-preset">AAPL</button>
+                <button onclick="setPTTicker('MSFT')" class="pt-preset">MSFT</button>
+                <button onclick="setPTTicker('JPM')" class="pt-preset">JPM</button>
+                <button onclick="setPTTicker('JNJ')" class="pt-preset">JNJ</button>
+                <button onclick="setPTTicker('XOM')" class="pt-preset">XOM</button>
+                <button onclick="setPTTicker('WMT')" class="pt-preset">WMT</button>
+                <button onclick="setPTTicker('BAC')" class="pt-preset">BAC</button>
+                <button onclick="setPTTicker('KO')" class="pt-preset">KO</button>
+                <button onclick="setPTTicker('DIS')" class="pt-preset">DIS</button>
+                <button onclick="setPTTicker('GS')" class="pt-preset">GS</button>
               </div>
               <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">⚡ NASDAQ</div>
               <div style="display:flex;gap:5px;flex-wrap:wrap">
-                <button onclick="setPTTicker('NVDA')"  class="pt-preset">NVDA</button>
-                <button onclick="setPTTicker('META')"  class="pt-preset">META</button>
-                <button onclick="setPTTicker('AMZN')"  class="pt-preset">AMZN</button>
-                <button onclick="setPTTicker('TSLA')"  class="pt-preset">TSLA</button>
+                <button onclick="setPTTicker('NVDA')" class="pt-preset">NVDA</button>
+                <button onclick="setPTTicker('META')" class="pt-preset">META</button>
+                <button onclick="setPTTicker('AMZN')" class="pt-preset">AMZN</button>
+                <button onclick="setPTTicker('TSLA')" class="pt-preset">TSLA</button>
                 <button onclick="setPTTicker('GOOGL')" class="pt-preset">GOOGL</button>
-                <button onclick="setPTTicker('NFLX')"  class="pt-preset">NFLX</button>
-                <button onclick="setPTTicker('AMD')"   class="pt-preset">AMD</button>
-                <button onclick="setPTTicker('ADBE')"  class="pt-preset">ADBE</button>
+                <button onclick="setPTTicker('NFLX')" class="pt-preset">NFLX</button>
+                <button onclick="setPTTicker('AMD')" class="pt-preset">AMD</button>
+                <button onclick="setPTTicker('ADBE')" class="pt-preset">ADBE</button>
               </div>
             </div>
           </div>
@@ -1805,7 +1803,7 @@ html, body {
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <div class="nav-item active" onclick="navigate('scan', this)">
+    <div class="nav-item" onclick="navigate('scan', this)">
       <div class="nav-icon">📡</div>
       <div class="nav-label">SCAN</div>
     </div>
@@ -1821,7 +1819,7 @@ html, body {
       <div class="nav-icon" style="position:relative">💼<span id="portfolio-badge" style="display:none;position:absolute;top:-4px;right:-6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:1.5px solid var(--bg)"></span></div>
       <div class="nav-label">CARTERA</div>
     </div>
-    <div class="nav-item" onclick="navigate('set', this)">
+    <div class="nav-item active" onclick="navigate('set', this)">
       <div class="nav-icon">⚙️</div>
       <div class="nav-label">AJUSTES</div>
     </div>
@@ -1851,7 +1849,7 @@ html, body {
           <div class="field-label" style="margin-bottom:6px">Riesgo por op.</div>
           <select class="field-input" id="input-risk-pct" style="margin-bottom:0" onchange="saveRiskSettings();calcRisk()">
             <option value="0.5">0.5% — Muy conservador</option>
-            <option value="1" selected>1% — Conservador</option>
+            <option value="1" selected="">1% — Conservador</option>
             <option value="2">2% — Moderado</option>
             <option value="3">3% — Agresivo</option>
           </select>
@@ -4505,5 +4503,5 @@ function removePosition(idx){
 }
 
 </script>
-</body>
-</html>
+
+</body></html>
