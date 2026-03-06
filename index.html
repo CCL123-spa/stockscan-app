@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.5.7</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.5.9</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2257,15 +2257,15 @@ function calcIndicators(candles) {
 }
 
 // ── Fetch datos reales desde el proxy ────────────────────────────────────────
-async function fetchRealData(ticker, range = '1y', yahooTickerOverride) {
-  const cacheKey = `${yahooTickerOverride || ticker}_${range}`;
-  const cached   = realDataCache[cacheKey];
+async function fetchRealData(ticker, range = '1y', proxyTickerOverride) {
+  const cacheKey   = `${proxyTickerOverride || ticker}_${range}`;
+  const cached     = realDataCache[cacheKey];
   if (cached && Date.now() < cached.expiry) return cached.data;
-  const yahooTicker = yahooTickerOverride || YAHOO_TICKERS[ticker] || ticker;
+  const proxyTicker = proxyTickerOverride || INTERNAL_TO_PROXY[ticker] || ticker;
   const proxyBase   = localStorage.getItem('stockscan_proxy_url') || PROXY_URL;
   const polygonKey  = localStorage.getItem('polygon_api_key') || '';
   const keyParam    = polygonKey ? `&apikey=${encodeURIComponent(polygonKey)}` : '';
-  const url = `${proxyBase}/quote?ticker=${encodeURIComponent(yahooTicker)}&range=${range}&interval=1d${keyParam}`;
+  const url = `${proxyBase}/quote?ticker=${encodeURIComponent(proxyTicker)}&range=${range}&interval=1d${keyParam}`;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20000);
   try {
@@ -2279,14 +2279,25 @@ async function fetchRealData(ticker, range = '1y', yahooTickerOverride) {
   } catch(e) { clearTimeout(timer); throw e; }
 }
 
-// Mapa de tickers internos → Yahoo Finance tickers
-const YAHOO_TICKERS = {
+// El proxy (Polygon) acepta tickers con sufijo directamente: SAN.MC, ASML.AS, SAP.DE...
+// Solo necesitamos mapear los tickers internos sin sufijo a su formato correcto
+const INTERNAL_TO_PROXY = {
   SAN:'SAN.MC', ITX:'ITX.MC', BBVA:'BBVA.MC', IBE:'IBE.MC', TEF:'TEF.MC',
   REP:'REP.MC', AMS:'AMS.MC', CABK:'CABK.MC', FER:'FER.MC', MAP:'MAP.MC',
   ASML:'ASML.AS', LVMH:'MC.PA', SAP:'SAP.DE', NOVO:'NOVO-B.CO', SIE:'SIE.DE',
-  AXA:'CS.PA', BAS:'BAS.DE', ALV:'ALV.DE', VOW:'VOW3.DE', DTE:'DTE.DE',
-  // S&P y NASDAQ usan ticker directo
+  AXA:'AXA.PA', BAS:'BAS.DE', ALV:'ALV.DE', VOW:'VOW3.DE', DTE:'DTE.DE',
+  AIR:'AIR.PA',
 };
+
+// Normaliza cualquier ticker al formato que el proxy entiende
+function normalizePTTicker(raw) {
+  // Si ya tiene sufijo de bolsa, enviarlo tal cual
+  if (/\.(MC|PA|DE|AS|CO|L|MI|BR)$/i.test(raw)) return raw;
+  // Si está en el mapa interno, convertir
+  if (INTERNAL_TO_PROXY[raw]) return INTERNAL_TO_PROXY[raw];
+  // US tickers sin sufijo — enviar tal cual
+  return raw;
+}
 
 // ── Scan con datos reales ─────────────────────────────────────────────────────
 async function fetchStockReal(stock) {
@@ -2488,8 +2499,9 @@ async function runPaperTrade() {
 
   try {
     // Siempre pedimos 2y para tener datos antes Y después de la fecha elegida
-    const range = '2y';
-    const data  = await fetchRealData(ticker, range, ticker);
+    const range      = '2y';
+    const proxyTicker = normalizePTTicker(ticker);
+    const data  = await fetchRealData(proxyTicker, range, proxyTicker);
 
     if (!data.candles || data.candles.length < 50) {
       throw new Error('Datos insuficientes para este ticker');
