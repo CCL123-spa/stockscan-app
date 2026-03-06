@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.5.4</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.5.6</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -1715,12 +1715,12 @@ html, body {
 
       <!-- Tabs: Casos clásicos / Paper trading -->
       <div style="display:flex;gap:0;margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px">
-        <button id="tab-classic" onclick="switchTrainTab('classic')" style="flex:1;padding:8px;border:none;border-radius:9px;background:var(--accent);color:var(--bg);font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:600;cursor:pointer">🎯 Casos clásicos</button>
-        <button id="tab-paper" onclick="switchTrainTab('paper')" style="flex:1;padding:8px;border:none;border-radius:9px;background:transparent;color:var(--text2);font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer">📅 Paper trading real</button>
+        <button id="tab-classic" onclick="switchTrainTab('classic')" style="flex:1;padding:8px;border:none;border-radius:9px;background:transparent;color:var(--text2);font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer">🎯 Casos clásicos</button>
+        <button id="tab-paper" onclick="switchTrainTab('paper')" style="flex:1;padding:8px;border:none;border-radius:9px;background:var(--accent);color:var(--bg);font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:600;cursor:pointer">📅 Paper trading real</button>
       </div>
 
       <!-- PANEL CASOS CLÁSICOS -->
-      <div id="panel-classic">
+      <div id="panel-classic" style="display:none">
         <div class="train-stats-bar">
           <div class="tstat">
             <div class="tstat-val" id="tr-total">0</div>
@@ -1754,7 +1754,7 @@ html, body {
       </div>
 
       <!-- PANEL PAPER TRADING HISTÓRICO -->
-      <div id="panel-paper" style="display:none">
+      <div id="panel-paper">
         <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px">
           <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Configura tu sesión</div>
 
@@ -1784,17 +1784,41 @@ html, body {
                 <button onclick="setPTTicker('REP.MC')"  class="pt-preset">REP</button>
                 <button onclick="setPTTicker('CABK.MC')" class="pt-preset">CABK</button>
                 <button onclick="setPTTicker('AMS.MC')"  class="pt-preset">AMS</button>
+                <button onclick="setPTTicker('FER.MC')"  class="pt-preset">FER</button>
+                <button onclick="setPTTicker('MAP.MC')"  class="pt-preset">MAP</button>
+                <button onclick="setPTTicker('ACS.MC')"  class="pt-preset">ACS</button>
+                <button onclick="setPTTicker('ELE.MC')"  class="pt-preset">ELE</button>
+                <button onclick="setPTTicker('SAB.MC')"  class="pt-preset">SAB</button>
+                <button onclick="setPTTicker('GRF.MC')"  class="pt-preset">GRF</button>
+                <button onclick="setPTTicker('MEL.MC')"  class="pt-preset">MEL</button>
+                <button onclick="setPTTicker('ACX.MC')"  class="pt-preset">ACX</button>
+                <button onclick="setPTTicker('NTGY.MC')" class="pt-preset">NTGY</button>
+                <button onclick="setPTTicker('BKT.MC')"  class="pt-preset">BKT</button>
+                <button onclick="setPTTicker('ENG.MC')"  class="pt-preset">ENG</button>
+                <button onclick="setPTTicker('LOG.MC')"  class="pt-preset">LOG</button>
               </div>
               <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">🇪🇺 EUROPA</div>
               <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
-                <button onclick="setPTTicker('ASML.AS')" class="pt-preset">ASML</button>
-                <button onclick="setPTTicker('MC.PA')"   class="pt-preset">LVMH</button>
-                <button onclick="setPTTicker('SAP.DE')"  class="pt-preset">SAP</button>
-                <button onclick="setPTTicker('SIE.DE')"  class="pt-preset">Siemens</button>
-                <button onclick="setPTTicker('ALV.DE')"  class="pt-preset">Allianz</button>
-                <button onclick="setPTTicker('BAS.DE')"  class="pt-preset">BASF</button>
-                <button onclick="setPTTicker('VOW3.DE')" class="pt-preset">VW</button>
-                <button onclick="setPTTicker('AIR.PA')"  class="pt-preset">Airbus</button>
+                <button onclick="setPTTicker('ASML.AS')"  class="pt-preset">ASML</button>
+                <button onclick="setPTTicker('MC.PA')"    class="pt-preset">LVMH</button>
+                <button onclick="setPTTicker('SAP.DE')"   class="pt-preset">SAP</button>
+                <button onclick="setPTTicker('SIE.DE')"   class="pt-preset">Siemens</button>
+                <button onclick="setPTTicker('ALV.DE')"   class="pt-preset">Allianz</button>
+                <button onclick="setPTTicker('BAS.DE')"   class="pt-preset">BASF</button>
+                <button onclick="setPTTicker('VOW3.DE')"  class="pt-preset">VW</button>
+                <button onclick="setPTTicker('AIR.PA')"   class="pt-preset">Airbus</button>
+                <button onclick="setPTTicker('NOVO-B.CO')" class="pt-preset">Novo</button>
+                <button onclick="setPTTicker('TTE.PA')"   class="pt-preset">Total</button>
+                <button onclick="setPTTicker('SAN.PA')"   class="pt-preset">Sanofi</button>
+                <button onclick="setPTTicker('OR.PA')"    class="pt-preset">L'Oréal</button>
+                <button onclick="setPTTicker('MUV2.DE')"  class="pt-preset">Munich Re</button>
+                <button onclick="setPTTicker('ADS.DE')"   class="pt-preset">Adidas</button>
+                <button onclick="setPTTicker('BMW.DE')"   class="pt-preset">BMW</button>
+                <button onclick="setPTTicker('DTE.DE')"   class="pt-preset">DT Telekom</button>
+                <button onclick="setPTTicker('IFX.DE')"   class="pt-preset">Infineon</button>
+                <button onclick="setPTTicker('RWE.DE')"   class="pt-preset">RWE</button>
+                <button onclick="setPTTicker('AXA.PA')"   class="pt-preset">AXA</button>
+                <button onclick="setPTTicker('BNP.PA')"   class="pt-preset">BNP</button>
               </div>
               <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">🇺🇸 S&P 500</div>
               <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
@@ -1808,6 +1832,26 @@ html, body {
                 <button onclick="setPTTicker('KO')"    class="pt-preset">KO</button>
                 <button onclick="setPTTicker('DIS')"   class="pt-preset">DIS</button>
                 <button onclick="setPTTicker('GS')"    class="pt-preset">GS</button>
+                <button onclick="setPTTicker('V')"     class="pt-preset">Visa</button>
+                <button onclick="setPTTicker('UNH')"   class="pt-preset">UNH</button>
+                <button onclick="setPTTicker('HD')"    class="pt-preset">HD</button>
+                <button onclick="setPTTicker('CVX')"   class="pt-preset">CVX</button>
+                <button onclick="setPTTicker('MRK')"   class="pt-preset">MRK</button>
+                <button onclick="setPTTicker('PFE')"   class="pt-preset">PFE</button>
+                <button onclick="setPTTicker('ABBV')"  class="pt-preset">ABBV</button>
+                <button onclick="setPTTicker('LLY')"   class="pt-preset">LLY</button>
+                <button onclick="setPTTicker('PG')"    class="pt-preset">PG</button>
+                <button onclick="setPTTicker('MA')"    class="pt-preset">MA</button>
+                <button onclick="setPTTicker('CAT')"   class="pt-preset">CAT</button>
+                <button onclick="setPTTicker('RTX')"   class="pt-preset">RTX</button>
+                <button onclick="setPTTicker('NEE')"   class="pt-preset">NEE</button>
+                <button onclick="setPTTicker('T')"     class="pt-preset">AT&T</button>
+                <button onclick="setPTTicker('VZ')"    class="pt-preset">VZ</button>
+                <button onclick="setPTTicker('C')"     class="pt-preset">Citi</button>
+                <button onclick="setPTTicker('WFC')"   class="pt-preset">WFC</button>
+                <button onclick="setPTTicker('MS')"    class="pt-preset">MS</button>
+                <button onclick="setPTTicker('BRK-B')" class="pt-preset">BRK</button>
+                <button onclick="setPTTicker('AMGN')"  class="pt-preset">AMGN</button>
               </div>
               <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">⚡ NASDAQ</div>
               <div style="display:flex;gap:5px;flex-wrap:wrap">
@@ -1819,6 +1863,28 @@ html, body {
                 <button onclick="setPTTicker('NFLX')"  class="pt-preset">NFLX</button>
                 <button onclick="setPTTicker('AMD')"   class="pt-preset">AMD</button>
                 <button onclick="setPTTicker('ADBE')"  class="pt-preset">ADBE</button>
+                <button onclick="setPTTicker('INTC')"  class="pt-preset">INTC</button>
+                <button onclick="setPTTicker('PYPL')"  class="pt-preset">PYPL</button>
+                <button onclick="setPTTicker('QCOM')"  class="pt-preset">QCOM</button>
+                <button onclick="setPTTicker('CSCO')"  class="pt-preset">CSCO</button>
+                <button onclick="setPTTicker('SBUX')"  class="pt-preset">SBUX</button>
+                <button onclick="setPTTicker('ABNB')"  class="pt-preset">ABNB</button>
+                <button onclick="setPTTicker('CRM')"   class="pt-preset">CRM</button>
+                <button onclick="setPTTicker('ORCL')"  class="pt-preset">ORCL</button>
+                <button onclick="setPTTicker('UBER')"  class="pt-preset">UBER</button>
+                <button onclick="setPTTicker('SNAP')"  class="pt-preset">SNAP</button>
+                <button onclick="setPTTicker('SHOP')"  class="pt-preset">SHOP</button>
+                <button onclick="setPTTicker('ZM')"    class="pt-preset">ZM</button>
+                <button onclick="setPTTicker('COIN')"  class="pt-preset">COIN</button>
+                <button onclick="setPTTicker('PLTR')"  class="pt-preset">PLTR</button>
+                <button onclick="setPTTicker('RBLX')"  class="pt-preset">RBLX</button>
+                <button onclick="setPTTicker('HOOD')"  class="pt-preset">HOOD</button>
+                <button onclick="setPTTicker('MSTR')"  class="pt-preset">MSTR</button>
+                <button onclick="setPTTicker('ARM')"   class="pt-preset">ARM</button>
+                <button onclick="setPTTicker('SMCI')"  class="pt-preset">SMCI</button>
+                <button onclick="setPTTicker('MRVL')"  class="pt-preset">MRVL</button>
+                <button onclick="setPTTicker('AVGO')"  class="pt-preset">AVGO</button>
+                <button onclick="setPTTicker('MU')"    class="pt-preset">MU</button>
               </div>
             </div>
           </div>
