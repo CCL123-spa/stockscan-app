@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.6.0</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.6.3</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -3201,13 +3201,11 @@ async function fetchNewsContext(session) {
       ? `El inversor ya tenía acciones de ${ticker} compradas a ${entryPrice}.`
       : `El inversor estaba estudiando si entrar en ${ticker}.`;
 
-    const prompt = `Eres un analista financiero. La fecha es ${actualDate}. 
+    const prompt = `Busca en internet noticias y contexto financiero sobre ${ticker} en torno al ${actualDate}.
+
 ${scenarioCtx}
 
-Describe en 3-4 frases cortas y directas el contexto fundamental y de noticias relevante para ${ticker} en esa fecha concreta. 
-Incluye: situación del sector, eventos corporativos recientes (resultados, cambios directivos, productos), contexto macro relevante.
-Sé específico con datos reales de esa época. Usa español. Formato: párrafo continuo sin listas ni bullets.
-Termina con una frase sobre qué factores hacían la decisión especialmente difícil en ese momento.`;
+Usando los resultados de búsqueda, describe en 3-4 frases el contexto real de esa fecha: situación del sector, eventos corporativos (resultados trimestrales, cambios directivos, productos), contexto macro relevante. Sé específico con datos reales encontrados. Responde en español, párrafo continuo sin listas. Termina con qué hacía difícil la decisión en ese momento.`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -3218,15 +3216,18 @@ Termina con una frase sobre qué factores hacían la decisión especialmente dif
         'anthropic-dangerous-direct-browser-access': 'true',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
+        tool_choice: { type: 'any' },
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         messages: [{ role: 'user', content: prompt }]
       })
     });
 
-    if (!response.ok) throw new Error(`API error ${response.status}`);
-    const data = await response.json();
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => ({}));
+      throw new Error(`API ${response.status}: ${errBody.error?.message || JSON.stringify(errBody)}`);
+    }    const data = await response.json();
     const textBlocks = (data.content || []).filter(b => b.type === 'text');
     const text = textBlocks.map(b => b.text).join(' ').trim();
 
