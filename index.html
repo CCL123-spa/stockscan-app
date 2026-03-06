@@ -1659,11 +1659,11 @@ html, body {
         </div>
       </div>
 
-      <div class="section-label">Publicación automática</div>
+      <div class="section-label">Publicación</div>
       <div class="card" style="margin-bottom:12px">
         <div style="padding:4px 0 10px">
           <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);line-height:1.7;margin-bottom:12px">
-            Descarga el archivo nuevo desde Claude, luego súbelo aquí directamente desde tu móvil.
+            Cuando Claude genere una versión nueva, descárgala y súbela aquí para publicarla en GitHub Pages.
           </div>
 
           <div style="margin-bottom:10px">
@@ -1673,22 +1673,14 @@ html, body {
 
           <div style="margin-bottom:12px">
             <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text3);margin-bottom:5px">REPOSITORIO</div>
-            <input id="gh-repo" type="text" placeholder="CCL123-spa/stockscan-app" value="CCL123-spa/stockscan-app" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text);outline:none">
+            <input id="gh-repo" type="text" value="CCL123-spa/stockscan-app" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text);outline:none">
           </div>
 
           <button onclick="saveGHSettings()" style="width:100%;padding:9px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2);cursor:pointer;margin-bottom:10px">💾 Guardar configuración</button>
 
-          <!-- Input oculto para seleccionar archivo -->
           <input type="file" id="file-upload-input" accept=".html,text/html" style="display:none" onchange="uploadFileToGitHub(this)">
-
-          <!-- Botón principal: seleccionar archivo y subir -->
-          <button onclick="document.getElementById('file-upload-input').click()" id="btn-upload-file" style="width:100%;padding:13px;background:var(--accent);color:var(--bg);border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;margin-bottom:8px">
+          <button onclick="document.getElementById('file-upload-input').click()" id="btn-upload-file" style="width:100%;padding:13px;background:var(--accent);color:var(--bg);border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer">
             📁 Seleccionar archivo y publicar
-          </button>
-
-          <!-- Botón secundario: publicar versión actual (para cambios menores) -->
-          <button onclick="publishToGitHub()" id="btn-publish" style="width:100%;padding:10px;background:var(--card2);color:var(--text2);border:1px solid var(--border);border-radius:10px;font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer">
-            🚀 Republicar versión actual
           </button>
 
           <div id="publish-status" style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2);text-align:center;margin-top:10px;min-height:18px"></div>
@@ -1697,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.5.0</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.5.1</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Yahoo Finance vía proxy propio</p></div>
@@ -3052,82 +3044,6 @@ function saveGHSettings() {
   setTimeout(() => document.getElementById('publish-status').textContent = '', 2000);
 }
 
-async function publishToGitHub() {
-  const token  = localStorage.getItem('gh_token') || document.getElementById('gh-token')?.value.trim();
-  const repo   = localStorage.getItem('gh_repo')  || document.getElementById('gh-repo')?.value.trim() || 'CCL123-spa/stockscan-app';
-  const proxy  = localStorage.getItem('stockscan_proxy_url') || 'https://stockscan-proxy.onrender.com';
-  const status = document.getElementById('publish-status');
-  const btn    = document.getElementById('btn-publish');
-
-  if (!token) {
-    status.style.color = 'var(--red)';
-    status.textContent = '❌ Añade tu GitHub token primero';
-    return;
-  }
-
-  btn.disabled = true;
-  status.style.color = 'var(--text2)';
-  status.textContent = '⏳ Descargando versión nueva desde servidor…';
-
-  try {
-    // 1. Descargar el HTML actualizado desde el proxy
-    const appRes = await fetch(`${proxy}/app`, { cache: 'no-store' });
-    if (!appRes.ok) throw new Error(`No hay versión nueva en el servidor (${appRes.status}) — pide a Claude que suba el archivo primero`);
-    const htmlContent = await appRes.text();
-    if (!htmlContent || htmlContent.length < 1000) throw new Error('El archivo descargado parece vacío o incompleto');
-
-    status.textContent = '⏳ Conectando con GitHub…';
-
-    const apiBase = `https://api.github.com/repos/${repo}/contents/index.html`;
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Accept': 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      'Content-Type': 'application/json',
-    };
-
-    // 2. Obtener SHA actual
-    const getRes = await fetch(apiBase, { headers });
-    if (getRes.status === 401) throw new Error('Token inválido — genera uno nuevo con permisos "repo"');
-    if (getRes.status === 404) throw new Error('Repositorio no encontrado: ' + repo);
-    if (!getRes.ok) throw new Error(`Error GitHub ${getRes.status}`);
-    const { sha } = await getRes.json();
-
-    status.textContent = '⏳ Subiendo…';
-
-    // 3. Codificar y subir
-    const encoder = new TextEncoder();
-    const bytes = encoder.encode(htmlContent);
-    let binary = '';
-    bytes.forEach(b => binary += String.fromCharCode(b));
-    const encoded = btoa(binary);
-
-    const putRes = await fetch(apiBase, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify({
-        message: `StockScan auto-update ${new Date().toLocaleString('es-ES')}`,
-        content: encoded,
-        sha,
-      })
-    });
-
-    if (!putRes.ok) {
-      const err = await putRes.json().catch(() => ({}));
-      throw new Error(err.message || `Error GitHub ${putRes.status}`);
-    }
-
-    status.style.color = 'var(--green)';
-    status.textContent = '✅ Actualizado desde servidor — GitHub Pages listo en ~1 min';
-
-  } catch(err) {
-    status.style.color = 'var(--red)';
-    status.textContent = '❌ ' + err.message;
-    console.error('publishToGitHub error:', err);
-  } finally {
-    btn.disabled = false;
-  }
-}
 
 // Restaurar configuración guardada al cargar
 (function loadGHSettings() {
