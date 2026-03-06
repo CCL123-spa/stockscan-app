@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.5.9</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.6.0</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -1774,52 +1774,6 @@ html, body {
             <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-bottom:6px">ACCIÓN A ANALIZAR</div>
             <input id="pt-ticker" type="text" placeholder="Ej: AAPL, SAN.MC, ASML.AS…" autocapitalize="characters" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none" oninput="this.value=this.value.toUpperCase()">
             <div style="margin-top:8px">
-              <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">🇪🇸 IBEX</div>
-              <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
-                <button onclick="setPTTicker('SAN.MC')"  class="pt-preset">SAN</button>
-                <button onclick="setPTTicker('ITX.MC')"  class="pt-preset">ITX</button>
-                <button onclick="setPTTicker('BBVA.MC')" class="pt-preset">BBVA</button>
-                <button onclick="setPTTicker('IBE.MC')"  class="pt-preset">IBE</button>
-                <button onclick="setPTTicker('TEF.MC')"  class="pt-preset">TEF</button>
-                <button onclick="setPTTicker('REP.MC')"  class="pt-preset">REP</button>
-                <button onclick="setPTTicker('CABK.MC')" class="pt-preset">CABK</button>
-                <button onclick="setPTTicker('AMS.MC')"  class="pt-preset">AMS</button>
-                <button onclick="setPTTicker('FER.MC')"  class="pt-preset">FER</button>
-                <button onclick="setPTTicker('MAP.MC')"  class="pt-preset">MAP</button>
-                <button onclick="setPTTicker('ACS.MC')"  class="pt-preset">ACS</button>
-                <button onclick="setPTTicker('ELE.MC')"  class="pt-preset">ELE</button>
-                <button onclick="setPTTicker('SAB.MC')"  class="pt-preset">SAB</button>
-                <button onclick="setPTTicker('GRF.MC')"  class="pt-preset">GRF</button>
-                <button onclick="setPTTicker('MEL.MC')"  class="pt-preset">MEL</button>
-                <button onclick="setPTTicker('ACX.MC')"  class="pt-preset">ACX</button>
-                <button onclick="setPTTicker('NTGY.MC')" class="pt-preset">NTGY</button>
-                <button onclick="setPTTicker('BKT.MC')"  class="pt-preset">BKT</button>
-                <button onclick="setPTTicker('ENG.MC')"  class="pt-preset">ENG</button>
-                <button onclick="setPTTicker('LOG.MC')"  class="pt-preset">LOG</button>
-              </div>
-              <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">🇪🇺 EUROPA</div>
-              <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
-                <button onclick="setPTTicker('ASML.AS')"  class="pt-preset">ASML</button>
-                <button onclick="setPTTicker('MC.PA')"    class="pt-preset">LVMH</button>
-                <button onclick="setPTTicker('SAP.DE')"   class="pt-preset">SAP</button>
-                <button onclick="setPTTicker('SIE.DE')"   class="pt-preset">Siemens</button>
-                <button onclick="setPTTicker('ALV.DE')"   class="pt-preset">Allianz</button>
-                <button onclick="setPTTicker('BAS.DE')"   class="pt-preset">BASF</button>
-                <button onclick="setPTTicker('VOW3.DE')"  class="pt-preset">VW</button>
-                <button onclick="setPTTicker('AIR.PA')"   class="pt-preset">Airbus</button>
-                <button onclick="setPTTicker('NOVO-B.CO')" class="pt-preset">Novo</button>
-                <button onclick="setPTTicker('TTE.PA')"   class="pt-preset">Total</button>
-                <button onclick="setPTTicker('SAN.PA')"   class="pt-preset">Sanofi</button>
-                <button onclick="setPTTicker('OR.PA')"    class="pt-preset">L'Oréal</button>
-                <button onclick="setPTTicker('MUV2.DE')"  class="pt-preset">Munich Re</button>
-                <button onclick="setPTTicker('ADS.DE')"   class="pt-preset">Adidas</button>
-                <button onclick="setPTTicker('BMW.DE')"   class="pt-preset">BMW</button>
-                <button onclick="setPTTicker('DTE.DE')"   class="pt-preset">DT Telekom</button>
-                <button onclick="setPTTicker('IFX.DE')"   class="pt-preset">Infineon</button>
-                <button onclick="setPTTicker('RWE.DE')"   class="pt-preset">RWE</button>
-                <button onclick="setPTTicker('AXA.PA')"   class="pt-preset">AXA</button>
-                <button onclick="setPTTicker('BNP.PA')"   class="pt-preset">BNP</button>
-              </div>
               <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:5px">🇺🇸 S&P 500</div>
               <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
                 <button onclick="setPTTicker('AAPL')"  class="pt-preset">AAPL</button>
@@ -3264,7 +3218,7 @@ Termina con una frase sobre qué factores hacían la decisión especialmente dif
         'anthropic-dangerous-direct-browser-access': 'true',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 1000,
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         messages: [{ role: 'user', content: prompt }]
