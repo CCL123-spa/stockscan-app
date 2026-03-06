@@ -1637,7 +1637,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.3</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.3.0</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.3.1</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Yahoo Finance vía proxy propio</p></div>
@@ -2552,18 +2552,14 @@ function decidePT(decision) {
 
   if (hasShares) {
     // Ya tiene acciones: comprar más / mantener / vender
-    if (decision === 'buy')  { correct = went30Up;   pnl = result30pct || 0; actionLabel = `Compraste más a ${price.toFixed(2)}`; }
-    if (decision === 'wait') { correct = went30Flat;  pnl = result30pct || 0; actionLabel = 'Mantuviste tu posición'; }
-    if (decision === 'sell') { correct = went30Dn;
-      // PnL de venta = lo que te ahorraste de caída, o lo que perdiste por salir antes de subida
-      pnl = result30pct !== null ? -result30pct : 0;
-      actionLabel = `Vendiste a ${price.toFixed(2)} (entrada: ${entryPrice})`;
-    }
+    if (decision === 'buy')  { correct = went30Up;              pnl = result30pct || 0; actionLabel = `Compraste más a ${price.toFixed(2)}`; }
+    if (decision === 'wait') { correct = went30Flat || went30Up; pnl = result30pct || 0; actionLabel = 'Mantuviste tu posición'; }
+    if (decision === 'sell') { correct = went30Dn;              pnl = result30pct !== null ? -result30pct : 0; actionLabel = `Vendiste a ${price.toFixed(2)} (entrada: ${entryPrice})`; }
   } else {
     // No tiene acciones: comprar / esperar / no entrar
-    if (decision === 'buy')  { correct = went30Up;   pnl = result30pct || 0; actionLabel = `Compraste a ${price.toFixed(2)}`; }
-    if (decision === 'wait') { correct = went30Flat;  pnl = 0; actionLabel = 'Esperaste sin posición'; }
-    if (decision === 'sell') { correct = went30Dn;    pnl = 0; actionLabel = 'Decidiste no entrar'; }
+    if (decision === 'buy')  { correct = went30Up;              pnl = result30pct || 0; actionLabel = `Compraste a ${price.toFixed(2)}`; }
+    if (decision === 'wait') { correct = went30Flat;            pnl = 0; actionLabel = 'Esperaste sin posición'; }
+    if (decision === 'sell') { correct = went30Dn || went30Flat; pnl = 0; actionLabel = 'Decidiste no entrar'; }
   }
 
   const pnlCol      = pnl >= 0 ? 'var(--green)' : 'var(--red)';
