@@ -1553,9 +1553,60 @@ html, body {
         </div>
       </div>
 
-    </div>
+      <div class="edu-card" onclick="toggleEdu(this)">
+        <div class="edu-card-head">
+          <div class="edu-icon" style="background:rgba(245,86,74,0.1)">🛑</div>
+          <div class="edu-text">
+            <h3>Stop Loss — Gestión del riesgo</h3>
+            <p>Protege tu capital · limita pérdidas · disciplina de salida</p>
+          </div>
+        </div>
+        <div class="edu-expand">
+          <div class="edu-body">
+            El stop loss es una <b>orden de venta automática</b> que se activa si el precio cae hasta un nivel predefinido. Es la herramienta más importante de gestión de riesgo.<br><br>
 
-    <!-- ── SETTINGS ── -->
+            <b>¿Por qué es imprescindible?</b><br>
+            Sin stop loss, una mala operación puede convertirse en una pérdida catastrófica. Con stop loss, tu pérdida máxima está controlada desde el momento de la entrada.<br><br>
+
+            <b>Los 3 métodos principales:</b><br><br>
+
+            <b>1. Stop por porcentaje fijo</b><br>
+            El más simple. Defines un % máximo de pérdida aceptable y lo aplicas al precio de entrada.<br>
+            Ejemplo: Compras a 100€, pones stop al −5% → stop en 95€.<br>
+            ✅ Fácil de calcular · ❌ No tiene en cuenta la volatilidad real de la acción.<br><br>
+
+            <b>2. Stop por ATR (Average True Range)</b><br>
+            El ATR mide la <b>volatilidad real</b> de la acción en los últimos 14 días. Un stop basado en ATR respeta el movimiento natural del precio.<br>
+            Fórmula: Stop = Precio entrada − (ATR × multiplicador)<br>
+            → Multiplicador 1.5× = stop ajustado (más riesgo de saltar por ruido)<br>
+            → Multiplicador 2.5× = stop moderado (equilibrio)<br>
+            → Multiplicador 3.5× = stop amplio (más margen, más pérdida potencial)<br>
+            ✅ Se adapta a cada acción · ✅ Respeta la volatilidad real.<br><br>
+
+            <b>3. Stop por soporte técnico</b><br>
+            Colocas el stop justo por debajo de un nivel de soporte clave (mínimo reciente, MA200, zona de consolidación). Si el precio rompe ese soporte, la tesis de inversión queda invalidada.<br>
+            ✅ Lógica técnica sólida · ❌ Requiere identificar bien el soporte.<br><br>
+
+            <b>Errores más comunes:</b><br>
+            → <b>Stop demasiado ajustado</b>: salta por el ruido normal del mercado antes de que la acción tenga oportunidad de moverse a tu favor.<br>
+            → <b>Stop demasiado amplio</b>: cuando salta, ya has perdido demasiado. Destruye la relación riesgo/beneficio.<br>
+            → <b>Mover el stop hacia abajo</b>: el error más grave. Si el precio cae hacia tu stop y lo mueves más abajo "para darle margen", has eliminado toda la protección.<br><br>
+
+            <b>Regla de oro — Ratio Riesgo/Beneficio:</b><br>
+            Antes de entrar, calcula: ¿cuánto puedo ganar vs cuánto puedo perder?<br>
+            Si tu stop está al −5% y tu objetivo es +10%, tu ratio es 1:2 → operación válida.<br>
+            <b>Nunca entres en una operación con ratio inferior a 1:1.5.</b>
+
+            <div class="edu-zone">
+              <span class="zone-tag" style="color:var(--green);border-color:rgba(34,211,160,0.3);background:rgba(34,211,160,0.08)">RATIO 1:2+ IDEAL</span>
+              <span class="zone-tag" style="color:var(--orange);border-color:rgba(245,158,42,0.3);background:rgba(245,158,42,0.08)">ATR ×2.5 MODERADO</span>
+              <span class="zone-tag" style="color:var(--red);border-color:rgba(245,86,74,0.3);background:rgba(245,86,74,0.08)">NUNCA MOVER ABAJO</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
     <div class="page" id="page-set">
 
       <div class="section-label">Fuente de datos</div>
@@ -1612,7 +1663,7 @@ html, body {
       <div class="card" style="margin-bottom:12px">
         <div style="padding:4px 0 10px">
           <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);line-height:1.7;margin-bottom:12px">
-            Publica actualizaciones directamente a GitHub Pages sin tocar el ordenador.
+            Descarga el archivo nuevo desde Claude, luego súbelo aquí directamente desde tu móvil.
           </div>
 
           <div style="margin-bottom:10px">
@@ -1627,8 +1678,17 @@ html, body {
 
           <button onclick="saveGHSettings()" style="width:100%;padding:9px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2);cursor:pointer;margin-bottom:10px">💾 Guardar configuración</button>
 
-          <button onclick="publishToGitHub()" id="btn-publish" style="width:100%;padding:13px;background:var(--green);color:var(--bg);border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer">
-            🚀 Publicar actualización
+          <!-- Input oculto para seleccionar archivo -->
+          <input type="file" id="file-upload-input" accept=".html,text/html" style="display:none" onchange="uploadFileToGitHub(this)">
+
+          <!-- Botón principal: seleccionar archivo y subir -->
+          <button onclick="document.getElementById('file-upload-input').click()" id="btn-upload-file" style="width:100%;padding:13px;background:var(--accent);color:var(--bg);border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;margin-bottom:8px">
+            📁 Seleccionar archivo y publicar
+          </button>
+
+          <!-- Botón secundario: publicar versión actual (para cambios menores) -->
+          <button onclick="publishToGitHub()" id="btn-publish" style="width:100%;padding:10px;background:var(--card2);color:var(--text2);border:1px solid var(--border);border-radius:10px;font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer">
+            🚀 Republicar versión actual
           </button>
 
           <div id="publish-status" style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2);text-align:center;margin-top:10px;min-height:18px"></div>
@@ -1636,8 +1696,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.3</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.3.1</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.5.0</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Yahoo Finance vía proxy propio</p></div>
@@ -2515,6 +2575,23 @@ function renderPaperTradeCard(session) {
         </div>
       </div>
 
+      <!-- STOP LOSS PANEL (aparece solo al comprar) -->
+      <div id="pt-stop-panel" style="display:none;padding:14px 16px;border-top:1px solid var(--border);background:rgba(245,86,74,0.04)">
+        <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--red);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">🛑 Coloca tu Stop Loss</div>
+        
+        <!-- Sugerencias -->
+        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);margin-bottom:8px">Niveles sugeridos:</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px" id="pt-stop-suggestions"></div>
+
+        <!-- Input manual -->
+        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text3);margin-bottom:5px">O introduce tu nivel:</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="pt-stop-input" type="number" step="0.01" style="flex:1;background:var(--card);border:1px solid var(--red);border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none" placeholder="0.00">
+          <button onclick="confirmStopLoss()" style="padding:9px 18px;background:var(--red);color:#fff;border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:600;cursor:pointer">Confirmar</button>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-top:6px" id="pt-stop-pct-preview"></div>
+      </div>
+
       <!-- RESULTADO (oculto hasta decidir) -->
       <div id="pt-outcome" style="display:none"></div>
     </div>
@@ -2532,37 +2609,222 @@ function renderPaperTradeCard(session) {
 
 function decidePT(decision) {
   if (!ptSession || ptSession.decided) return;
-  ptSession.decided = true;
 
+  // Si compra → mostrar panel stop loss antes de resolver
+  if (decision === 'buy' || (decision === 'buy' && ptSession.hasShares)) {
+    ptSession.pendingDecision = 'buy';
+    showStopLossPanel();
+    // Deshabilitar botones de decisión
+    ['buy','wait','sell'].forEach(d => {
+      const btn = document.getElementById('pt-btn-' + d);
+      if (btn) { btn.disabled = true; if (d === 'buy') btn.classList.add('selected-buy'); }
+    });
+    return;
+  }
+
+  // Para esperar/vender → resolver directamente
+  ptSession.decided = true;
   ['buy','wait','sell'].forEach(d => {
     const btn = document.getElementById('pt-btn-' + d);
     if (btn) { btn.disabled = true; if (d === decision) btn.classList.add('selected-' + d); }
   });
+  resolvePT(decision, null);
+}
 
+function showStopLossPanel() {
+  const panel = document.getElementById('pt-stop-panel');
+  if (!panel) return;
+  panel.style.display = 'block';
+
+  const price = ptSession.indicators.price;
+  const candles = ptSession.pastCandles.slice(-20);
+  const lows = candles.map(c => c.l);
+  const recentLow = Math.min(...lows);
+
+  // Calcular ATR aproximado (últimas 14 velas)
+  const atrCandles = ptSession.pastCandles.slice(-15);
+  let atrSum = 0;
+  for (let i = 1; i < atrCandles.length; i++) {
+    const tr = Math.max(
+      atrCandles[i].h - atrCandles[i].l,
+      Math.abs(atrCandles[i].h - atrCandles[i-1].c),
+      Math.abs(atrCandles[i].l - atrCandles[i-1].c)
+    );
+    atrSum += tr;
+  }
+  const atr = atrSum / (atrCandles.length - 1);
+
+  // 3 niveles sugeridos
+  const suggestions = [
+    {
+      label: 'Ajustado',
+      price: +(price - atr * 1.5).toFixed(4),
+      desc: '1.5× ATR — stop cercano, mayor riesgo de saltar por ruido',
+      color: 'var(--orange)'
+    },
+    {
+      label: 'Moderado',
+      price: +(price - atr * 2.5).toFixed(4),
+      desc: '2.5× ATR — equilibrio entre protección y margen de maniobra',
+      color: 'var(--accent)'
+    },
+    {
+      label: 'Conservador',
+      price: +Math.min(recentLow * 0.99, price - atr * 3.5).toFixed(4),
+      desc: 'Bajo mínimo reciente — amplio margen, mayor pérdida potencial',
+      color: 'var(--text2)'
+    },
+  ];
+
+  ptSession.stopSuggestions = suggestions;
+
+  const sugEl = document.getElementById('pt-stop-suggestions');
+  if (sugEl) {
+    sugEl.innerHTML = suggestions.map((s, i) => {
+      const pct = +((s.price - price) / price * 100).toFixed(1);
+      return `
+        <div onclick="selectStopSuggestion(${i})" id="pt-stop-sug-${i}" style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer">
+          <div>
+            <span style="font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:600;color:${s.color}">${s.label}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-left:8px">${s.desc}</span>
+          </div>
+          <div style="text-align:right;margin-left:10px;flex-shrink:0">
+            <div style="font-family:'DM Mono',monospace;font-size:0.7rem;font-weight:600;color:var(--red)">${s.price.toFixed(2)}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3)">${pct}%</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Actualizar preview al escribir
+  const input = document.getElementById('pt-stop-input');
+  if (input) {
+    input.addEventListener('input', () => {
+      const val = parseFloat(input.value);
+      const preview = document.getElementById('pt-stop-pct-preview');
+      if (preview && val > 0) {
+        const pct = +((val - price) / price * 100).toFixed(1);
+        preview.textContent = `Stop al ${pct}% desde el precio de entrada`;
+        preview.style.color = pct < -15 ? 'var(--red)' : 'var(--text3)';
+      }
+    });
+  }
+
+  // Scroll al panel
+  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function selectStopSuggestion(idx) {
+  const s = ptSession.stopSuggestions[idx];
+  if (!s) return;
+  const input = document.getElementById('pt-stop-input');
+  if (input) {
+    input.value = s.price.toFixed(4);
+    input.dispatchEvent(new Event('input'));
+  }
+  // Resaltar seleccionado
+  [0,1,2].forEach(i => {
+    const el = document.getElementById('pt-stop-sug-' + i);
+    if (el) el.style.borderColor = i === idx ? 'var(--red)' : 'var(--border)';
+  });
+}
+
+function confirmStopLoss() {
+  const input = document.getElementById('pt-stop-input');
+  const val = parseFloat(input?.value);
+  if (!val || val <= 0 || val >= ptSession.indicators.price) {
+    input.style.borderColor = 'var(--red)';
+    const preview = document.getElementById('pt-stop-pct-preview');
+    if (preview) { preview.textContent = 'El stop debe ser inferior al precio de entrada'; preview.style.color = 'var(--red)'; }
+    return;
+  }
+  ptSession.stopLevel = val;
+  ptSession.decided = true;
+  document.getElementById('pt-stop-panel').style.display = 'none';
+  resolvePT('buy', val);
+}
+function resolvePT(decision, stopLevel) {
   const { result30pct, result90pct, indicators: ind, futureCandles, hasShares, entryPrice, entryPnl } = ptSession;
   const price = ind.price;
   const went30Up = result30pct !== null && result30pct > 3;
   const went30Dn = result30pct !== null && result30pct < -3;
   const went30Flat = !went30Up && !went30Dn;
 
-  // Evaluar corrección según escenario
-  let correct = false;
-  let pnl = 0;
-  let actionLabel = '';
+  // ── Evaluar stop loss si aplica ──────────────────────────────────────────
+  let stopHit = false;
+  let stopHitDay = null;
+  let stopHitPrice = null;
+  let stopPct = null;
+  let stopEvalHtml = '';
 
-  if (hasShares) {
-    // Ya tiene acciones: comprar más / mantener / vender
-    if (decision === 'buy')  { correct = went30Up;              pnl = result30pct || 0; actionLabel = `Compraste más a ${price.toFixed(2)}`; }
-    if (decision === 'wait') { correct = went30Flat || went30Up; pnl = result30pct || 0; actionLabel = 'Mantuviste tu posición'; }
-    if (decision === 'sell') { correct = went30Dn;              pnl = result30pct !== null ? -result30pct : 0; actionLabel = `Vendiste a ${price.toFixed(2)} (entrada: ${entryPrice})`; }
-  } else {
-    // No tiene acciones: comprar / esperar / no entrar
-    if (decision === 'buy')  { correct = went30Up;              pnl = result30pct || 0; actionLabel = `Compraste a ${price.toFixed(2)}`; }
-    if (decision === 'wait') { correct = went30Flat;            pnl = 0; actionLabel = 'Esperaste sin posición'; }
-    if (decision === 'sell') { correct = went30Dn || went30Flat; pnl = 0; actionLabel = 'Decidiste no entrar'; }
+  if (decision === 'buy' && stopLevel) {
+    stopPct = +((stopLevel - price) / price * 100).toFixed(1);
+    // Buscar el primer día en que el mínimo tocó o cruzó el stop
+    for (let i = 0; i < futureCandles.length; i++) {
+      if (futureCandles[i].l <= stopLevel) {
+        stopHit = true;
+        stopHitDay = i + 1;
+        stopHitPrice = stopLevel;
+        break;
+      }
+    }
+
+    // Evaluar si el stop fue bien colocado
+    const stopTooTight  = stopHit && stopHitDay <= 10; // saltó en los primeros 10 días
+    const stopTooWide   = !stopHit && went30Dn;         // no saltó pero la acción bajó mucho
+    const stopIdeal     = stopHit && stopHitDay > 10;   // saltó pero dio margen suficiente
+    const stopPerfect   = !stopHit && went30Up;          // no saltó y la acción subió
+
+    let stopIcon, stopText, stopColor, stopDetail;
+    if (stopPerfect) {
+      stopIcon = '✅'; stopColor = 'var(--green)';
+      stopText = 'Stop bien colocado — no saltó y la acción subió';
+      stopDetail = `Tu stop en ${stopLevel.toFixed(2)} (${stopPct}%) dio el margen necesario.`;
+    } else if (stopIdeal) {
+      stopIcon = '⚠️'; stopColor = 'var(--orange)';
+      stopText = `Stop activado el día ${stopHitDay} — te protegió de mayor caída`;
+      stopDetail = `Saliste a ${stopLevel.toFixed(2)} (${stopPct}%). ${went30Dn ? 'La acción siguió bajando — el stop te salvó.' : 'La acción se recuperó después — stop quizás algo ajustado.'}`;
+    } else if (stopTooTight) {
+      stopIcon = '❌'; stopColor = 'var(--red)';
+      stopText = `Stop demasiado ajustado — saltó el día ${stopHitDay}`;
+      stopDetail = `Tu stop en ${stopLevel.toFixed(2)} (${stopPct}%) era muy cercano al ruido del mercado. Considera usar un stop más amplio.`;
+    } else if (stopTooWide) {
+      stopIcon = '❌'; stopColor = 'var(--red)';
+      stopText = 'Stop demasiado amplio — no te protegió de la bajada';
+      stopDetail = `La acción cayó ${result30pct}% pero tu stop en ${stopLevel.toFixed(2)} (${stopPct}%) no llegó a activarse.`;
+    } else {
+      stopIcon = '✅'; stopColor = 'var(--green)';
+      stopText = 'Stop correcto — mercado lateral, sin activación';
+      stopDetail = `Tu stop en ${stopLevel.toFixed(2)} (${stopPct}%) no fue necesario.`;
+    }
+
+    stopEvalHtml = `
+      <div style="margin-bottom:12px;padding:10px 12px;background:var(--card);border:1px solid ${stopColor};border-radius:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span>${stopIcon}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:600;color:${stopColor}">${stopText}</span>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);line-height:1.6">${stopDetail}</div>
+      </div>`;
   }
 
-  const pnlCol      = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  // ── Evaluar decisión principal ───────────────────────────────────────────
+  let correct = false, pnl = 0, actionLabel = '';
+
+  // Si el stop saltó muy pronto, la decisión de compra se considera subóptima independientemente
+  const stopKilledTrade = stopHit && stopHitDay <= 10;
+
+  if (hasShares) {
+    if (decision === 'buy')  { correct = went30Up && !stopKilledTrade; pnl = stopHit ? stopPct : (result30pct || 0); actionLabel = `Compraste más a ${price.toFixed(2)}`; }
+    if (decision === 'wait') { correct = went30Flat || went30Up;       pnl = result30pct || 0; actionLabel = 'Mantuviste tu posición'; }
+    if (decision === 'sell') { correct = went30Dn;                     pnl = result30pct !== null ? -result30pct : 0; actionLabel = `Vendiste a ${price.toFixed(2)} (entrada: ${entryPrice})`; }
+  } else {
+    if (decision === 'buy')  { correct = went30Up && !stopKilledTrade; pnl = stopHit ? stopPct : (result30pct || 0); actionLabel = `Compraste a ${price.toFixed(2)}`; }
+    if (decision === 'wait') { correct = went30Flat;                    pnl = 0; actionLabel = 'Esperaste sin posición'; }
+    if (decision === 'sell') { correct = went30Dn || went30Flat;        pnl = 0; actionLabel = 'Decidiste no entrar'; }
+  }
+
+  const pnlCol       = pnl >= 0 ? 'var(--green)' : 'var(--red)';
   const outcomeClass = correct ? 'pt-outcome-correct' : 'pt-outcome-wrong';
   const outcomeIcon  = correct ? '✅' : '❌';
   const outcomeText  = correct ? 'Decisión correcta' : 'Decisión subóptima';
@@ -2576,7 +2838,6 @@ function decidePT(decision) {
   const r30col = result30pct !== null && result30pct >= 0 ? 'var(--green)' : 'var(--red)';
   const r90col = result90pct !== null && result90pct >= 0 ? 'var(--green)' : 'var(--red)';
 
-  // Si tenía acciones, mostrar también PnL total incluyendo la entrada original
   const totalPnlHtml = hasShares && decision !== 'sell' ? `
     <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);margin-top:6px">
       PnL entrada original: <span style="color:${entryPnl>=0?'var(--green)':'var(--red)'};font-weight:600">${entryPnl>=0?'+':''}${entryPnl}%</span>
@@ -2591,11 +2852,16 @@ function decidePT(decision) {
       <div style="flex:1">
         <div style="font-weight:700;font-size:0.9rem">${outcomeText}</div>
         <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);margin-top:2px">${actionLabel}</div>
+        ${stopLevel ? `<div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text3);margin-top:2px">Stop en ${stopLevel.toFixed(2)} (${stopPct}%)</div>` : ''}
         ${totalPnlHtml}
       </div>
-      ${(decision === 'buy' || (decision==='wait' && hasShares)) && result30pct !== null ?
+      ${decision === 'buy' && result30pct !== null ?
+        `<div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:${pnlCol}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</div>` : ''}
+      ${decision === 'wait' && hasShares && result30pct !== null ?
         `<div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:${pnlCol}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</div>` : ''}
     </div>
+
+    ${stopEvalHtml}
 
     <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.07em">Lo que pasó después</div>
     <div style="display:flex;gap:10px;margin-bottom:12px">
@@ -2610,7 +2876,7 @@ function decidePT(decision) {
     </div>
 
     ${futureSlice.length > 5 ? `
-    <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:4px">PRECIO REAL ANTES Y DESPUÉS · LÍNEA BLANCA = FECHA DE DECISIÓN</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:4px">PRECIO REAL ANTES Y DESPUÉS · LÍNEA BLANCA = FECHA DE DECISIÓN${stopLevel ? ' · LÍNEA ROJA = STOP LOSS' : ''}</div>
     <canvas id="chart-pt-full" style="width:100%;height:130px;display:block;border-radius:8px;overflow:hidden"></canvas>` : ''}
 
     <button onclick="resetPaperTrade()" style="width:100%;margin-top:12px;padding:11px;background:var(--card2);border:1px solid var(--border);border-radius:10px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2);cursor:pointer">
@@ -2623,12 +2889,12 @@ function decidePT(decision) {
       const closes = allCandles.map(c => c.c);
       const ma50arr  = calcSMA(closes, Math.min(50, closes.length));
       const ma200arr = calcSMA(closes, Math.min(200, closes.length));
-      drawChartWithSplit('chart-pt-full', { candles: allCandles, ma50: ma50arr, ma200: ma200arr }, splitIdx);
+      drawChartWithSplit('chart-pt-full', { candles: allCandles, ma50: ma50arr, ma200: ma200arr }, splitIdx, stopLevel);
     });
   }
 }
 
-function drawChartWithSplit(canvasId, series, splitIdx) {
+function drawChartWithSplit(canvasId, series, splitIdx, stopLevel) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   // Primero dibujar el gráfico normal
@@ -2660,12 +2926,120 @@ function drawChartWithSplit(canvasId, series, splitIdx) {
   ctx.font = '8px "DM Mono", monospace';
   ctx.textAlign = 'center';
   ctx.fillText('DECISIÓN', xSplit, padT + 8);
+
+  // Línea horizontal del stop loss
+  if (stopLevel) {
+    const prices = series.candles.map(c => c.c);
+    const minP = Math.min(...series.candles.map(c => c.l));
+    const maxP = Math.max(...series.candles.map(c => c.h));
+    const chartH = h - padT - padB;
+    const yStop = padT + chartH - ((stopLevel - minP) / (maxP - minP)) * chartH;
+
+    ctx.strokeStyle = 'rgba(245,86,74,0.85)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(padL, yStop);
+    ctx.lineTo(w - padR, yStop);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Etiqueta stop
+    ctx.fillStyle = 'rgba(245,86,74,0.9)';
+    ctx.font = '8px "DM Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(`SL ${stopLevel.toFixed(2)}`, w - padR - 2, yStop - 3);
+  }
 }
 
 function resetPaperTrade() {
   ptSession = null;
   document.getElementById('pt-result').style.display = 'none';
   document.getElementById('pt-result').innerHTML = '';
+}
+
+// ── SUBIR ARCHIVO DESDE MÓVIL ────────────────────────────────────────────────
+async function uploadFileToGitHub(input) {
+  const file   = input.files[0];
+  if (!file) return;
+
+  const token  = localStorage.getItem('gh_token') || document.getElementById('gh-token')?.value.trim();
+  const repo   = localStorage.getItem('gh_repo')  || document.getElementById('gh-repo')?.value.trim() || 'CCL123-spa/stockscan-app';
+  const status = document.getElementById('publish-status');
+  const btn    = document.getElementById('btn-upload-file');
+
+  if (!token) {
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ Añade tu GitHub token primero';
+    return;
+  }
+
+  btn.disabled = true;
+  status.style.color = 'var(--text2)';
+  status.textContent = '⏳ Leyendo archivo…';
+
+  try {
+    // 1. Leer el archivo seleccionado
+    const htmlContent = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsText(file, 'UTF-8');
+    });
+
+    status.textContent = '⏳ Conectando con GitHub…';
+
+    const apiBase = `https://api.github.com/repos/${repo}/contents/index.html`;
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Content-Type': 'application/json',
+    };
+
+    // 2. Obtener SHA actual
+    const getRes = await fetch(apiBase, { headers });
+    if (getRes.status === 401) throw new Error('Token inválido — genera uno nuevo con permisos "repo"');
+    if (getRes.status === 404) throw new Error('Repositorio no encontrado: ' + repo);
+    if (!getRes.ok) throw new Error(`Error GitHub ${getRes.status}`);
+    const { sha } = await getRes.json();
+
+    status.textContent = '⏳ Subiendo archivo…';
+
+    // 3. Codificar en base64
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(htmlContent);
+    let binary = '';
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    const encoded = btoa(binary);
+
+    // 4. PUT
+    const putRes = await fetch(apiBase, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({
+        message: `StockScan update ${new Date().toLocaleString('es-ES')} — ${file.name}`,
+        content: encoded,
+        sha,
+      })
+    });
+
+    if (!putRes.ok) {
+      const err = await putRes.json().catch(() => ({}));
+      throw new Error(err.message || `Error GitHub ${putRes.status}`);
+    }
+
+    status.style.color = 'var(--green)';
+    status.textContent = `✅ "${file.name}" publicado — GitHub Pages actualiza en ~1 min`;
+
+  } catch(err) {
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ ' + err.message;
+    console.error('uploadFileToGitHub error:', err);
+  } finally {
+    btn.disabled = false;
+    input.value = ''; // reset para poder seleccionar el mismo archivo otra vez
+  }
 }
 
 // ── GITHUB AUTO-PUBLISH ──────────────────────────────────────────────────────
@@ -2681,6 +3055,7 @@ function saveGHSettings() {
 async function publishToGitHub() {
   const token  = localStorage.getItem('gh_token') || document.getElementById('gh-token')?.value.trim();
   const repo   = localStorage.getItem('gh_repo')  || document.getElementById('gh-repo')?.value.trim() || 'CCL123-spa/stockscan-app';
+  const proxy  = localStorage.getItem('stockscan_proxy_url') || 'https://stockscan-proxy.onrender.com';
   const status = document.getElementById('publish-status');
   const btn    = document.getElementById('btn-publish');
 
@@ -2692,9 +3067,17 @@ async function publishToGitHub() {
 
   btn.disabled = true;
   status.style.color = 'var(--text2)';
-  status.textContent = '⏳ Conectando con GitHub…';
+  status.textContent = '⏳ Descargando versión nueva desde servidor…';
 
   try {
+    // 1. Descargar el HTML actualizado desde el proxy
+    const appRes = await fetch(`${proxy}/app`, { cache: 'no-store' });
+    if (!appRes.ok) throw new Error(`No hay versión nueva en el servidor (${appRes.status}) — pide a Claude que suba el archivo primero`);
+    const htmlContent = await appRes.text();
+    if (!htmlContent || htmlContent.length < 1000) throw new Error('El archivo descargado parece vacío o incompleto');
+
+    status.textContent = '⏳ Conectando con GitHub…';
+
     const apiBase = `https://api.github.com/repos/${repo}/contents/index.html`;
     const headers = {
       'Authorization': `Bearer ${token}`,
@@ -2703,51 +3086,39 @@ async function publishToGitHub() {
       'Content-Type': 'application/json',
     };
 
-    // 1. Obtener SHA del archivo actual
-    status.textContent = '⏳ Obteniendo versión actual…';
+    // 2. Obtener SHA actual
     const getRes = await fetch(apiBase, { headers });
-    
-    if (getRes.status === 401) throw new Error('Token inválido o sin permisos — genera un nuevo token con permisos "repo"');
+    if (getRes.status === 401) throw new Error('Token inválido — genera uno nuevo con permisos "repo"');
     if (getRes.status === 404) throw new Error('Repositorio no encontrado: ' + repo);
     if (!getRes.ok) throw new Error(`Error GitHub ${getRes.status}`);
-    
-    const getJson = await getRes.json();
-    const sha = getJson.sha;
+    const { sha } = await getRes.json();
 
-    status.textContent = '⏳ Preparando contenido…';
+    status.textContent = '⏳ Subiendo…';
 
-    // 2. Obtener el HTML — fetch a sí mismo para tener el source limpio
-    const selfRes = await fetch(window.location.href);
-    const htmlContent = await selfRes.text();
-    
-    // 3. Codificar en base64 con soporte unicode
+    // 3. Codificar y subir
     const encoder = new TextEncoder();
     const bytes = encoder.encode(htmlContent);
     let binary = '';
     bytes.forEach(b => binary += String.fromCharCode(b));
     const encoded = btoa(binary);
 
-    status.textContent = '⏳ Subiendo…';
-
-    // 4. PUT para actualizar
     const putRes = await fetch(apiBase, {
       method: 'PUT',
       headers,
       body: JSON.stringify({
-        message: `StockScan update ${new Date().toLocaleString('es-ES')}`,
+        message: `StockScan auto-update ${new Date().toLocaleString('es-ES')}`,
         content: encoded,
         sha,
       })
     });
 
-    if (putRes.status === 401) throw new Error('Token sin permisos de escritura — necesitas permisos "repo"');
     if (!putRes.ok) {
       const err = await putRes.json().catch(() => ({}));
       throw new Error(err.message || `Error GitHub ${putRes.status}`);
     }
 
     status.style.color = 'var(--green)';
-    status.textContent = '✅ Publicado — GitHub Pages actualiza en ~1 min';
+    status.textContent = '✅ Actualizado desde servidor — GitHub Pages listo en ~1 min';
 
   } catch(err) {
     status.style.color = 'var(--red)';
