@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.5.3</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.5.4</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2017,6 +2017,7 @@ html, body {
 <script>
 // ── DATA ──────────────────────────────────────────────────────────────────────
 const STOCKS = [
+  // IBEX
   {t:'SAN',n:'Banco Santander',m:'ibex',s:'Financiero'},
   {t:'ITX',n:'Inditex',m:'ibex',s:'Consumo'},
   {t:'BBVA',n:'BBVA',m:'ibex',s:'Financiero'},
@@ -2027,6 +2028,12 @@ const STOCKS = [
   {t:'CABK',n:'CaixaBank',m:'ibex',s:'Financiero'},
   {t:'FER',n:'Ferrovial',m:'ibex',s:'Infraestructura'},
   {t:'MAP',n:'Mapfre',m:'ibex',s:'Seguros'},
+  {t:'ACS',n:'ACS',m:'ibex',s:'Construcción'},
+  {t:'ELE',n:'Endesa',m:'ibex',s:'Utilities'},
+  {t:'SAB',n:'Banco Sabadell',m:'ibex',s:'Financiero'},
+  {t:'GRF',n:'Grifols',m:'ibex',s:'Salud'},
+  {t:'MEL',n:'Meliá Hotels',m:'ibex',s:'Turismo'},
+  // EUROSTOXX
   {t:'ASML',n:'ASML Holding',m:'eurostoxx',s:'Semiconductores'},
   {t:'LVMH',n:'LVMH',m:'eurostoxx',s:'Lujo'},
   {t:'SAP',n:'SAP SE',m:'eurostoxx',s:'Software'},
@@ -2037,6 +2044,12 @@ const STOCKS = [
   {t:'ALV',n:'Allianz',m:'eurostoxx',s:'Seguros'},
   {t:'VOW',n:'Volkswagen',m:'eurostoxx',s:'Automoción'},
   {t:'DTE',n:'Deutsche Telekom',m:'eurostoxx',s:'Telecom'},
+  {t:'AIR',n:'Airbus',m:'eurostoxx',s:'Aeroespacial'},
+  {t:'TTE',n:'TotalEnergies',m:'eurostoxx',s:'Energía'},
+  {t:'SAN.PA',n:'Sanofi',m:'eurostoxx',s:'Farma'},
+  {t:'OR.PA',n:'L\'Oréal',m:'eurostoxx',s:'Consumo'},
+  {t:'MUV2',n:'Munich Re',m:'eurostoxx',s:'Seguros'},
+  // S&P 500
   {t:'AAPL',n:'Apple',m:'sp500',s:'Tecnología'},
   {t:'MSFT',n:'Microsoft',m:'sp500',s:'Software'},
   {t:'JPM',n:'JPMorgan Chase',m:'sp500',s:'Financiero'},
@@ -2047,6 +2060,12 @@ const STOCKS = [
   {t:'BAC',n:'Bank of America',m:'sp500',s:'Financiero'},
   {t:'KO',n:'Coca-Cola',m:'sp500',s:'Bebidas'},
   {t:'DIS',n:'Walt Disney',m:'sp500',s:'Entretenimiento'},
+  {t:'V',n:'Visa',m:'sp500',s:'Fintech'},
+  {t:'UNH',n:'UnitedHealth',m:'sp500',s:'Salud'},
+  {t:'HD',n:'Home Depot',m:'sp500',s:'Retail'},
+  {t:'CVX',n:'Chevron',m:'sp500',s:'Energía'},
+  {t:'MRK',n:'Merck',m:'sp500',s:'Farma'},
+  // NASDAQ
   {t:'NVDA',n:'NVIDIA',m:'nasdaq',s:'Semiconductores'},
   {t:'AMZN',n:'Amazon',m:'nasdaq',s:'E-commerce'},
   {t:'GOOGL',n:'Alphabet',m:'nasdaq',s:'Tecnología'},
@@ -2057,6 +2076,11 @@ const STOCKS = [
   {t:'INTC',n:'Intel',m:'nasdaq',s:'Semiconductores'},
   {t:'ADBE',n:'Adobe',m:'nasdaq',s:'Software'},
   {t:'PYPL',n:'PayPal',m:'nasdaq',s:'Fintech'},
+  {t:'QCOM',n:'Qualcomm',m:'nasdaq',s:'Semiconductores'},
+  {t:'CSCO',n:'Cisco',m:'nasdaq',s:'Redes'},
+  {t:'SBUX',n:'Starbucks',m:'nasdaq',s:'Consumo'},
+  {t:'ABNB',n:'Airbnb',m:'nasdaq',s:'Turismo'},
+  {t:'CRM',n:'Salesforce',m:'nasdaq',s:'Software'},
 ];
 
 const PRICES = {
@@ -2821,6 +2845,68 @@ function resolvePT(decision, stopLevel) {
   const outcomeIcon  = correct ? '✅' : '❌';
   const outcomeText  = correct ? 'Decisión correcta' : 'Decisión subóptima';
 
+  // ── FEEDBACK DETALLADO DE LA DECISIÓN ─────────────────────────────────────
+  let decisionFeedback = '';
+  if (ptSession.hasShares) {
+    // Tenía posición abierta
+    if (decision === 'buy') {
+      if (went30Up && !stopKilledTrade)
+        decisionFeedback = `✅ Buena decisión promediar a la baja. La acción subió ${result30pct}% en 30 días, confirmando la tesis alcista.`;
+      else if (stopKilledTrade)
+        decisionFeedback = `❌ Promediar fue arriesgado — el stop saltó antes de que la acción se recuperase. Añadir a una posición perdedora amplifica el riesgo.`;
+      else if (went30Dn)
+        decisionFeedback = `❌ Promediar a la baja fue prematuro. La acción continuó cayendo ${result30pct}%. Esperar confirmación de suelo habría sido más prudente.`;
+      else
+        decisionFeedback = `⚠️ El mercado se quedó lateral. Promediar sin tendencia clara no añadió valor.`;
+    } else if (decision === 'wait') {
+      if (went30Up)
+        decisionFeedback = `✅ Mantener fue correcto. La acción subió ${result30pct}% — la paciencia fue recompensada.`;
+      else if (went30Dn)
+        decisionFeedback = `❌ Mantener fue costoso. La acción cayó ${result30pct}%. Reducir exposición o salir habría limitado las pérdidas.`;
+      else
+        decisionFeedback = `✅ Mercado lateral — mantener sin actuar fue la decisión correcta. No todas las señales requieren acción.`;
+    } else if (decision === 'sell') {
+      if (went30Dn)
+        decisionFeedback = `✅ Buena decisión salir. La acción cayó ${result30pct}% después — cortaste las pérdidas a tiempo.`;
+      else if (went30Up)
+        decisionFeedback = `❌ Saliste demasiado pronto. La acción subió ${result30pct}% después de tu venta. El pánico puede hacer vender en mínimos.`;
+      else
+        decisionFeedback = `⚠️ El mercado se quedó lateral tras tu salida. Decisión defensiva, no necesariamente incorrecta.`;
+    }
+  } else {
+    // Sin posición — decisión de entrar o no
+    if (decision === 'buy') {
+      if (went30Up && !stopKilledTrade)
+        decisionFeedback = `✅ Entrada correcta. La acción subió ${result30pct}% en 30 días. Identificaste bien la oportunidad.`;
+      else if (stopKilledTrade)
+        decisionFeedback = `❌ Entraste pero el stop saltó pronto. La zona de entrada no tenía suficiente soporte — esperar consolidación habría sido mejor.`;
+      else if (went30Dn)
+        decisionFeedback = `❌ Entrada prematura. La acción cayó ${result30pct}% después. Esperar confirmación de la señal habría evitado la pérdida.`;
+      else
+        decisionFeedback = `⚠️ Entraste pero el mercado se quedó lateral. Sin catalizador claro, es mejor esperar tendencia definida.`;
+    } else if (decision === 'wait') {
+      if (went30Up)
+        decisionFeedback = `❌ Oportunidad perdida. La acción subió ${result30pct}% — las señales apuntaban a una buena entrada.`;
+      else if (went30Dn)
+        decisionFeedback = `✅ Correcto no entrar. La acción cayó ${result30pct}% — evitaste una pérdida. La paciencia tiene valor.`;
+      else
+        decisionFeedback = `✅ Sin tendencia clara, esperar fue lo correcto. No necesitas estar siempre en el mercado.`;
+    } else if (decision === 'sell') {
+      if (went30Dn)
+        decisionFeedback = `✅ Correcto evitar la posición. La acción cayó ${result30pct}% — tu análisis bajista fue acertado.`;
+      else if (went30Up)
+        decisionFeedback = `❌ Visión bajista equivocada. La acción subió ${result30pct}%. Revisar los indicadores que apuntaban al alza.`;
+      else
+        decisionFeedback = `⚠️ Mercado lateral tras tu análisis bajista. Sin tendencia, cualquier decisión era válida.`;
+    }
+  }
+
+  const decisionFeedbackHtml = decisionFeedback ? `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text);line-height:1.6">
+      <div style="font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Análisis de tu decisión</div>
+      ${decisionFeedback}
+    </div>` : '';
+
   const futureSlice = futureCandles.slice(0, 90);
   const allCandles  = [...ptSession.pastCandles.slice(-60), ...futureSlice];
   const splitIdx    = ptSession.pastCandles.slice(-60).length;
@@ -2852,6 +2938,8 @@ function resolvePT(decision, stopLevel) {
       ${decision === 'wait' && hasShares && result30pct !== null ?
         `<div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:${pnlCol}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</div>` : ''}
     </div>
+
+    ${decisionFeedbackHtml}
 
     ${stopEvalHtml}
 
