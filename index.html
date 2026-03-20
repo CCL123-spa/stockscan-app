@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.6.5</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.6.6</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2865,7 +2865,7 @@ function resolvePT(decision, stopLevel) {
   if (hasShares) {
     const overbought = ind.rsi > 70;
     if (decision === 'buy')  { correct = went30Up && !stopKilledTrade; pnl = stopHit ? stopPct : (result30pct || 0); actionLabel = `Compraste más a ${price.toFixed(2)}`; }
-    if (decision === 'wait') { correct = went30Flat || went30Up || (went30Dn && !overbought); pnl = result30pct || 0; actionLabel = 'Mantuviste tu posición'; }
+    if (decision === 'wait') { correct = went30Flat || went30Up; pnl = result30pct || 0; actionLabel = 'Mantuviste tu posición'; }
     if (decision === 'sell') { correct = went30Dn || (overbought && !went30Up); pnl = result30pct !== null ? -result30pct : 0; actionLabel = `Vendiste a ${price.toFixed(2)} (entrada: ${entryPrice})`; }
   } else {
     if (decision === 'buy')  { correct = went30Up && !stopKilledTrade; pnl = stopHit ? stopPct : (result30pct || 0); actionLabel = `Compraste a ${price.toFixed(2)}`; }
