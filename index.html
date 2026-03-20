@@ -159,15 +159,15 @@ html, body {
 }
 
 .nav-icon {
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   line-height: 1;
   transition: transform 0.2s;
 }
 
 .nav-label {
   font-family: 'DM Mono', monospace;
-  font-size: 0.58rem;
-  letter-spacing: 0.06em;
+  font-size: 0.48rem;
+  letter-spacing: 0.04em;
   color: var(--text2);
   transition: color 0.15s;
 }
@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.6.6</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.7.0</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -1875,6 +1875,105 @@ html, body {
       </div>
 
     </div><!-- /page-portfolio -->
+    <!-- ── DIARIO ── -->
+    <div class="page" id="page-diary">
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center">
+          <div id="diary-stat-total" style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--text)">0</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--text3);margin-top:2px">OPS</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center">
+          <div id="diary-stat-winrate" style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--green)">—</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--text3);margin-top:2px">WIN RATE</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center">
+          <div id="diary-stat-pnl" style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--accent)">—</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--text3);margin-top:2px">P&L MEDIO</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center">
+          <div id="diary-stat-streak" style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--orange)">—</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--text3);margin-top:2px">RACHA</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0;margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px">
+        <button id="diary-tab-log" onclick="switchDiaryTab('log')" style="flex:1;padding:8px;border:none;border-radius:9px;background:var(--accent);color:var(--bg);font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:600;cursor:pointer">📋 Registro</button>
+        <button id="diary-tab-new" onclick="switchDiaryTab('new')" style="flex:1;padding:8px;border:none;border-radius:9px;background:transparent;color:var(--text2);font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer">✏️ Nueva entrada</button>
+      </div>
+
+      <div id="diary-panel-log">
+        <div id="diary-entries-list">
+          <div style="text-align:center;padding:40px 20px">
+            <div style="font-size:2rem;margin-bottom:12px">📓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">Tu diario está vacío</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-top:6px">Las operaciones del paper trading<br>se guardarán aquí automáticamente</div>
+          </div>
+        </div>
+        <div id="diary-sync-status" style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);text-align:center;margin-top:10px"></div>
+      </div>
+
+      <div id="diary-panel-new" style="display:none">
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Nueva operación manual</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:4px">TICKER</div>
+              <input id="diary-new-ticker" type="text" placeholder="AAPL" autocapitalize="characters" oninput="this.value=this.value.toUpperCase()" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none;box-sizing:border-box">
+            </div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:4px">FECHA</div>
+              <input id="diary-new-date" type="date" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none;box-sizing:border-box">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:4px">TIPO</div>
+              <select id="diary-new-type" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text);outline:none;box-sizing:border-box">
+                <option value="buy">📈 Compra</option>
+                <option value="sell">📉 Venta</option>
+                <option value="watch">👀 Observación</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:4px">PRECIO ENTRADA</div>
+              <input id="diary-new-price" type="number" placeholder="0.00" step="0.01" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none;box-sizing:border-box">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:4px">STOP LOSS</div>
+              <input id="diary-new-stop" type="number" placeholder="0.00" step="0.01" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none;box-sizing:border-box">
+            </div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:4px">OBJETIVO</div>
+              <input id="diary-new-target" type="number" placeholder="0.00" step="0.01" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none;box-sizing:border-box">
+            </div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:6px">EMOCIÓN AL ENTRAR</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap" id="emotion-btns">
+              <button onclick="selectEmotion(this,'confident')" class="pt-preset">💪 Confiado</button>
+              <button onclick="selectEmotion(this,'doubtful')" class="pt-preset">🤔 Con dudas</button>
+              <button onclick="selectEmotion(this,'fearful')" class="pt-preset">😰 Con miedo</button>
+              <button onclick="selectEmotion(this,'fomo')" class="pt-preset">🚀 FOMO</button>
+              <button onclick="selectEmotion(this,'neutral')" class="pt-preset">😐 Neutral</button>
+            </div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:4px">RAZONAMIENTO DE ENTRADA</div>
+            <textarea id="diary-new-reason" placeholder="¿Por qué entraste? ¿Qué viste en los indicadores?" rows="3" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text);outline:none;resize:none;box-sizing:border-box"></textarea>
+          </div>
+          <div style="margin-bottom:14px">
+            <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:4px">RESULTADO Y APRENDIZAJE (puedes rellenar después)</div>
+            <textarea id="diary-new-lesson" placeholder="¿Qué pasó? ¿Qué aprendiste?" rows="2" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text);outline:none;resize:none;box-sizing:border-box"></textarea>
+          </div>
+          <button onclick="saveManualDiaryEntry()" style="width:100%;padding:12px;background:var(--accent);color:var(--bg);border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer">💾 Guardar en diario</button>
+          <div id="diary-new-status" style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);text-align:center;margin-top:8px"></div>
+        </div>
+      </div>
+
+    </div><!-- /page-diary -->
 
   </div><!-- /pages -->
 
@@ -1896,7 +1995,11 @@ html, body {
       <div class="nav-icon" style="position:relative">💼<span id="portfolio-badge" style="display:none;position:absolute;top:-4px;right:-6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:1.5px solid var(--bg)"></span></div>
       <div class="nav-label">CARTERA</div>
     </div>
-    <div class="nav-item" onclick="navigate('set', this)">
+    <div class="nav-item" onclick="navigate('diary', this)">
+      <div class="nav-icon">📓</div>
+      <div class="nav-label">DIARIO</div>
+    </div>
+        <div class="nav-item" onclick="navigate('set', this)">
       <div class="nav-icon">⚙️</div>
       <div class="nav-label">AJUSTES</div>
     </div>
@@ -2942,6 +3045,27 @@ function resolvePT(decision, stopLevel) {
     }
   }
 
+  // ── AUTO-GUARDAR EN DIARIO ────────────────────────────────────────────────
+  autoSaveDiaryEntry({
+    id: Date.now(),
+    source: 'paper',
+    ticker: ptSession.ticker,
+    date: ptSession.actualDate,
+    type: decision,
+    price: price,
+    stop: null,
+    target: null,
+    emotion: '',
+    reason: '',
+    lesson: '',
+    result30: result30pct,
+    result90: result90pct,
+    correct: correct,
+    indicators: { rsi: ind.rsi, hist: ind.hist, score: ind.score, golden: ind.golden },
+    feedback: decisionFeedback,
+    createdAt: new Date().toISOString()
+  });
+
   const decisionFeedbackHtml = decisionFeedback ? `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text);line-height:1.6">
       <div style="font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Análisis de tu decisión</div>
@@ -3254,6 +3378,221 @@ Usando los resultados de búsqueda, describe en 3-4 frases el contexto real de e
   }
 }
 
+
+// ── DIARIO DE TRADING ─────────────────────────────────────────────────────────
+
+let diaryEntries = [];
+let selectedEmotion = '';
+
+function selectEmotion(btn, emotion) {
+  selectedEmotion = emotion;
+  document.querySelectorAll('#emotion-btns button').forEach(b => {
+    b.style.background = '';
+    b.style.color = '';
+    b.style.borderColor = '';
+  });
+  btn.style.background = 'var(--accent)';
+  btn.style.color = 'var(--bg)';
+}
+
+function switchDiaryTab(tab) {
+  const isLog = tab === 'log';
+  document.getElementById('diary-panel-log').style.display = isLog ? '' : 'none';
+  document.getElementById('diary-panel-new').style.display = isLog ? 'none' : '';
+  document.getElementById('diary-tab-log').style.background = isLog ? 'var(--accent)' : 'transparent';
+  document.getElementById('diary-tab-log').style.color = isLog ? 'var(--bg)' : 'var(--text2)';
+  document.getElementById('diary-tab-log').style.fontWeight = isLog ? '600' : 'normal';
+  document.getElementById('diary-tab-new').style.background = isLog ? 'transparent' : 'var(--accent)';
+  document.getElementById('diary-tab-new').style.color = isLog ? 'var(--text2)' : 'var(--bg)';
+  document.getElementById('diary-tab-new').style.fontWeight = isLog ? 'normal' : '600';
+  if (isLog) renderDiaryEntries();
+}
+
+async function loadDiaryFromGitHub() {
+  const token = localStorage.getItem('gh_token');
+  const repo  = localStorage.getItem('gh_repo') || 'CCL123-spa/stockscan-app';
+  if (!token) { diaryEntries = JSON.parse(localStorage.getItem('diary_entries') || '[]'); renderDiaryEntries(); return; }
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/diario.json`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (res.status === 404) { diaryEntries = []; return; }
+    if (!res.ok) throw new Error('GitHub ' + res.status);
+    const data = await res.json();
+    diaryEntries = JSON.parse(atob(data.content.replace(/\n/g,'')));
+    localStorage.setItem('diary_entries', JSON.stringify(diaryEntries));
+    renderDiaryEntries();
+    updateDiaryStats();
+  } catch(e) {
+    diaryEntries = JSON.parse(localStorage.getItem('diary_entries') || '[]');
+    renderDiaryEntries();
+  }
+}
+
+async function saveDiaryToGitHub() {
+  const token = localStorage.getItem('gh_token');
+  const repo  = localStorage.getItem('gh_repo') || 'CCL123-spa/stockscan-app';
+  localStorage.setItem('diary_entries', JSON.stringify(diaryEntries));
+  const statusEl = document.getElementById('diary-sync-status');
+  if (!token) { if(statusEl) statusEl.textContent = '💾 Guardado localmente (sin GitHub token)'; return; }
+  try {
+    if(statusEl) statusEl.textContent = '⏳ Sincronizando con GitHub…';
+    const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
+    const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/diario.json`, { headers });
+    const sha = getRes.ok ? (await getRes.json()).sha : undefined;
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(diaryEntries, null, 2))));
+    const body = { message: 'Diario update ' + new Date().toLocaleString('es-ES'), content, ...(sha && { sha }) };
+    const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/diario.json`, { method:'PUT', headers, body: JSON.stringify(body) });
+    if (!putRes.ok) throw new Error('GitHub ' + putRes.status);
+    if(statusEl) statusEl.textContent = '✅ Sincronizado con GitHub · ' + new Date().toLocaleTimeString('es-ES');
+  } catch(e) {
+    if(statusEl) statusEl.textContent = '⚠️ Error sync: ' + e.message;
+  }
+}
+
+function autoSaveDiaryEntry(entry) {
+  diaryEntries.unshift(entry);
+  localStorage.setItem('diary_entries', JSON.stringify(diaryEntries));
+  saveDiaryToGitHub();
+  updateDiaryStats();
+}
+
+function saveManualDiaryEntry() {
+  const ticker  = document.getElementById('diary-new-ticker').value.trim().toUpperCase();
+  const date    = document.getElementById('diary-new-date').value;
+  const type    = document.getElementById('diary-new-type').value;
+  const price   = parseFloat(document.getElementById('diary-new-price').value) || null;
+  const stop    = parseFloat(document.getElementById('diary-new-stop').value) || null;
+  const target  = parseFloat(document.getElementById('diary-new-target').value) || null;
+  const reason  = document.getElementById('diary-new-reason').value.trim();
+  const lesson  = document.getElementById('diary-new-lesson').value.trim();
+  const statusEl = document.getElementById('diary-new-status');
+
+  if (!ticker || !date) { statusEl.style.color='var(--red)'; statusEl.textContent='❌ Ticker y fecha son obligatorios'; return; }
+
+  const entry = {
+    id: Date.now(),
+    source: 'manual',
+    ticker, date, type,
+    price, stop, target,
+    emotion: selectedEmotion || 'neutral',
+    reason, lesson,
+    result30: null, correct: null,
+    createdAt: new Date().toISOString()
+  };
+
+  autoSaveDiaryEntry(entry);
+
+  // Reset form
+  document.getElementById('diary-new-ticker').value = '';
+  document.getElementById('diary-new-date').value = '';
+  document.getElementById('diary-new-price').value = '';
+  document.getElementById('diary-new-stop').value = '';
+  document.getElementById('diary-new-target').value = '';
+  document.getElementById('diary-new-reason').value = '';
+  document.getElementById('diary-new-lesson').value = '';
+  selectedEmotion = '';
+  document.querySelectorAll('#emotion-btns button').forEach(b => { b.style.background=''; b.style.color=''; });
+
+  statusEl.style.color='var(--green)'; statusEl.textContent='✅ Entrada guardada';
+  setTimeout(() => { statusEl.textContent=''; switchDiaryTab('log'); }, 1500);
+}
+
+const EMOTION_LABELS = { confident:'💪 Confiado', doubtful:'🤔 Con dudas', fearful:'😰 Con miedo', fomo:'🚀 FOMO', neutral:'😐 Neutral', '':'' };
+const TYPE_LABELS    = { buy:'📈 Compra', sell:'📉 Venta', watch:'👀 Observación', wait:'⏳ Esperar', 'no-enter':'🚫 No entrar' };
+
+function renderDiaryEntries() {
+  const el = document.getElementById('diary-entries-list');
+  if (!el) return;
+  if (!diaryEntries.length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px"><div style="font-size:2rem;margin-bottom:12px">📓</div><div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">Tu diario está vacío</div><div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-top:6px">Las operaciones del paper trading<br>se guardarán aquí automáticamente</div></div>`;
+    return;
+  }
+  el.innerHTML = diaryEntries.map((e, i) => {
+    const correctIcon = e.correct === true ? '✅' : e.correct === false ? '❌' : '⏳';
+    const pnlColor    = e.result30 > 0 ? 'var(--green)' : e.result30 < 0 ? 'var(--red)' : 'var(--text3)';
+    const sourceBadge = e.source === 'paper' ? '<span style="background:var(--accent);color:var(--bg);border-radius:4px;padding:1px 5px;font-size:0.45rem;font-weight:700;margin-left:4px">PAPER</span>' : '<span style="background:var(--orange);color:var(--bg);border-radius:4px;padding:1px 5px;font-size:0.45rem;font-weight:700;margin-left:4px">MANUAL</span>';
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px" onclick="toggleDiaryDetail(${i})">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--accent)">${e.ticker}</span>
+          ${sourceBadge}
+        </div>
+        <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3)">${e.date}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2)">${TYPE_LABELS[e.type]||e.type}</span>
+          ${e.emotion ? `<span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3)">${EMOTION_LABELS[e.emotion]||''}</span>` : ''}
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          ${e.result30 !== null ? `<span style="font-family:'DM Mono',monospace;font-size:0.75rem;font-weight:700;color:${pnlColor}">${e.result30>0?'+':''}${e.result30}%</span>` : ''}
+          <span style="font-size:0.9rem">${correctIcon}</span>
+        </div>
+      </div>
+      <div id="diary-detail-${i}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        ${e.reason ? `<div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-bottom:3px">RAZONAMIENTO</div><div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text);margin-bottom:8px;line-height:1.5">${e.reason}</div>` : ''}
+        ${e.indicators ? `<div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-bottom:3px">INDICADORES</div><div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2);margin-bottom:8px">RSI ${e.indicators.rsi} · MACD ${e.indicators.hist>0?'Alcista':'Bajista'} · Score ${e.indicators.score}/5</div>` : ''}
+        ${e.stop ? `<div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text3)">Stop: ${e.stop} · Objetivo: ${e.target||'—'}</div>` : ''}
+        ${e.lesson ? `<div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-top:8px;margin-bottom:3px">APRENDIZAJE</div><div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--green);line-height:1.5">${e.lesson}</div>` : ''}
+        <div style="margin-top:10px">
+          <button onclick="event.stopPropagation();deleteDiaryEntry(${i})" style="padding:5px 10px;border:1px solid var(--red);background:transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--red);cursor:pointer">🗑 Eliminar</button>
+          ${!e.lesson ? `<button onclick="event.stopPropagation();editLesson(${i})" style="margin-left:6px;padding:5px 10px;border:1px solid var(--border);background:transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text2);cursor:pointer">✏️ Añadir aprendizaje</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDiaryDetail(i) {
+  const el = document.getElementById(`diary-detail-${i}`);
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+function deleteDiaryEntry(i) {
+  if (!confirm('¿Eliminar esta entrada?')) return;
+  diaryEntries.splice(i, 1);
+  saveDiaryToGitHub();
+  updateDiaryStats();
+  renderDiaryEntries();
+}
+
+function editLesson(i) {
+  const lesson = prompt('¿Qué aprendiste en esta operación?');
+  if (lesson === null) return;
+  diaryEntries[i].lesson = lesson;
+  saveDiaryToGitHub();
+  renderDiaryEntries();
+}
+
+function updateDiaryStats() {
+  const total  = diaryEntries.length;
+  const withResult = diaryEntries.filter(e => e.correct !== null);
+  const wins   = withResult.filter(e => e.correct).length;
+  const winRate = withResult.length ? Math.round(wins/withResult.length*100) : null;
+  const pnls   = diaryEntries.filter(e => e.result30 !== null).map(e => e.result30);
+  const avgPnl = pnls.length ? (pnls.reduce((a,b)=>a+b,0)/pnls.length).toFixed(1) : null;
+
+  // Racha actual
+  let streak = 0, streakType = '';
+  for (const e of diaryEntries) {
+    if (e.correct === null) break;
+    if (streak === 0) { streakType = e.correct ? 'win' : 'loss'; streak = 1; }
+    else if ((e.correct && streakType==='win') || (!e.correct && streakType==='loss')) streak++;
+    else break;
+  }
+
+  const statTotal   = document.getElementById('diary-stat-total');
+  const statWinrate = document.getElementById('diary-stat-winrate');
+  const statPnl     = document.getElementById('diary-stat-pnl');
+  const statStreak  = document.getElementById('diary-stat-streak');
+
+  if (statTotal)   statTotal.textContent   = total;
+  if (statWinrate) { statWinrate.textContent = winRate !== null ? winRate+'%' : '—'; statWinrate.style.color = winRate >= 50 ? 'var(--green)' : 'var(--red)'; }
+  if (statPnl)     { statPnl.textContent = avgPnl !== null ? (avgPnl>0?'+':'')+avgPnl+'%' : '—'; statPnl.style.color = avgPnl > 0 ? 'var(--green)' : avgPnl < 0 ? 'var(--red)' : 'var(--accent)'; }
+  if (statStreak)  statStreak.textContent  = streak > 1 ? streak+(streakType==='win'?'🟢':'🔴') : '—';
+}
+
 // ── PROXY SETTINGS ───────────────────────────────────────────────────────────
 async function testProxy() {
   const dot  = document.getElementById('proxy-status-dot');
@@ -3300,6 +3639,7 @@ function navigate(id, el) {
   if (page) page.classList.add('active');
   if (el) el.classList.add('active');
   if (id === 'portfolio') renderPortfolio();
+  if (id === 'diary') { loadDiaryFromGitHub(); updateDiaryStats(); }
 }
 
 // ── FILTER PILLS ────────────────────────────────────────────────────────────
