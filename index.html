@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.7.0</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.0</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -1974,6 +1974,44 @@ html, body {
       </div>
 
     </div><!-- /page-diary -->
+    <!-- ── GUÍA ── -->
+    <div class="page" id="page-guide">
+
+      <!-- Header progreso -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div>
+            <div id="guide-phase-label" style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em">Fase actual</div>
+            <div id="guide-phase-title" style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--text);margin-top:2px">Cargando…</div>
+          </div>
+          <div style="text-align:right">
+            <div id="guide-step-counter" style="font-family:'DM Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--accent)">—</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text3)">PASOS</div>
+          </div>
+        </div>
+        <!-- Barra progreso global -->
+        <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden">
+          <div id="guide-progress-bar" style="height:100%;background:var(--accent);border-radius:4px;transition:width 0.4s;width:0%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px">
+          <div id="guide-month-dots" style="display:flex;gap:6px"></div>
+          <div id="guide-pct-label" style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text3)">0%</div>
+        </div>
+      </div>
+
+      <!-- Paso actual destacado -->
+      <div id="guide-current-step" style="background:linear-gradient(135deg,rgba(0,229,176,0.08),rgba(0,229,176,0.02));border:1px solid var(--accent);border-radius:14px;padding:16px;margin-bottom:14px">
+        <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">➤ AHORA TOCA</div>
+        <div id="guide-current-title" style="font-family:'Outfit',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text);margin-bottom:6px">—</div>
+        <div id="guide-current-desc" style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2);line-height:1.6;margin-bottom:12px">—</div>
+        <div id="guide-current-action" style=""></div>
+        <div id="guide-current-condition" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text3);margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,229,176,0.15)"></div>
+      </div>
+
+      <!-- Lista de todos los pasos -->
+      <div id="guide-steps-list"></div>
+
+    </div><!-- /page-guide -->
 
   </div><!-- /pages -->
 
@@ -1995,7 +2033,11 @@ html, body {
       <div class="nav-icon" style="position:relative">💼<span id="portfolio-badge" style="display:none;position:absolute;top:-4px;right:-6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:1.5px solid var(--bg)"></span></div>
       <div class="nav-label">CARTERA</div>
     </div>
-    <div class="nav-item" onclick="navigate('diary', this)">
+    <div class="nav-item" onclick="navigate('guide', this)">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-label">GUÍA</div>
+    </div>
+        <div class="nav-item" onclick="navigate('diary', this)">
       <div class="nav-icon">📓</div>
       <div class="nav-label">DIARIO</div>
     </div>
@@ -3314,6 +3356,10 @@ function saveGHSettings() {
   if (ai && akey)  ai.value = akey;
 })();
 
+// Cargar diario y guía al inicio
+diaryEntries = JSON.parse(localStorage.getItem('diary_entries') || '[]');
+loadGuideProgress();
+
 // ── CONTEXTO DE NOTICIAS VÍA CLAUDE API ──────────────────────────────────────
 async function fetchNewsContext(session) {
   const { ticker, actualDate, indicators: ind, hasShares, entryPrice } = session;
@@ -3593,6 +3639,336 @@ function updateDiaryStats() {
   if (statStreak)  statStreak.textContent  = streak > 1 ? streak+(streakType==='win'?'🟢':'🔴') : '—';
 }
 
+
+// ── GUÍA DE 3 MESES ──────────────────────────────────────────────────────────
+
+const GUIDE_STEPS = [
+  // ── MES 1 ──────────────────────────────────────────────────────────────────
+  {
+    id: 'read-aprende', month: 1, phase: 'Mes 1 — Aprender sin riesgo',
+    title: 'Lee la sección APRENDE',
+    desc: 'Antes de operar, entiende los conceptos. Lee al menos RSI, MACD y Medias Móviles en la sección APRENDE.',
+    action: { label: '📚 Ir a APRENDE', nav: 'edu' },
+    condition: 'Complétalo manualmente cuando hayas leído los conceptos básicos',
+    manualComplete: true,
+  },
+  {
+    id: 'first-paper', month: 1, phase: 'Mes 1 — Aprender sin riesgo',
+    title: 'Haz tu primera sesión de Paper Trading',
+    desc: 'Ve a ENTRENA → Paper Trading. Elige cualquier acción del S&P 500, una fecha de hace 6-12 meses, y toma una decisión. No importa si aciertas — lo importante es empezar.',
+    action: { label: '🎯 Ir a ENTRENA', nav: 'train' },
+    condition: 'Se completará automáticamente al hacer tu primera operación de paper trading',
+    check: () => diaryEntries.filter(e => e.source === 'paper').length >= 1,
+  },
+  {
+    id: 'first-lesson', month: 1, phase: 'Mes 1 — Aprender sin riesgo',
+    title: 'Escribe tu primer aprendizaje',
+    desc: 'Abre el DIARIO, busca tu primera operación y pulsa "Añadir aprendizaje". Aunque sea una frase corta — ¿qué notaste? ¿qué harías diferente?',
+    action: { label: '📓 Ir al DIARIO', nav: 'diary' },
+    condition: 'Se completará al escribir el aprendizaje en cualquier entrada del diario',
+    check: () => diaryEntries.some(e => e.lesson && e.lesson.trim().length > 0),
+  },
+  {
+    id: '5-papers', month: 1, phase: 'Mes 1 — Aprender sin riesgo',
+    title: 'Llega a 5 operaciones de paper trading',
+    desc: 'La consistencia es la clave. Haz al menos 5 sesiones de paper trading. Empieza a identificar qué indicadores te resultan más claros.',
+    action: { label: '🎯 Ir a ENTRENA', nav: 'train' },
+    condition: 'Automático al completar 5 operaciones de paper trading',
+    check: () => diaryEntries.filter(e => e.source === 'paper').length >= 5,
+    progress: () => { const n = diaryEntries.filter(e => e.source === 'paper').length; return { current: Math.min(n,5), total: 5 }; }
+  },
+  {
+    id: 'understand-scan', month: 1, phase: 'Mes 1 — Aprender sin riesgo',
+    title: 'Usa el SCAN en tiempo real',
+    desc: 'Abre el SCAN y analiza 3 acciones diferentes hoy. Observa sus indicadores sin necesidad de decidir nada. Practica "leer" un gráfico rápido.',
+    action: { label: '📡 Ir al SCAN', nav: 'scan' },
+    condition: 'Complétalo manualmente cuando hayas explorado el SCAN',
+    manualComplete: true,
+  },
+  {
+    id: '10-papers', month: 1, phase: 'Mes 1 — Aprender sin riesgo',
+    title: 'Llega a 10 operaciones con aprendizajes',
+    desc: 'A partir de aquí los patrones empiezan a repetirse. ¿Tiendes a comprar en sobrecompra? ¿Ignoras el MACD? El diario te lo dirá.',
+    action: { label: '🎯 Ir a ENTRENA', nav: 'train' },
+    condition: 'Automático al tener 10 operaciones con aprendizaje escrito',
+    check: () => diaryEntries.filter(e => e.source === 'paper' && e.lesson).length >= 10,
+    progress: () => { const n = diaryEntries.filter(e => e.source === 'paper' && e.lesson).length; return { current: Math.min(n,10), total: 10 }; }
+  },
+  {
+    id: 'review-stats', month: 1, phase: 'Mes 1 — Aprender sin riesgo',
+    title: 'Revisa tus estadísticas del DIARIO',
+    desc: 'Ve al DIARIO y mira tu win rate. ¿Es mayor del 50%? ¿Con qué emoción tomas peores decisiones? ¿Qué tipo de setup te funciona mejor?',
+    action: { label: '📓 Ver estadísticas', nav: 'diary' },
+    condition: 'Complétalo manualmente tras revisar tus stats',
+    manualComplete: true,
+  },
+  {
+    id: '20-papers', month: 1, phase: 'Mes 1 — Aprender sin riesgo',
+    title: '🏆 20 operaciones — Fin del Mes 1',
+    desc: '¡Enhorabuena! 20 operaciones es suficiente muestra para empezar a ver patrones en tu toma de decisiones. Estás listo para el Mes 2.',
+    action: { label: '🎯 Última sesión', nav: 'train' },
+    condition: 'Automático al completar 20 operaciones de paper trading',
+    check: () => diaryEntries.filter(e => e.source === 'paper').length >= 20,
+    progress: () => { const n = diaryEntries.filter(e => e.source === 'paper').length; return { current: Math.min(n,20), total: 20 }; }
+  },
+
+  // ── MES 2 ──────────────────────────────────────────────────────────────────
+  {
+    id: 'define-entry', month: 2, phase: 'Mes 2 — Desarrollar tu sistema',
+    title: 'Define tu señal de entrada',
+    desc: 'Basándote en tus 20 operaciones, decide: ¿qué combinación de indicadores te hará entrar? Ejemplo: "Entro cuando RSI < 40 + MACD alcista + Golden Cross". Escríbelo.',
+    action: { label: '📓 Ir al DIARIO', nav: 'diary' },
+    condition: 'Complétalo cuando hayas definido y escrito tu señal de entrada',
+    manualComplete: true,
+  },
+  {
+    id: 'define-exit', month: 2, phase: 'Mes 2 — Desarrollar tu sistema',
+    title: 'Define tu señal de salida y stop loss',
+    desc: 'Igual de importante que entrar es saber cuándo salir. Define: ¿qué % de stop loss usarás? ¿Cuándo tomas beneficios? Sin esta regla, el miedo decide por ti.',
+    action: { label: '📓 Ir al DIARIO', nav: 'diary' },
+    condition: 'Complétalo cuando hayas definido tus reglas de salida',
+    manualComplete: true,
+  },
+  {
+    id: '30-papers-system', month: 2, phase: 'Mes 2 — Desarrollar tu sistema',
+    title: 'Aplica tu sistema en 10 operaciones más',
+    desc: 'Ahora opera siguiendo SOLO tus reglas definidas. Si tu sistema dice no entrar, no entras aunque tengas "corazonada". El objetivo es probar el sistema, no ganar.',
+    action: { label: '🎯 Ir a ENTRENA', nav: 'train' },
+    condition: 'Automático al llegar a 30 operaciones totales',
+    check: () => diaryEntries.filter(e => e.source === 'paper').length >= 30,
+    progress: () => { const n = diaryEntries.filter(e => e.source === 'paper').length; return { current: Math.min(Math.max(n-20,0),10), total: 10 }; }
+  },
+  {
+    id: 'winrate-check', month: 2, phase: 'Mes 2 — Desarrollar tu sistema',
+    title: 'Verifica: ¿tu win rate es > 50%?',
+    desc: 'Revisa las últimas 10 operaciones aplicando tu sistema. Si el win rate es > 50%, tu sistema tiene ventaja estadística. Si no, ajusta una variable y prueba 10 más.',
+    action: { label: '📓 Ver win rate', nav: 'diary' },
+    condition: 'Complétalo cuando tu win rate en las últimas 10 operaciones supere el 50%',
+    manualComplete: true,
+  },
+  {
+    id: 'open-broker', month: 2, phase: 'Mes 2 — Desarrollar tu sistema',
+    title: 'Abre una cuenta en un broker',
+    desc: 'Es momento de preparar la infraestructura. Te recomendamos Interactive Brokers o DEGIRO para empezar. Abre la cuenta pero NO deposites todo tu capital aún.',
+    action: { label: '✅ Marcar como hecho', nav: null },
+    condition: 'Complétalo cuando hayas abierto tu cuenta de broker',
+    manualComplete: true,
+  },
+  {
+    id: 'setup-cartera', month: 2, phase: 'Mes 2 — Desarrollar tu sistema',
+    title: 'Configura tu CARTERA en StockScan',
+    desc: 'Ve a CARTERA y configura tu capital total y porcentaje de riesgo por operación. Esto te dirá exactamente cuánto dinero arriesgar en cada trade.',
+    action: { label: '💼 Ir a CARTERA', nav: 'portfolio' },
+    condition: 'Complétalo manualmente cuando hayas configurado la cartera',
+    manualComplete: true,
+  },
+  {
+    id: '40-papers', month: 2, phase: 'Mes 2 — Desarrollar tu sistema',
+    title: '🏆 40 operaciones — Fin del Mes 2',
+    desc: 'Tienes un sistema definido y probado. Conoces tus patrones. Sabes cuánto arriesgar. Estás listo para dinero real.',
+    action: { label: '🎯 Última sesión paper', nav: 'train' },
+    condition: 'Automático al completar 40 operaciones de paper trading',
+    check: () => diaryEntries.filter(e => e.source === 'paper').length >= 40,
+    progress: () => { const n = diaryEntries.filter(e => e.source === 'paper').length; return { current: Math.min(Math.max(n-30,0),10), total: 10 }; }
+  },
+
+  // ── MES 3 ──────────────────────────────────────────────────────────────────
+  {
+    id: 'first-real', month: 3, phase: 'Mes 3 — Dinero real, poco capital',
+    title: 'Tu primera operación real',
+    desc: 'Deposita solo el 5-10% de tu capital disponible. Aplica tu sistema. La primera operación real se siente diferente — el objetivo no es ganar, es ejecutar bien.',
+    action: { label: '📓 Registrar en DIARIO', nav: 'diary' },
+    condition: 'Complétalo cuando hayas ejecutado tu primera operación real en el broker',
+    manualComplete: true,
+  },
+  {
+    id: 'real-lesson', month: 3, phase: 'Mes 3 — Dinero real, poco capital',
+    title: 'Compara: ¿operaste igual que en paper?',
+    desc: 'El dinero real activa emociones que el paper no tiene. ¿Tomaste la misma decisión que habrías tomado en paper? Si no, ¿por qué? Escríbelo en el diario.',
+    action: { label: '📓 Escribir reflexión', nav: 'diary' },
+    condition: 'Complétalo cuando hayas escrito la comparación en el diario',
+    manualComplete: true,
+  },
+  {
+    id: '5-reals', month: 3, phase: 'Mes 3 — Dinero real, poco capital',
+    title: '5 operaciones reales registradas',
+    desc: 'Registra cada operación real en el DIARIO manualmente con precio, stop, objetivo y tu razonamiento. Este hábito es lo que separa a los traders rentables.',
+    action: { label: '📓 Ir al DIARIO', nav: 'diary' },
+    condition: 'Automático al tener 5 entradas manuales en el diario',
+    check: () => diaryEntries.filter(e => e.source === 'manual').length >= 5,
+    progress: () => { const n = diaryEntries.filter(e => e.source === 'manual').length; return { current: Math.min(n,5), total: 5 }; }
+  },
+  {
+    id: 'weekly-review', month: 3, phase: 'Mes 3 — Dinero real, poco capital',
+    title: 'Primera revisión semanal',
+    desc: 'Cada domingo revisa: ¿seguiste tu sistema? ¿Dónde saliste del plan? ¿Qué mejorar esta semana? Este ritual semanal es más valioso que cualquier indicador.',
+    action: { label: '📓 Revisar diario', nav: 'diary' },
+    condition: 'Complétalo manualmente tras tu primera revisión semanal',
+    manualComplete: true,
+  },
+  {
+    id: 'graduate', month: 3, phase: 'Mes 3 — Dinero real, poco capital',
+    title: '🎓 ¡Completaste los 3 meses!',
+    desc: 'Has pasado de cero a tener un sistema propio, un diario de operaciones y experiencia real. Ahora puedes aumentar gradualmente el capital y refinar tu sistema. El viaje continúa.',
+    action: { label: '✅ Celebrar', nav: null },
+    condition: 'Complétalo cuando hayas completado tu primera revisión semanal del mes 3',
+    manualComplete: true,
+  },
+];
+
+let guideProgress = {};
+
+function loadGuideProgress() {
+  const saved = localStorage.getItem('guide_progress');
+  guideProgress = saved ? JSON.parse(saved) : {};
+}
+
+function saveGuideProgress() {
+  localStorage.setItem('guide_progress', JSON.stringify(guideProgress));
+}
+
+function isStepComplete(step) {
+  if (guideProgress[step.id]) return true;
+  if (step.check) return step.check();
+  return false;
+}
+
+function completeStep(stepId) {
+  guideProgress[stepId] = new Date().toISOString();
+  saveGuideProgress();
+  renderGuide();
+}
+
+function renderGuide() {
+  // Evaluar estado de cada paso
+  const states = GUIDE_STEPS.map(s => ({ ...s, done: isStepComplete(s) }));
+  const totalDone = states.filter(s => s.done).length;
+  const total = states.length;
+  const pct = Math.round(totalDone / total * 100);
+
+  // Barra progreso
+  const bar = document.getElementById('guide-progress-bar');
+  const pctLabel = document.getElementById('guide-pct-label');
+  if (bar) bar.style.width = pct + '%';
+  if (pctLabel) pctLabel.textContent = pct + '%';
+
+  // Mes dots
+  const dotsEl = document.getElementById('guide-month-dots');
+  if (dotsEl) {
+    dotsEl.innerHTML = [1,2,3].map(m => {
+      const mSteps = states.filter(s => s.month === m);
+      const mDone  = mSteps.filter(s => s.done).length;
+      const mPct   = Math.round(mDone/mSteps.length*100);
+      const color  = mPct === 100 ? 'var(--green)' : mPct > 0 ? 'var(--accent)' : 'var(--border)';
+      return `<div style="display:flex;align-items:center;gap:3px">
+        <div style="width:8px;height:8px;border-radius:50%;background:${color}"></div>
+        <span style="font-family:'DM Mono',monospace;font-size:0.48rem;color:${mPct>0?'var(--text2)':'var(--text3)'}">M${m} ${mPct}%</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Paso actual (primer no completado)
+  const currentStep = states.find(s => !s.done);
+
+  // Counter
+  const counterEl = document.getElementById('guide-step-counter');
+  const phaseLabel = document.getElementById('guide-phase-label');
+  const phaseTitle = document.getElementById('guide-phase-title');
+  if (counterEl) counterEl.textContent = `${totalDone}/${total}`;
+  if (phaseLabel) phaseLabel.textContent = currentStep ? `Mes ${currentStep.month} de 3` : '¡Completado!';
+  if (phaseTitle) phaseTitle.textContent = currentStep ? currentStep.phase : '🎓 Los 3 meses completados';
+
+  // Panel paso actual
+  const currentEl = document.getElementById('guide-current-step');
+  const currentTitle = document.getElementById('guide-current-title');
+  const currentDesc = document.getElementById('guide-current-desc');
+  const currentAction = document.getElementById('guide-current-action');
+  const currentCond = document.getElementById('guide-current-condition');
+
+  if (currentStep) {
+    if (currentTitle) currentTitle.textContent = currentStep.title;
+    if (currentDesc)  currentDesc.textContent  = currentStep.desc;
+    if (currentCond)  currentCond.textContent  = '🔄 ' + currentStep.condition;
+
+    // Progreso interno del paso
+    let progressHtml = '';
+    if (currentStep.progress) {
+      const p = currentStep.progress();
+      const w = Math.round(p.current/p.total*100);
+      progressHtml = `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3)">Progreso</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--accent)">${p.current}/${p.total}</span>
+        </div>
+        <div style="background:var(--border);border-radius:4px;height:4px">
+          <div style="width:${w}%;height:100%;background:var(--accent);border-radius:4px;transition:width 0.4s"></div>
+        </div>
+      </div>`;
+    }
+
+    let actionHtml = progressHtml;
+    if (currentStep.action && currentStep.action.nav) {
+      actionHtml += `<button onclick="navigateFromGuide('${currentStep.action.nav}')" style="padding:10px 18px;background:var(--accent);color:var(--bg);border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">${currentStep.action.label}</button>`;
+    }
+    if (currentStep.manualComplete) {
+      actionHtml += `${currentStep.action?.nav ? '  ' : ''}<button onclick="completeStep('${currentStep.id}')" style="padding:10px 18px;background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:10px;font-family:'DM Mono',monospace;font-size:0.75rem;cursor:pointer">✅ Marcar como completado</button>`;
+    }
+    if (currentAction) currentAction.innerHTML = actionHtml;
+    if (currentEl) currentEl.style.display = '';
+  } else {
+    if (currentEl) currentEl.innerHTML = `<div style="text-align:center;padding:20px"><div style="font-size:2.5rem;margin-bottom:10px">🎓</div><div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--green)">¡Enhorabuena! Has completado los 3 meses</div><div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2);margin-top:8px">Ahora tienes un sistema propio y experiencia real</div></div>`;
+  }
+
+  // Lista de todos los pasos agrupados por mes
+  const listEl = document.getElementById('guide-steps-list');
+  if (!listEl) return;
+
+  let html = '';
+  [1,2,3].forEach(m => {
+    const mSteps = states.filter(s => s.month === m);
+    const mDone = mSteps.filter(s => s.done).length;
+    const monthNames = {1:'Mes 1 — Aprender sin riesgo', 2:'Mes 2 — Desarrollar tu sistema', 3:'Mes 3 — Dinero real'};
+    html += `<div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em">${monthNames[m]}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3)">${mDone}/${mSteps.length}</div>
+      </div>`;
+    mSteps.forEach(s => {
+      const isNext = s === currentStep;
+      const bg = s.done ? 'var(--card)' : isNext ? 'rgba(0,229,176,0.04)' : 'var(--card)';
+      const border = s.done ? 'var(--border)' : isNext ? 'var(--accent)' : 'var(--border)';
+      const icon = s.done ? '✅' : isNext ? '▶' : '○';
+      const iconColor = s.done ? 'var(--green)' : isNext ? 'var(--accent)' : 'var(--text3)';
+      const titleColor = s.done ? 'var(--text2)' : isNext ? 'var(--text)' : 'var(--text3)';
+      html += `<div style="background:${bg};border:1px solid ${border};border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:0.9rem;color:${iconColor};min-width:18px">${icon}</span>
+        <div style="flex:1">
+          <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:${titleColor};${s.done?'text-decoration:line-through;':''}">${s.title}</div>
+          ${s.progress && !s.done ? (() => { const p=s.progress(); const w=Math.round(p.current/p.total*100); return `<div style="background:var(--border);border-radius:2px;height:3px;margin-top:5px"><div style="width:${w}%;height:100%;background:var(--accent);border-radius:2px"></div></div><span style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text3)">${p.current}/${p.total}</span>`; })() : ''}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+function navigateFromGuide(pageId) {
+  const navItems = document.querySelectorAll('.nav-item');
+  let targetNav = null;
+  navItems.forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + pageId + "'")) targetNav = n;
+  });
+  navigate(pageId, targetNav);
+}
+
+// Auto-check guide when diary entries change
+const _origAutoSave = autoSaveDiaryEntry;
+autoSaveDiaryEntry = function(entry) {
+  _origAutoSave(entry);
+  if (document.getElementById('page-guide')?.classList.contains('active')) renderGuide();
+};
+
 // ── PROXY SETTINGS ───────────────────────────────────────────────────────────
 async function testProxy() {
   const dot  = document.getElementById('proxy-status-dot');
@@ -3640,6 +4016,7 @@ function navigate(id, el) {
   if (el) el.classList.add('active');
   if (id === 'portfolio') renderPortfolio();
   if (id === 'diary') { loadDiaryFromGitHub(); updateDiaryStats(); }
+  if (id === 'guide') { loadGuideProgress(); renderGuide(); }
 }
 
 // ── FILTER PILLS ────────────────────────────────────────────────────────────
