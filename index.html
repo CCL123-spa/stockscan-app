@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.6.4</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.6.5</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2794,8 +2794,8 @@ function confirmStopLoss() {
 function resolvePT(decision, stopLevel) {
   const { result30pct, result90pct, indicators: ind, futureCandles, hasShares, entryPrice, entryPnl } = ptSession;
   const price = ind.price;
-  const went30Up = result30pct !== null && result30pct > 3;
-  const went30Dn = result30pct !== null && result30pct < -3;
+  const went30Up   = result30pct !== null && result30pct > 3;
+  const went30Dn   = result30pct !== null && result30pct < -1.5;
   const went30Flat = !went30Up && !went30Dn;
 
   // ── Evaluar stop loss si aplica ──────────────────────────────────────────
@@ -2863,9 +2863,10 @@ function resolvePT(decision, stopLevel) {
   const stopKilledTrade = stopHit && stopHitDay <= 10;
 
   if (hasShares) {
+    const overbought = ind.rsi > 70;
     if (decision === 'buy')  { correct = went30Up && !stopKilledTrade; pnl = stopHit ? stopPct : (result30pct || 0); actionLabel = `Compraste más a ${price.toFixed(2)}`; }
-    if (decision === 'wait') { correct = went30Flat || went30Up;       pnl = result30pct || 0; actionLabel = 'Mantuviste tu posición'; }
-    if (decision === 'sell') { correct = went30Dn;                     pnl = result30pct !== null ? -result30pct : 0; actionLabel = `Vendiste a ${price.toFixed(2)} (entrada: ${entryPrice})`; }
+    if (decision === 'wait') { correct = went30Flat || went30Up || (went30Dn && !overbought); pnl = result30pct || 0; actionLabel = 'Mantuviste tu posición'; }
+    if (decision === 'sell') { correct = went30Dn || (overbought && !went30Up); pnl = result30pct !== null ? -result30pct : 0; actionLabel = `Vendiste a ${price.toFixed(2)} (entrada: ${entryPrice})`; }
   } else {
     if (decision === 'buy')  { correct = went30Up && !stopKilledTrade; pnl = stopHit ? stopPct : (result30pct || 0); actionLabel = `Compraste a ${price.toFixed(2)}`; }
     if (decision === 'wait') { correct = went30Flat || (went30Up && ind.score <= 2); pnl = 0; actionLabel = 'Esperaste sin posición'; }
@@ -2893,6 +2894,8 @@ function resolvePT(decision, stopLevel) {
     } else if (decision === 'wait') {
       if (went30Up)
         decisionFeedback = `✅ Mantener fue correcto. La acción subió ${result30pct}% — la paciencia fue recompensada.`;
+      else if (went30Dn && ind.rsi > 70)
+        decisionFeedback = `❌ Con RSI en sobrecompra (${ind.rsi}) vender habría sido lo óptimo. La acción cayó ${result30pct}% — el RSI alto era una señal de salida.`;
       else if (went30Dn)
         decisionFeedback = `❌ Mantener fue costoso. La acción cayó ${result30pct}%. Reducir exposición o salir habría limitado las pérdidas.`;
       else
