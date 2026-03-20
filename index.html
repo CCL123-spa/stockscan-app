@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.6.3</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.6.4</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2868,8 +2868,8 @@ function resolvePT(decision, stopLevel) {
     if (decision === 'sell') { correct = went30Dn;                     pnl = result30pct !== null ? -result30pct : 0; actionLabel = `Vendiste a ${price.toFixed(2)} (entrada: ${entryPrice})`; }
   } else {
     if (decision === 'buy')  { correct = went30Up && !stopKilledTrade; pnl = stopHit ? stopPct : (result30pct || 0); actionLabel = `Compraste a ${price.toFixed(2)}`; }
-    if (decision === 'wait') { correct = went30Flat;                    pnl = 0; actionLabel = 'Esperaste sin posición'; }
-    if (decision === 'sell') { correct = went30Dn || went30Flat;        pnl = 0; actionLabel = 'Decidiste no entrar'; }
+    if (decision === 'wait') { correct = went30Flat || (went30Up && ind.score <= 2); pnl = 0; actionLabel = 'Esperaste sin posición'; }
+    if (decision === 'sell') { correct = went30Dn || went30Flat || (went30Up && ind.score <= 2); pnl = 0; actionLabel = 'Decidiste no entrar'; }
   }
 
   const pnlCol       = pnl >= 0 ? 'var(--green)' : 'var(--red)';
@@ -2917,18 +2917,24 @@ function resolvePT(decision, stopLevel) {
       else
         decisionFeedback = `⚠️ Entraste pero el mercado se quedó lateral. Sin catalizador claro, es mejor esperar tendencia definida.`;
     } else if (decision === 'wait') {
-      if (went30Up)
-        decisionFeedback = `❌ Oportunidad perdida. La acción subió ${result30pct}% — las señales apuntaban a una buena entrada.`;
-      else if (went30Dn)
+      if (went30Up) {
+        if (ind.score <= 2)
+          decisionFeedback = `⚠️ La acción subió ${result30pct}% pero los indicadores eran bajistas (${ind.score}/5 señales). Una subida contra los indicadores es difícil de anticipar — tu análisis técnico era razonable.`;
+        else
+          decisionFeedback = `❌ Oportunidad perdida. La acción subió ${result30pct}% y las señales técnicas apuntaban al alza (${ind.score}/5). Más confianza en los indicadores habría ayudado.`;
+      } else if (went30Dn)
         decisionFeedback = `✅ Correcto no entrar. La acción cayó ${result30pct}% — evitaste una pérdida. La paciencia tiene valor.`;
       else
         decisionFeedback = `✅ Sin tendencia clara, esperar fue lo correcto. No necesitas estar siempre en el mercado.`;
     } else if (decision === 'sell') {
       if (went30Dn)
         decisionFeedback = `✅ Correcto evitar la posición. La acción cayó ${result30pct}% — tu análisis bajista fue acertado.`;
-      else if (went30Up)
-        decisionFeedback = `❌ Visión bajista equivocada. La acción subió ${result30pct}%. Revisar los indicadores que apuntaban al alza.`;
-      else
+      else if (went30Up) {
+        if (ind.score <= 2)
+          decisionFeedback = `⚠️ La acción subió ${result30pct}% a pesar de indicadores bajistas (${ind.score}/5). Movimiento contraintuitivo — con ese score tu decisión era técnicamente justificada.`;
+        else
+          decisionFeedback = `❌ Visión bajista equivocada. La acción subió ${result30pct}% y había señales alcistas (${ind.score}/5). Revisar el peso del MACD vs medias móviles.`;
+      } else
         decisionFeedback = `⚠️ Mercado lateral tras tu análisis bajista. Sin tendencia, cualquier decisión era válida.`;
     }
   }
