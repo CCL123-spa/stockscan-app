@@ -11,7 +11,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "",
+      "lesson": "El contexto era bueno pero había algo de sobrecompra con el RSI a 65 que me echo para atrás. Además el valor venía de una buena subida sobre la media móvil y era probable que ya le quedara poco recorrido ",
       "result30": 1.8,
       "result90": -10.2,
       "correct": true,
@@ -21,7 +21,7 @@
         "score": 2,
         "golden": true
       },
-      "feedback": "✅ Sin tendencia clara, esperar fue lo correcto. No necesitas estar siempre en el mercado.",
+      "feedback": "â Sin tendencia clara, esperar fue lo correcto. No necesitas estar siempre en el mercado.",
       "createdAt": "2026-03-23T22:45:24.833Z"
     },
     {
@@ -35,7 +35,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "Identificar los patrones. Leer el contexto es importante. Poner un stop loss conservador siempre es la mejor opciÃ³n ",
+      "lesson": "Identificar los patrones. Leer el contexto es importante. Poner un stop loss conservador siempre es la mejor opciÃÂ³n ",
       "result30": 17.2,
       "result90": 12.4,
       "correct": true,
@@ -45,12 +45,12 @@
         "score": 2,
         "golden": true
       },
-      "feedback": "Ã¢ÂÂ Entrada correcta. La acciÃÂ³n subiÃÂ³ 17.2% en 30 dÃÂ­as. Identificaste bien la oportunidad.",
+      "feedback": "ÃÂ¢ÃÂÃÂ Entrada correcta. La acciÃÂÃÂ³n subiÃÂÃÂ³ 17.2% en 30 dÃÂÃÂ­as. Identificaste bien la oportunidad.",
       "createdAt": "2026-03-23T22:42:18.436Z"
     }
   ],
   "guide": {
     "read-aprende": "2026-03-23T22:40:16.930Z"
   },
-  "updatedAt": "2026-03-23T22:45:24.833Z"
+  "updatedAt": "2026-03-23T22:47:05.281Z"
 }
