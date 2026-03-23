@@ -11,7 +11,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "",
+      "lesson": "Ya había ganado un 12% con esa acción que por encima de 10% ya considero suficiente. Había algo de sobrecompra con el RSI a 65. La acción venía de una buena subida y todo eso me hizo vender y cobrar las ganancias ",
       "result30": -6.1,
       "result90": -15.6,
       "correct": true,
@@ -21,7 +21,7 @@
         "score": 3,
         "golden": true
       },
-      "feedback": "✅ Buena decisión salir. La acción cayó -6.1% después — cortaste las pérdidas a tiempo.",
+      "feedback": "â Buena decisiÃ³n salir. La acciÃ³n cayÃ³ -6.1% despuÃ©s â cortaste las pÃ©rdidas a tiempo.",
       "createdAt": "2026-03-23T22:48:47.964Z"
     },
     {
@@ -35,7 +35,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "El contexto era bueno pero había algo de sobrecompra con el RSI a 65 que me echo para atrás. Además el valor venía de una buena subida sobre la media móvil y era probable que ya le quedara poco recorrido ",
+      "lesson": "El contexto era bueno pero habÃ­a algo de sobrecompra con el RSI a 65 que me echo para atrÃ¡s. AdemÃ¡s el valor venÃ­a de una buena subida sobre la media mÃ³vil y era probable que ya le quedara poco recorrido ",
       "result30": 1.8,
       "result90": -10.2,
       "correct": true,
@@ -45,7 +45,7 @@
         "score": 2,
         "golden": true
       },
-      "feedback": "â Sin tendencia clara, esperar fue lo correcto. No necesitas estar siempre en el mercado.",
+      "feedback": "Ã¢ÂÂ Sin tendencia clara, esperar fue lo correcto. No necesitas estar siempre en el mercado.",
       "createdAt": "2026-03-23T22:45:24.833Z"
     },
     {
@@ -59,7 +59,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "Identificar los patrones. Leer el contexto es importante. Poner un stop loss conservador siempre es la mejor opciÃÂ³n ",
+      "lesson": "Identificar los patrones. Leer el contexto es importante. Poner un stop loss conservador siempre es la mejor opciÃÂÃÂ³n ",
       "result30": 17.2,
       "result90": 12.4,
       "correct": true,
@@ -69,12 +69,12 @@
         "score": 2,
         "golden": true
       },
-      "feedback": "ÃÂ¢ÃÂÃÂ Entrada correcta. La acciÃÂÃÂ³n subiÃÂÃÂ³ 17.2% en 30 dÃÂÃÂ­as. Identificaste bien la oportunidad.",
+      "feedback": "ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Entrada correcta. La acciÃÂÃÂÃÂÃÂ³n subiÃÂÃÂÃÂÃÂ³ 17.2% en 30 dÃÂÃÂÃÂÃÂ­as. Identificaste bien la oportunidad.",
       "createdAt": "2026-03-23T22:42:18.436Z"
     }
   ],
   "guide": {
     "read-aprende": "2026-03-23T22:40:16.930Z"
   },
-  "updatedAt": "2026-03-23T22:48:47.964Z"
+  "updatedAt": "2026-03-23T22:50:29.504Z"
 }
