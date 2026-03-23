@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.0</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.2</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -3356,8 +3356,10 @@ function saveGHSettings() {
   if (ai && akey)  ai.value = akey;
 })();
 
-// Cargar diario y guía al inicio
-diaryEntries = JSON.parse(localStorage.getItem('diary_entries') || '[]');
+// Cargar datos al inicio desde almacenamiento local (GitHub se sincroniza al abrir cada sección)
+const _initData = getLocalData();
+diaryEntries = _initData.diary || [];
+guideProgress = _initData.guide || {};
 loadGuideProgress();
 
 // ── CONTEXTO DE NOTICIAS VÍA CLAUDE API ──────────────────────────────────────
@@ -3454,53 +3456,142 @@ function switchDiaryTab(tab) {
   if (isLog) renderDiaryEntries();
 }
 
-async function loadDiaryFromGitHub() {
+// ── ALMACENAMIENTO UNIFICADO EN GITHUB ───────────────────────────────────────
+// Todo se guarda en stockscan-data.json: { diary: [...], guide: {...} }
+
+const DATA_FILE = 'stockscan-data.json';
+let _ghSavePending = false;
+let _ghSaveTimer = null;
+
+function getLocalData() {
+  try {
+    return JSON.parse(localStorage.getItem('stockscan_data') || '{"diary":[],"guide":{}}');
+  } catch(e) { return { diary: [], guide: {} }; }
+}
+
+function setLocalData(data) {
+  localStorage.setItem('stockscan_data', JSON.stringify(data));
+  // Migrar claves antiguas por compatibilidad
+  localStorage.setItem('diary_entries', JSON.stringify(data.diary || []));
+  localStorage.setItem('guide_progress', JSON.stringify(data.guide || {}));
+}
+
+async function loadFromGitHub() {
   const token = localStorage.getItem('gh_token');
   const repo  = localStorage.getItem('gh_repo') || 'CCL123-spa/stockscan-app';
-  if (!token) { diaryEntries = JSON.parse(localStorage.getItem('diary_entries') || '[]'); renderDiaryEntries(); return; }
+  const statusEl = document.getElementById('diary-sync-status');
+
+  // Siempre cargar local primero para respuesta inmediata
+  const local = getLocalData();
+  diaryEntries = local.diary || [];
+  guideProgress = local.guide || {};
+
+  if (!token) {
+    if(statusEl) statusEl.textContent = '⚠️ Sin GitHub token — datos solo locales';
+    renderDiaryEntries(); updateDiaryStats();
+    return;
+  }
+
   try {
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/diario.json`, {
+    if(statusEl) statusEl.textContent = '⏳ Sincronizando con GitHub…';
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${DATA_FILE}`, {
       headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
     });
-    if (res.status === 404) { diaryEntries = []; return; }
+
+    if (res.status === 404) {
+      // Primer uso — subir los datos locales si los hay
+      if (diaryEntries.length > 0 || Object.keys(guideProgress).length > 0) {
+        await saveToGitHub(true);
+      }
+      if(statusEl) statusEl.textContent = '✅ Datos inicializados en GitHub';
+      renderDiaryEntries(); updateDiaryStats();
+      return;
+    }
+
     if (!res.ok) throw new Error('GitHub ' + res.status);
-    const data = await res.json();
-    diaryEntries = JSON.parse(atob(data.content.replace(/\n/g,'')));
-    localStorage.setItem('diary_entries', JSON.stringify(diaryEntries));
-    renderDiaryEntries();
-    updateDiaryStats();
+
+    const file = await res.json();
+    const remoteData = JSON.parse(atob(file.content.replace(/\n/g, '')));
+
+    // Merge: si GitHub tiene más entradas de diario, usar GitHub
+    const remoteIds = new Set((remoteData.diary || []).map(e => e.id));
+    const localOnly = diaryEntries.filter(e => !remoteIds.has(e.id));
+    
+    if (localOnly.length > 0) {
+      // Hay entradas locales que no están en GitHub — hacer merge y subir
+      remoteData.diary = [...localOnly, ...(remoteData.diary || [])];
+      remoteData.guide = { ...(remoteData.guide || {}), ...guideProgress };
+      remoteData._sha = file.sha;
+      diaryEntries = remoteData.diary;
+      guideProgress = remoteData.guide;
+      setLocalData(remoteData);
+      await saveToGitHub(false, file.sha);
+      if(statusEl) statusEl.textContent = `✅ Sincronizado · ${diaryEntries.length} entradas`;
+    } else {
+      // GitHub es la fuente de verdad
+      diaryEntries = remoteData.diary || [];
+      guideProgress = remoteData.guide || {};
+      setLocalData(remoteData);
+      if(statusEl) statusEl.textContent = `✅ Sincronizado · ${diaryEntries.length} entradas · ${new Date().toLocaleTimeString('es-ES')}`;
+    }
+
+    renderDiaryEntries(); updateDiaryStats();
+
   } catch(e) {
-    diaryEntries = JSON.parse(localStorage.getItem('diary_entries') || '[]');
-    renderDiaryEntries();
+    if(statusEl) statusEl.textContent = '⚠️ Sin conexión — usando datos locales';
+    renderDiaryEntries(); updateDiaryStats();
   }
 }
 
-async function saveDiaryToGitHub() {
+async function saveToGitHub(silent = false, knownSha = null) {
   const token = localStorage.getItem('gh_token');
   const repo  = localStorage.getItem('gh_repo') || 'CCL123-spa/stockscan-app';
-  localStorage.setItem('diary_entries', JSON.stringify(diaryEntries));
   const statusEl = document.getElementById('diary-sync-status');
-  if (!token) { if(statusEl) statusEl.textContent = '💾 Guardado localmente (sin GitHub token)'; return; }
-  try {
-    if(statusEl) statusEl.textContent = '⏳ Sincronizando con GitHub…';
-    const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
-    const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/diario.json`, { headers });
-    const sha = getRes.ok ? (await getRes.json()).sha : undefined;
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(diaryEntries, null, 2))));
-    const body = { message: 'Diario update ' + new Date().toLocaleString('es-ES'), content, ...(sha && { sha }) };
-    const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/diario.json`, { method:'PUT', headers, body: JSON.stringify(body) });
-    if (!putRes.ok) throw new Error('GitHub ' + putRes.status);
-    if(statusEl) statusEl.textContent = '✅ Sincronizado con GitHub · ' + new Date().toLocaleTimeString('es-ES');
-  } catch(e) {
-    if(statusEl) statusEl.textContent = '⚠️ Error sync: ' + e.message;
+
+  const dataToSave = { diary: diaryEntries, guide: guideProgress, updatedAt: new Date().toISOString() };
+  setLocalData(dataToSave);
+
+  if (!token) {
+    if(!silent && statusEl) statusEl.textContent = '💾 Guardado localmente (configura GitHub token en Ajustes)';
+    return;
   }
+
+  // Debounce — esperar 2s antes de subir para agrupar cambios rápidos
+  if (_ghSaveTimer) clearTimeout(_ghSaveTimer);
+  _ghSaveTimer = setTimeout(async () => {
+    try {
+      if(!silent && statusEl) statusEl.textContent = '⏳ Guardando en GitHub…';
+      const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
+      
+      // Obtener SHA actual si no lo tenemos
+      let sha = knownSha;
+      if (!sha) {
+        const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${DATA_FILE}`, { headers });
+        if (getRes.ok) sha = (await getRes.json()).sha;
+      }
+
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSave, null, 2))));
+      const body = { message: `StockScan data · ${new Date().toLocaleString('es-ES')}`, content, ...(sha && { sha }) };
+      const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${DATA_FILE}`, { method:'PUT', headers, body: JSON.stringify(body) });
+      
+      if (!putRes.ok) throw new Error('GitHub ' + putRes.status);
+      if(!silent && statusEl) statusEl.textContent = `✅ Guardado en GitHub · ${new Date().toLocaleTimeString('es-ES')}`;
+    } catch(e) {
+      if(!silent && statusEl) statusEl.textContent = '⚠️ Error al guardar: ' + e.message;
+    }
+  }, 2000);
 }
+
+// Mantener compatibilidad con código existente
+async function loadDiaryFromGitHub() { await loadFromGitHub(); }
+async function saveDiaryToGitHub()   { await saveToGitHub(); }
 
 function autoSaveDiaryEntry(entry) {
   diaryEntries.unshift(entry);
   localStorage.setItem('diary_entries', JSON.stringify(diaryEntries));
   saveDiaryToGitHub();
   updateDiaryStats();
+  onDiaryUpdated();
 }
 
 function saveManualDiaryEntry() {
@@ -3819,12 +3910,12 @@ const GUIDE_STEPS = [
 let guideProgress = {};
 
 function loadGuideProgress() {
-  const saved = localStorage.getItem('guide_progress');
-  guideProgress = saved ? JSON.parse(saved) : {};
+  const data = getLocalData();
+  guideProgress = data.guide || {};
 }
 
 function saveGuideProgress() {
-  localStorage.setItem('guide_progress', JSON.stringify(guideProgress));
+  saveToGitHub();
 }
 
 function isStepComplete(step) {
@@ -3840,6 +3931,7 @@ function completeStep(stepId) {
 }
 
 function renderGuide() {
+  try {
   // Evaluar estado de cada paso
   const states = GUIDE_STEPS.map(s => ({ ...s, done: isStepComplete(s) }));
   const totalDone = states.filter(s => s.done).length;
@@ -3951,6 +4043,11 @@ function renderGuide() {
     html += '</div>';
   });
   listEl.innerHTML = html;
+  } catch(e) {
+    console.error('renderGuide error:', e);
+    const phaseTitle = document.getElementById('guide-phase-title');
+    if (phaseTitle) phaseTitle.textContent = 'Error al cargar: ' + e.message;
+  }
 }
 
 function navigateFromGuide(pageId) {
@@ -3963,11 +4060,9 @@ function navigateFromGuide(pageId) {
 }
 
 // Auto-check guide when diary entries change
-const _origAutoSave = autoSaveDiaryEntry;
-autoSaveDiaryEntry = function(entry) {
-  _origAutoSave(entry);
+function onDiaryUpdated() {
   if (document.getElementById('page-guide')?.classList.contains('active')) renderGuide();
-};
+}
 
 // ── PROXY SETTINGS ───────────────────────────────────────────────────────────
 async function testProxy() {
@@ -4015,8 +4110,8 @@ function navigate(id, el) {
   if (page) page.classList.add('active');
   if (el) el.classList.add('active');
   if (id === 'portfolio') renderPortfolio();
-  if (id === 'diary') { loadDiaryFromGitHub(); updateDiaryStats(); }
-  if (id === 'guide') { loadGuideProgress(); renderGuide(); }
+  if (id === 'diary') { loadFromGitHub(); }
+  if (id === 'guide') { loadGuideProgress(); diaryEntries = getLocalData().diary || []; renderGuide(); loadFromGitHub().then(() => renderGuide()); }
 }
 
 // ── FILTER PILLS ────────────────────────────────────────────────────────────
