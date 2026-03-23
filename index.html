@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.3</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.4</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -1981,7 +1981,7 @@ html, body {
       <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div>
-            <div id="guide-phase-label" style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em">Fase actual</div>
+            <div id="guide-version" style="font-size:0.5rem;color:var(--text3);position:absolute;top:4px;right:8px">v1.8.4</div><div id="guide-phase-label" style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em">Fase actual</div>
             <div id="guide-phase-title" style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--text);margin-top:2px">Cargando…</div>
           </div>
           <div style="text-align:right">
@@ -2033,7 +2033,7 @@ html, body {
       <div class="nav-icon" style="position:relative">💼<span id="portfolio-badge" style="display:none;position:absolute;top:-4px;right:-6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:1.5px solid var(--bg)"></span></div>
       <div class="nav-label">CARTERA</div>
     </div>
-    <div class="nav-item" onclick="navigate('guide', this)">
+    <div class="nav-item" onclick="navigate('guide', this); setTimeout(renderGuide, 100)">
       <div class="nav-icon">🗺️</div>
       <div class="nav-label">GUÍA</div>
     </div>
@@ -3586,6 +3586,10 @@ async function saveToGitHub(silent = false, knownSha = null) {
 async function loadDiaryFromGitHub() { await loadFromGitHub(); }
 async function saveDiaryToGitHub()   { await saveToGitHub(); }
 
+function onDiaryUpdated() {
+  try { if (document.getElementById('page-guide')?.classList.contains('active')) renderGuide(); } catch(e) {}
+}
+
 function autoSaveDiaryEntry(entry) {
   diaryEntries.unshift(entry);
   localStorage.setItem('diary_entries', JSON.stringify(diaryEntries));
@@ -3932,14 +3936,28 @@ function completeStep(stepId) {
 }
 
 function renderGuide() {
-  // Debug: marcar que la función fue llamada
-  const phaseTitle0 = document.getElementById('guide-phase-title');
-  if (phaseTitle0) phaseTitle0.textContent = 'Iniciando…';
-  try {
-  // Evaluar estado de cada paso
+  // Ensure variables are initialized
   if (!Array.isArray(diaryEntries)) diaryEntries = [];
   if (!guideProgress || typeof guideProgress !== 'object') guideProgress = {};
-  const states = GUIDE_STEPS.map(s => ({ ...s, done: isStepComplete(s) }));
+
+  const phaseTitle0 = document.getElementById('guide-phase-title');
+  const phaseLabel0 = document.getElementById('guide-phase-label');
+  if (phaseTitle0) phaseTitle0.textContent = 'Calculando progreso…';
+  if (phaseLabel0) phaseLabel0.textContent = 'FASE ACTUAL';
+
+  let states;
+  try {
+    states = GUIDE_STEPS.map(s => {
+      let done = false;
+      try { done = isStepComplete(s); } catch(e) { done = false; }
+      return { ...s, done };
+    });
+  } catch(e) {
+    if (phaseTitle0) phaseTitle0.textContent = 'Error: ' + e.message;
+    return;
+  }
+
+  try {
   const totalDone = states.filter(s => s.done).length;
   const total = states.length;
   const pct = Math.round(totalDone / total * 100);
@@ -4066,9 +4084,6 @@ function navigateFromGuide(pageId) {
 }
 
 // Auto-check guide when diary entries change
-function onDiaryUpdated() {
-  if (document.getElementById('page-guide')?.classList.contains('active')) renderGuide();
-}
 
 // ── PROXY SETTINGS ───────────────────────────────────────────────────────────
 async function testProxy() {
