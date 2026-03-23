@@ -11,7 +11,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "",
+      "lesson": "Ya había ganado más de un 10% que para mi es la decisión de vender y salir. No ser avaricioso. El rsi estaba en 49 que esta bien y parecía que el valor estaba tocando el suelo sobre la media y podría rebotar pero mejor vender, recoger ganancias y acerté ",
       "result30": 2.4,
       "result90": 6.5,
       "correct": false,
@@ -21,7 +21,7 @@
         "score": 3,
         "golden": true
       },
-      "feedback": "⚠️ El mercado se quedó lateral tras tu salida. Decisión defensiva, no necesariamente incorrecta.",
+      "feedback": "â ï¸ El mercado se quedÃ³ lateral tras tu salida. DecisiÃ³n defensiva, no necesariamente incorrecta.",
       "createdAt": "2026-03-23T22:52:11.379Z"
     },
     {
@@ -35,7 +35,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "Ya había ganado un 12% con esa acción que por encima de 10% ya considero suficiente. Había algo de sobrecompra con el RSI a 65. La acción venía de una buena subida y todo eso me hizo vender y cobrar las ganancias ",
+      "lesson": "Ya habÃ­a ganado un 12% con esa acciÃ³n que por encima de 10% ya considero suficiente. HabÃ­a algo de sobrecompra con el RSI a 65. La acciÃ³n venÃ­a de una buena subida y todo eso me hizo vender y cobrar las ganancias ",
       "result30": -6.1,
       "result90": -15.6,
       "correct": true,
@@ -45,7 +45,7 @@
         "score": 3,
         "golden": true
       },
-      "feedback": "â Buena decisiÃ³n salir. La acciÃ³n cayÃ³ -6.1% despuÃ©s â cortaste las pÃ©rdidas a tiempo.",
+      "feedback": "Ã¢ÂÂ Buena decisiÃÂ³n salir. La acciÃÂ³n cayÃÂ³ -6.1% despuÃÂ©s Ã¢ÂÂ cortaste las pÃÂ©rdidas a tiempo.",
       "createdAt": "2026-03-23T22:48:47.964Z"
     },
     {
@@ -59,7 +59,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "El contexto era bueno pero habÃ­a algo de sobrecompra con el RSI a 65 que me echo para atrÃ¡s. AdemÃ¡s el valor venÃ­a de una buena subida sobre la media mÃ³vil y era probable que ya le quedara poco recorrido ",
+      "lesson": "El contexto era bueno pero habÃÂ­a algo de sobrecompra con el RSI a 65 que me echo para atrÃÂ¡s. AdemÃÂ¡s el valor venÃÂ­a de una buena subida sobre la media mÃÂ³vil y era probable que ya le quedara poco recorrido ",
       "result30": 1.8,
       "result90": -10.2,
       "correct": true,
@@ -69,7 +69,7 @@
         "score": 2,
         "golden": true
       },
-      "feedback": "Ã¢ÂÂ Sin tendencia clara, esperar fue lo correcto. No necesitas estar siempre en el mercado.",
+      "feedback": "ÃÂ¢ÃÂÃÂ Sin tendencia clara, esperar fue lo correcto. No necesitas estar siempre en el mercado.",
       "createdAt": "2026-03-23T22:45:24.833Z"
     },
     {
@@ -83,7 +83,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "Identificar los patrones. Leer el contexto es importante. Poner un stop loss conservador siempre es la mejor opciÃÂÃÂ³n ",
+      "lesson": "Identificar los patrones. Leer el contexto es importante. Poner un stop loss conservador siempre es la mejor opciÃÂÃÂÃÂÃÂ³n ",
       "result30": 17.2,
       "result90": 12.4,
       "correct": true,
@@ -93,12 +93,12 @@
         "score": 2,
         "golden": true
       },
-      "feedback": "ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Entrada correcta. La acciÃÂÃÂÃÂÃÂ³n subiÃÂÃÂÃÂÃÂ³ 17.2% en 30 dÃÂÃÂÃÂÃÂ­as. Identificaste bien la oportunidad.",
+      "feedback": "ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Entrada correcta. La acciÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³n subiÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³ 17.2% en 30 dÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ­as. Identificaste bien la oportunidad.",
       "createdAt": "2026-03-23T22:42:18.436Z"
     }
   ],
   "guide": {
     "read-aprende": "2026-03-23T22:40:16.930Z"
   },
-  "updatedAt": "2026-03-23T22:52:11.379Z"
+  "updatedAt": "2026-03-23T23:02:55.285Z"
 }
