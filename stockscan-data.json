@@ -1,7 +1,32 @@
 {
-  "diary": [],
+  "diary": [
+    {
+      "id": 1774305738436,
+      "source": "paper",
+      "ticker": "NEE",
+      "date": "22 de septiembre de 2025",
+      "type": "buy",
+      "price": 72.35,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": 17.2,
+      "result90": 12.4,
+      "correct": true,
+      "indicators": {
+        "rsi": 52,
+        "hist": 0.136,
+        "score": 2,
+        "golden": true
+      },
+      "feedback": "✅ Entrada correcta. La acción subió 17.2% en 30 días. Identificaste bien la oportunidad.",
+      "createdAt": "2026-03-23T22:42:18.436Z"
+    }
+  ],
   "guide": {
     "read-aprende": "2026-03-23T22:40:16.930Z"
   },
-  "updatedAt": "2026-03-23T22:40:16.931Z"
+  "updatedAt": "2026-03-23T22:42:18.437Z"
 }
