@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.4</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.5</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -3356,11 +3356,7 @@ function saveGHSettings() {
   if (ai && akey)  ai.value = akey;
 })();
 
-// Cargar datos al inicio desde almacenamiento local (GitHub se sincroniza al abrir cada sección)
-const _initData = getLocalData();
-diaryEntries = _initData.diary || [];
-guideProgress = _initData.guide || {};
-loadGuideProgress();
+// (datos inicializados más abajo)
 
 // ── CONTEXTO DE NOTICIAS VÍA CLAUDE API ──────────────────────────────────────
 async function fetchNewsContext(session) {
@@ -4124,6 +4120,18 @@ function saveProxyUrl() {
 setTimeout(testProxy, 2000); // test silencioso al arrancar
 
 // ── NAVIGATION ──────────────────────────────────────────────────────────────
+// ── INICIALIZACIÓN ───────────────────────────────────────────────────────────
+(function initApp() {
+  try {
+    const d = getLocalData();
+    diaryEntries = Array.isArray(d.diary) ? d.diary : [];
+    guideProgress = (d.guide && typeof d.guide === 'object') ? d.guide : {};
+  } catch(e) {
+    diaryEntries = [];
+    guideProgress = {};
+  }
+})();
+
 function navigate(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -4132,7 +4140,17 @@ function navigate(id, el) {
   if (el) el.classList.add('active');
   if (id === 'portfolio') renderPortfolio();
   if (id === 'diary') { loadFromGitHub(); }
-  if (id === 'guide') { loadGuideProgress(); diaryEntries = getLocalData().diary || []; renderGuide(); loadFromGitHub().then(() => renderGuide()); }
+  if (id === 'guide') {
+    try {
+      if (typeof getLocalData === 'function') {
+        const d = getLocalData();
+        diaryEntries = Array.isArray(d.diary) ? d.diary : [];
+        guideProgress = (d.guide && typeof d.guide === 'object') ? d.guide : {};
+      }
+    } catch(e) { diaryEntries = diaryEntries || []; guideProgress = guideProgress || {}; }
+    renderGuide();
+    try { loadFromGitHub().then(() => renderGuide()).catch(() => {}); } catch(e) {}
+  }
 }
 
 // ── FILTER PILLS ────────────────────────────────────────────────────────────
