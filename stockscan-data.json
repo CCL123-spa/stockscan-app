@@ -1,6 +1,30 @@
 {
   "diary": [
     {
+      "id": 1774306331379,
+      "source": "paper",
+      "ticker": "KO",
+      "date": "22 de diciembre de 2025",
+      "type": "sell",
+      "price": 70.21,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": 2.4,
+      "result90": 6.5,
+      "correct": false,
+      "indicators": {
+        "rsi": 49,
+        "hist": -0.07,
+        "score": 3,
+        "golden": true
+      },
+      "feedback": "⚠️ El mercado se quedó lateral tras tu salida. Decisión defensiva, no necesariamente incorrecta.",
+      "createdAt": "2026-03-23T22:52:11.379Z"
+    },
+    {
       "id": 1774306127964,
       "source": "paper",
       "ticker": "BAC",
@@ -76,5 +100,5 @@
   "guide": {
     "read-aprende": "2026-03-23T22:40:16.930Z"
   },
-  "updatedAt": "2026-03-23T22:50:29.504Z"
+  "updatedAt": "2026-03-23T22:52:11.379Z"
 }
