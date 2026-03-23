@@ -1,6 +1,30 @@
 {
   "diary": [
     {
+      "id": 1774307130194,
+      "source": "paper",
+      "ticker": "HD",
+      "date": "22 de diciembre de 2025",
+      "type": "wait",
+      "price": 346.39,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": 10,
+      "result90": -7.4,
+      "correct": true,
+      "indicators": {
+        "rsi": 42,
+        "hist": 0.255,
+        "score": 2,
+        "golden": false
+      },
+      "feedback": "⚠️ La acción subió 10% pero los indicadores eran bajistas (2/5 señales). Una subida contra los indicadores es difícil de anticipar — tu análisis técnico era razonable.",
+      "createdAt": "2026-03-23T23:05:30.194Z"
+    },
+    {
       "id": 1774306331379,
       "source": "paper",
       "ticker": "KO",
@@ -100,5 +124,5 @@
   "guide": {
     "read-aprende": "2026-03-23T22:40:16.930Z"
   },
-  "updatedAt": "2026-03-23T23:02:55.285Z"
+  "updatedAt": "2026-03-23T23:05:30.195Z"
 }
