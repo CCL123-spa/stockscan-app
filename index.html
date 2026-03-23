@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.2</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.3</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -3733,6 +3733,8 @@ function updateDiaryStats() {
 
 // ── GUÍA DE 3 MESES ──────────────────────────────────────────────────────────
 
+let guideProgress = {};
+
 const GUIDE_STEPS = [
   // ── MES 1 ──────────────────────────────────────────────────────────────────
   {
@@ -3907,7 +3909,6 @@ const GUIDE_STEPS = [
   },
 ];
 
-let guideProgress = {};
 
 function loadGuideProgress() {
   const data = getLocalData();
@@ -3931,8 +3932,13 @@ function completeStep(stepId) {
 }
 
 function renderGuide() {
+  // Debug: marcar que la función fue llamada
+  const phaseTitle0 = document.getElementById('guide-phase-title');
+  if (phaseTitle0) phaseTitle0.textContent = 'Iniciando…';
   try {
   // Evaluar estado de cada paso
+  if (!Array.isArray(diaryEntries)) diaryEntries = [];
+  if (!guideProgress || typeof guideProgress !== 'object') guideProgress = {};
   const states = GUIDE_STEPS.map(s => ({ ...s, done: isStepComplete(s) }));
   const totalDone = states.filter(s => s.done).length;
   const total = states.length;
