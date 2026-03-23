@@ -11,7 +11,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "",
+      "lesson": "Identificar los patrones. Leer el contexto es importante. Poner un stop loss conservador siempre es la mejor opción ",
       "result30": 17.2,
       "result90": 12.4,
       "correct": true,
@@ -21,12 +21,12 @@
         "score": 2,
         "golden": true
       },
-      "feedback": "✅ Entrada correcta. La acción subió 17.2% en 30 días. Identificaste bien la oportunidad.",
+      "feedback": "â Entrada correcta. La acciÃ³n subiÃ³ 17.2% en 30 dÃ­as. Identificaste bien la oportunidad.",
       "createdAt": "2026-03-23T22:42:18.436Z"
     }
   ],
   "guide": {
     "read-aprende": "2026-03-23T22:40:16.930Z"
   },
-  "updatedAt": "2026-03-23T22:42:18.437Z"
+  "updatedAt": "2026-03-23T22:43:30.521Z"
 }
