@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.5</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.9.5</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -1706,6 +1706,36 @@ html, body {
           Construido con Claude · Solo educacional<br>
           No constituye asesoramiento financiero
         </div>
+      </div>
+
+      <!-- FISCALIDAD -->
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px">
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">🧾 Fiscalidad personal</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text3);margin-bottom:10px;line-height:1.6">Las ganancias de acciones tributan en la base del ahorro (tramos 19-28%). Tu tipo marginal IRPF sirve para estimar el impacto total en tu declaración anual.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:5px">TIPO MARGINAL IRPF (%)</div>
+            <input id="irpf-pct" type="number" placeholder="Ej: 37" min="0" max="60" step="1"
+              style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none;box-sizing:border-box"
+              oninput="saveIRPF()">
+            <div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--text3);margin-top:4px">Base general de tu declaración</div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-bottom:5px">COMISIÓN BROKER (€/op)</div>
+            <input id="broker-fee-fiscal" type="number" placeholder="1" min="0" step="0.5"
+              style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text);outline:none;box-sizing:border-box"
+              oninput="saveIRPF()">
+            <div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--text3);margin-top:4px">DEGIRO ~1€ · IB ~1-2€</div>
+          </div>
+        </div>
+        <div id="irpf-preview" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--accent);margin-top:4px"></div>
+      </div>
+
+      <!-- PAPER TRADING RESET -->
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px">
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">🎮 Paper Trading</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text3);margin-bottom:10px">Si quieres empezar de cero con los 10.000€ simulados, pulsa el botón de reset. Las posiciones cerradas se conservarán en el diario.</div>
+        <button onclick="resetPaperPortfolio()" style="width:100%;padding:10px;background:transparent;border:1px solid var(--red);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--red);cursor:pointer">🔄 Resetear cartera paper a 10.000€</button>
       </div>
 
     </div><!-- /page-set -->
@@ -1857,20 +1887,111 @@ html, body {
     <!-- ── CARTERA ── -->
     <div class="page" id="page-portfolio">
 
-      <div class="port-header-row">
-        <div>
-          <div class="section-label" style="margin-bottom:2px">Mi cartera</div>
-          <div id="port-summary" style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2)">Sin posiciones</div>
-        </div>
-        <button class="btn-add-position" onclick="openAddSheet()">+ Añadir</button>
+      <!-- Tabs Real / Paper -->
+      <div style="display:flex;gap:0;margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px">
+        <button id="port-tab-real" onclick="switchPortTab('real')" style="flex:1;padding:8px;border:none;border-radius:9px;background:var(--accent);color:var(--bg);font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:600;cursor:pointer">💼 Real</button>
+        <button id="port-tab-paper" onclick="switchPortTab('paper')" style="flex:1;padding:8px;border:none;border-radius:9px;background:transparent;color:var(--text2);font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer">🎮 Paper</button>
       </div>
 
-      <div id="port-alerts-area"></div>
-      <div id="port-list-area">
-        <div class="empty-state">
-          <div class="empty-icon">💼</div>
-          <div class="empty-title">Cartera vacía</div>
-          <div class="empty-sub">Añade las acciones que tienes<br>y vigilaremos las señales por ti</div>
+      <!-- ── CARTERA REAL ── -->
+      <div id="port-panel-real">
+
+        <!-- Stats financieros reales -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em">💼 Capital Real</div>
+            <button onclick="openAportacion()" style="padding:4px 10px;border:1px solid var(--accent);background:transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--accent);cursor:pointer">+ Aportación</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px">
+            <div style="text-align:center">
+              <div id="real-stat-disponible" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:700;color:var(--accent)">0€</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text3);margin-top:2px">DISPONIBLE LÍQUIDO</div>
+            </div>
+            <div style="text-align:center">
+              <div id="real-stat-invertido" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:700;color:var(--text)">0€</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text3);margin-top:2px">EN POSICIONES</div>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:10px">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+              <div style="text-align:center">
+                <div id="real-stat-pnl" style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--text)">+0€</div>
+                <div style="font-family:'DM Mono',monospace;font-size:0.42rem;color:var(--text3);margin-top:2px">P&L BRUTO</div>
+              </div>
+              <div style="text-align:center">
+                <div id="real-stat-retenido" style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--orange)">0€</div>
+                <div style="font-family:'DM Mono',monospace;font-size:0.42rem;color:var(--text3);margin-top:2px">RETENIDO 19%</div>
+              </div>
+              <div style="text-align:center">
+                <div id="real-stat-fiscal" style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--text2)">0€</div>
+                <div style="font-family:'DM Mono',monospace;font-size:0.42rem;color:var(--text3);margin-top:2px">EST. FIN AÑO</div>
+              </div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--text3);margin-top:8px;text-align:center" id="real-fiscal-note">Retención = pagos a cuenta · Est. fin año = impuesto real tras compensar ganancias y pérdidas</div>
+            <div id="real-net-final" style="font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:700;text-align:center;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)"></div>
+          </div>
+        </div>
+
+        <div class="port-header-row" style="margin-bottom:10px">
+          <div id="port-summary" style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2)">Sin posiciones</div>
+          <button class="btn-add-position" onclick="openAddSheet(null,null,'real')">+ Añadir</button>
+        </div>
+        <div id="port-alerts-area"></div>
+        <div id="port-list-area">
+          <div class="empty-state">
+            <div class="empty-icon">💼</div>
+            <div class="empty-title">Sin posiciones reales</div>
+            <div class="empty-sub">Añade tus compras y registra<br>aportaciones de efectivo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CARTERA PAPER ── -->
+      <div id="port-panel-paper" style="display:none">
+
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em">🎮 Capital Simulado</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--text3)">10.000€ iniciales</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px">
+            <div style="text-align:center">
+              <div id="paper-stat-capital" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:700;color:var(--accent)">10.000€</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text3);margin-top:2px">DISPONIBLE</div>
+            </div>
+            <div style="text-align:center">
+              <div id="paper-stat-invertido" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:700;color:var(--text)">0€</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text3);margin-top:2px">EN POSICIONES</div>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:10px">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+              <div style="text-align:center">
+                <div id="paper-stat-pnl" style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--text)">+0€</div>
+                <div style="font-family:'DM Mono',monospace;font-size:0.42rem;color:var(--text3);margin-top:2px">P&L BRUTO</div>
+              </div>
+              <div style="text-align:center">
+                <div id="paper-stat-retenido" style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--orange)">0€</div>
+                <div style="font-family:'DM Mono',monospace;font-size:0.42rem;color:var(--text3);margin-top:2px">RETENCIÓN 19%</div>
+              </div>
+              <div style="text-align:center">
+                <div id="paper-stat-ops" style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--text2)">0</div>
+                <div style="font-family:'DM Mono',monospace;font-size:0.42rem;color:var(--text3);margin-top:2px">OPERACIONES</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="port-header-row" style="margin-bottom:10px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2)" id="port-paper-summary">Sin posiciones</div>
+          <button class="btn-add-position" onclick="openAddSheet(null,null,'paper')">+ Añadir</button>
+        </div>
+        <div id="port-paper-list">
+          <div class="empty-state">
+            <div class="empty-icon">🎮</div>
+            <div class="empty-title">Sin posiciones paper</div>
+            <div class="empty-sub">Practica sin riesgo con<br>10.000€ simulados</div>
+          </div>
         </div>
       </div>
 
@@ -2053,7 +2174,7 @@ html, body {
 <div class="add-sheet-overlay" id="addOverlay" onclick="closeAddSheet()"></div>
 <div class="add-sheet" id="addSheet">
   <div class="add-sheet-handle"></div>
-  <div class="add-sheet-title">Añadir posición</div>
+  <div class="add-sheet-title" id="addSheet-title">Añadir posición</div>
   <div class="add-sheet-body">
 
     <!-- Capital y riesgo (se recuerdan) -->
@@ -3354,6 +3475,11 @@ function saveGHSettings() {
   if (ri && repo)  ri.value = repo;
   if (pi && pkey)  pi.value = pkey;
   if (ai && akey)  ai.value = akey;
+  const irpfEl = document.getElementById('irpf-pct');
+  const feeEl  = document.getElementById('broker-fee-fiscal');
+  if (irpfEl) irpfEl.value = localStorage.getItem('irpf_pct') || '';
+  if (feeEl)  feeEl.value  = localStorage.getItem('broker_fee_fiscal') || '1';
+  updateIRPFPreview();
 })();
 
 // (datos inicializados más abajo)
@@ -3461,15 +3587,27 @@ let _ghSaveTimer = null;
 
 function getLocalData() {
   try {
-    return JSON.parse(localStorage.getItem('stockscan_data') || '{"diary":[],"guide":{}}');
-  } catch(e) { return { diary: [], guide: {} }; }
+    const d = JSON.parse(localStorage.getItem('stockscan_data') || '{"diary":[],"guide":{},"portfolio":[],"paperPortfolio":[]}');
+    // Migrate from old separate keys if needed
+    if (!d.portfolio || d.portfolio.length === 0) {
+      const old = localStorage.getItem('stockscan_portfolio');
+      if (old) d.portfolio = JSON.parse(old);
+    }
+    if (!d.paperPortfolio || d.paperPortfolio.length === 0) {
+      const old = localStorage.getItem('stockscan_paper_portfolio');
+      if (old) d.paperPortfolio = JSON.parse(old);
+    }
+    return d;
+  } catch(e) { return { diary: [], guide: {}, portfolio: [], paperPortfolio: [] }; }
 }
 
 function setLocalData(data) {
   localStorage.setItem('stockscan_data', JSON.stringify(data));
-  // Migrar claves antiguas por compatibilidad
+  // Keep individual keys for compatibility
   localStorage.setItem('diary_entries', JSON.stringify(data.diary || []));
   localStorage.setItem('guide_progress', JSON.stringify(data.guide || {}));
+  localStorage.setItem('stockscan_portfolio', JSON.stringify(data.portfolio || []));
+  localStorage.setItem('stockscan_paper_portfolio', JSON.stringify(data.paperPortfolio || []));
 }
 
 async function loadFromGitHub() {
@@ -3517,9 +3655,13 @@ async function loadFromGitHub() {
       // Hay entradas locales que no están en GitHub — hacer merge y subir
       remoteData.diary = [...localOnly, ...(remoteData.diary || [])];
       remoteData.guide = { ...(remoteData.guide || {}), ...guideProgress };
+      remoteData.portfolio = remoteData.portfolio || portfolio;
+      remoteData.paperPortfolio = remoteData.paperPortfolio || paperPortfolio;
       remoteData._sha = file.sha;
       diaryEntries = remoteData.diary;
       guideProgress = remoteData.guide;
+      portfolio = remoteData.portfolio;
+      paperPortfolio = remoteData.paperPortfolio;
       setLocalData(remoteData);
       await saveToGitHub(false, file.sha);
       if(statusEl) statusEl.textContent = `✅ Sincronizado · ${diaryEntries.length} entradas`;
@@ -3527,6 +3669,8 @@ async function loadFromGitHub() {
       // GitHub es la fuente de verdad
       diaryEntries = remoteData.diary || [];
       guideProgress = remoteData.guide || {};
+      portfolio = remoteData.portfolio || [];
+      paperPortfolio = remoteData.paperPortfolio || [];
       setLocalData(remoteData);
       if(statusEl) statusEl.textContent = `✅ Sincronizado · ${diaryEntries.length} entradas · ${new Date().toLocaleTimeString('es-ES')}`;
     }
@@ -4126,11 +4270,47 @@ setTimeout(testProxy, 2000); // test silencioso al arrancar
     const d = getLocalData();
     diaryEntries = Array.isArray(d.diary) ? d.diary : [];
     guideProgress = (d.guide && typeof d.guide === 'object') ? d.guide : {};
+    portfolio = Array.isArray(d.portfolio) ? d.portfolio : [];
+    paperPortfolio = Array.isArray(d.paperPortfolio) ? d.paperPortfolio : [];
+    realAportaciones = Array.isArray(d.realAportaciones) ? d.realAportaciones : [];
   } catch(e) {
     diaryEntries = [];
     guideProgress = {};
+    portfolio = [];
+    paperPortfolio = [];
+    realAportaciones = [];
   }
 })();
+
+
+// ── IRPF / FISCALIDAD ────────────────────────────────────────────────────────
+function saveIRPF() {
+  const pct = parseFloat(document.getElementById('irpf-pct')?.value) || 0;
+  const fee = parseFloat(document.getElementById('broker-fee-fiscal')?.value) || 1;
+  localStorage.setItem('irpf_pct', pct);
+  localStorage.setItem('broker_fee_fiscal', fee);
+  updateIRPFPreview();
+}
+
+function getIRPF() {
+  return {
+    pct: parseFloat(localStorage.getItem('irpf_pct') || '0'),
+    fee: parseFloat(localStorage.getItem('broker_fee_fiscal') || '1')
+  };
+}
+
+function updateIRPFPreview() {
+  const el = document.getElementById('irpf-preview');
+  if (!el) return;
+  const irpf = getIRPF();
+  if (!irpf.pct) { el.textContent = ''; return; }
+  // Example: 1000€ ganancia
+  const ganancia = 1000;
+  const retencion = ganancia * 0.19;
+  const impuestoAhorro = ganancia * 0.19; // primer tramo
+  const liquidoEjemplo = ganancia - impuestoAhorro - (irpf.fee * 2);
+  el.textContent = `Ejemplo: 1.000€ ganancia → ${liquidoEjemplo.toFixed(0)}€ líquido neto (después de retención 19% y comisiones)`;
+}
 
 function navigate(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -4138,7 +4318,7 @@ function navigate(id, el) {
   const page = document.getElementById('page-'+id);
   if (page) page.classList.add('active');
   if (el) el.classList.add('active');
-  if (id === 'portfolio') renderPortfolio();
+  if (id === 'portfolio') { renderPortfolio(); if(document.getElementById('port-panel-paper')?.style.display!=='none') renderPaperPortfolio(); }
   if (id === 'diary') { loadFromGitHub(); }
   if (id === 'guide') {
     try {
@@ -5604,14 +5784,30 @@ function openSheet(ticker) {
     </div>
     <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);margin-top:6px;text-align:center;margin-bottom:16px">Score ${s.score}/5 señales positivas</div>
 
+    <!-- ANÁLISIS IA -->
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em">🤖 Análisis IA · Contexto actual</div>
+        <button onclick="loadScanAI('${s.t}',${s.price},${s.rsi},'${macdBull?'alcista':'bajista'}','${s.golden?'golden':'death'}')" style="padding:5px 10px;border:1px solid var(--accent);background:transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--accent);cursor:pointer">▶ Analizar</button>
+      </div>
+      <div id="ai-analysis-content" style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2);line-height:1.7">
+        Pulsa "Analizar" para obtener contexto de noticias recientes, análisis macro y opinión sobre si entrar ahora.
+      </div>
+    </div>
+
     <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">
       Situaciones históricas similares
     </div>
     ${simHtml}
 
-    <button onclick="closeSheet();openAddSheet('${s.t}',${s.price})" style="width:100%;margin-top:8px;padding:14px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer">
-      + Añadir a cartera
-    </button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <button onclick="closeSheet();openAddSheet('${s.t}',${s.price},'real')" style="padding:13px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">
+        💼 Cartera Real
+      </button>
+      <button onclick="closeSheet();openAddSheet('${s.t}',${s.price},'paper')" style="padding:13px;background:transparent;border:1.5px solid var(--accent);color:var(--accent);border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">
+        🎮 Paper Trading
+      </button>
+    </div>
   `;
 
   // Dibujar gráfico tras render — usa datos reales si están disponibles
@@ -5644,10 +5840,19 @@ function openSheet(ticker) {
 // CARTERA — seguimiento de posiciones con alertas técnicas
 // ════════════════════════════════════════════════════════════════════════════
 
-let portfolio = JSON.parse(localStorage.getItem('stockscan_portfolio') || '[]');
+let portfolio = [];
 let riskSettings = JSON.parse(localStorage.getItem('stockscan_risk') || '{"capital":0,"riskPct":1,"brokerFee":1}');
 
-function savePortfolio() { localStorage.setItem('stockscan_portfolio', JSON.stringify(portfolio)); }
+function savePortfolio() {
+  localStorage.setItem('stockscan_portfolio', JSON.stringify(portfolio));
+  // Sync to GitHub unified data
+  try {
+    const d = getLocalData();
+    d.portfolio = portfolio;
+    localStorage.setItem('stockscan_data', JSON.stringify(d));
+    saveToGitHub(true);
+  } catch(e) {}
+}
 function saveRiskSettings() {
   riskSettings.capital   = parseFloat(document.getElementById('input-capital').value) || 0;
   riskSettings.riskPct   = parseFloat(document.getElementById('input-risk-pct').value) || 1;
@@ -5742,6 +5947,10 @@ function setStopPct(pct) {
 
 // ── Renderizar cartera ────────────────────────────────────────────────────────
 function renderPortfolio() {
+  // Also refresh paper if visible
+  if (document.getElementById('port-panel-paper')?.style.display !== 'none') renderPaperPortfolio();
+  renderRealStats();
+
   const alertArea=document.getElementById('port-alerts-area');
   const listArea=document.getElementById('port-list-area');
   const summary=document.getElementById('port-summary');
@@ -5915,19 +6124,117 @@ function confirmAddPosition(){
   const stopVal=parseFloat(document.getElementById('input-stop').value);
   const shares=parseFloat(document.getElementById('input-shares').value)||1;
   const buyDate=document.getElementById('input-date').value||new Date().toISOString().slice(0,10);
+  const portfolioType = document.getElementById('addSheet').dataset.portfolioType || 'real';
+
   if(!ticker||isNaN(buyPrice)||buyPrice<=0){
     document.getElementById('input-ticker').style.borderColor='var(--red)';
     setTimeout(()=>document.getElementById('input-ticker').style.borderColor='',1200); return;
   }
+
+  const comment = prompt(`Añadiendo ${ticker} a ${portfolioType==='paper'?'Paper Trading':'Cartera Real'}\n\n¿En qué te has basado para esta compra? (indicadores, contexto, noticias...)`);
+  if (comment === null) return;
+
   saveRiskSettings();
-  portfolio.push({ticker,buyPrice,shares,buyDate,initialStop:stopVal||+(buyPrice*0.92).toFixed(2),highWaterMark:buyPrice,addedAt:Date.now()});
-  savePortfolio(); closeAddSheet(); renderPortfolio();
+  const tech = getTechData(ticker);
+  const position = {ticker, buyPrice, shares, buyDate, initialStop:stopVal||+(buyPrice*0.92).toFixed(2), highWaterMark:buyPrice, addedAt:Date.now(), buyComment:comment, buyIndicators:tech, portfolioType};
+
+  if (portfolioType === 'paper') {
+    const stats = calcPaperStats();
+    const cost = buyPrice * shares;
+    if (cost > stats.available) {
+      alert(`Capital insuficiente. Disponible: ${stats.available.toFixed(0)}€, necesitas: ${cost.toFixed(0)}€`);
+      return;
+    }
+    paperPortfolio.push({...position, status:'open'});
+    savePaperPortfolio();
+  } else {
+    portfolio.push(position);
+    savePortfolio();
+  }
+
+  // Save to diary
+  autoSaveDiaryEntry({
+    id: Date.now(), source: portfolioType === 'paper' ? 'paper-portfolio' : 'real-portfolio',
+    ticker, date: buyDate, type: 'buy',
+    price: buyPrice, shares, stop: stopVal || +(buyPrice*0.92).toFixed(2),
+    emotion: '', reason: comment, lesson: '',
+    indicators: tech, result30: null, correct: null,
+    createdAt: new Date().toISOString()
+  });
+
+  closeAddSheet();
+  if (portfolioType === 'paper') {
+    renderPaperPortfolio();
+    navigate('portfolio', document.querySelector('[onclick*="portfolio"]'));
+    switchPortTab('paper');
+  } else {
+    renderPortfolio();
+    navigate('portfolio', document.querySelector('[onclick*="portfolio"]'));
+  }
 }
 
 function removePosition(idx){
   portfolio.splice(idx,1); savePortfolio(); closePosSheet(); renderPortfolio();
 }
 
+// ── PORTFOLIO: Real vs Paper ──────────────────────────────────────────────────
+function renderPaperPortfolio() {
+  const stats = calcPaperStats();
+  const set = (id, txt, col) => { const el = document.getElementById(id); if(el){ el.textContent=txt; if(col) el.style.color=col; } };
+  set('paper-stat-capital', stats.disponible.toFixed(0)+'€', stats.disponible >= PAPER_CAPITAL_INITIAL*0.9 ? 'var(--accent)' : stats.disponible < 0 ? 'var(--red)' : 'var(--orange)');
+  set('paper-stat-invertido', stats.invertido.toFixed(0)+'€');
+  const pnlNeto = stats.pnlRealizado - stats.fiscal.comisionesTotal;
+  set('paper-stat-pnl', (pnlNeto>=0?'+':'')+pnlNeto.toFixed(0)+'€', pnlNeto>=0?'var(--green)':'var(--red)');
+  set('paper-stat-retenido', stats.fiscal.retencionTotal.toFixed(0)+'€', stats.fiscal.retencionTotal>0?'var(--orange)':'var(--text2)');
+  set('paper-stat-ops', stats.total+'');
+
+  const listEl = document.getElementById('port-paper-list');
+  if (!listEl) return;
+
+  const allPos = paperPortfolio;
+  if (!allPos.length) {
+    listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🎮</div><div class="empty-title">Sin posiciones paper</div><div class="empty-sub">Practica sin riesgo con<br>10.000€ simulados</div></div>';
+    return;
+  }
+
+  listEl.innerHTML = allPos.map((p, i) => {
+    const isClosed = p.status === 'closed';
+    const tech = isClosed ? null : getTechData(p.ticker);
+    const currentPrice = isClosed ? p.sellPrice : (tech?.price || p.buyPrice);
+    const pnlEur = isClosed ? (p.realizedPnl||0) : ((currentPrice - p.buyPrice) * p.shares);
+    const pnlPct = ((currentPrice - p.buyPrice) / p.buyPrice * 100).toFixed(1);
+    const comision = BROKER_FEE * (isClosed ? 2 : 1);
+    const pnlNeto = pnlEur - comision;
+    const retencion = pnlNeto > 0 ? pnlNeto * RETENCION_PCT : 0;
+    const liquidoReal = isClosed ? pnlEur - comision - retencion : null;
+    const pnlCol = pnlEur >= 0 ? 'var(--green)' : 'var(--red)';
+    const daysSince = Math.round((Date.now() - new Date(p.buyDate).getTime()) / 86400000);
+
+    const closedDetails = isClosed
+      ? '<div style="font-family:\'DM Mono\',monospace;font-size:0.55rem;color:var(--text3);display:flex;gap:12px">'
+        + '<span>Comisión: -' + comision.toFixed(0) + '€</span>'
+        + (retencion>0 ? '<span style="color:var(--orange)">Retención: -' + retencion.toFixed(0) + '€</span>' : '')
+        + '<span style="color:' + (liquidoReal>=0?'var(--green)':'var(--red)') + '">Líquido neto: ' + (liquidoReal>=0?'+':'') + liquidoReal.toFixed(0) + '€</span>'
+        + '</div>'
+      : '<button onclick="openClosePaperPosition(' + i + ')" style="width:100%;padding:7px;border:1px solid var(--accent);background:transparent;border-radius:8px;font-family:\'DM Mono\',monospace;font-size:0.62rem;color:var(--accent);cursor:pointer">💰 Cerrar posición</button>';
+
+    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 14px;margin-bottom:8px;opacity:' + (isClosed?0.65:1) + '">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
+      + '<div style="display:flex;align-items:center;gap:7px">'
+      + '<span style="font-family:\'DM Mono\',monospace;font-size:0.9rem;font-weight:700;color:var(--accent)">' + p.ticker + '</span>'
+      + '<span style="font-family:\'DM Mono\',monospace;font-size:0.45rem;background:var(--card2);padding:2px 6px;border-radius:4px;color:var(--text3)">' + (isClosed?'CERRADA':'ABIERTA') + '</span>'
+      + '</div>'
+      + '<span style="font-family:\'DM Mono\',monospace;font-size:0.8rem;font-weight:700;color:' + pnlCol + '">' + (pnlEur>=0?'+':'') + pnlEur.toFixed(0) + '€</span>'
+      + '</div>'
+      + '<div style="font-family:\'DM Mono\',monospace;font-size:0.58rem;color:var(--text2);margin-bottom:6px">'
+      + p.shares + ' acc · Entrada: ' + p.buyPrice.toFixed(2) + '€ · '
+      + (isClosed ? 'Salida: ' + (p.sellPrice||0).toFixed(2) + '€' : 'Actual: ' + currentPrice.toFixed(2) + '€')
+      + (isClosed ? '' : ' · ' + daysSince + 'd')
+      + '</div>'
+      + closedDetails
+      + '</div>';
+  }).join('');
+}
 </script>
 </body>
 </html>
