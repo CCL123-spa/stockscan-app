@@ -11,7 +11,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "",
+      "lesson": "Este no lo esperaba. Todas las señales eran positivas. El contexto era positivo. Fue un error inesperado de salto de stop loss. Había que hacerlo puerto mucho la lejos pero sería demasiado. Riesgo. No había visto casos similares antes ",
       "result30": -12.9,
       "result90": 7.5,
       "correct": false,
@@ -270,5 +270,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:35:45.500Z"
+  "updatedAt": "2026-03-24T22:37:58.767Z"
 }
