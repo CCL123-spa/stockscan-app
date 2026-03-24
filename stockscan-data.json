@@ -11,7 +11,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "",
+      "lesson": "La acción siguió cayendo antes de subir. Mejor cortar pérdidas pronto",
       "result30": 11.2,
       "result90": -4.1,
       "correct": false,
@@ -486,5 +486,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:52:13.329Z"
+  "updatedAt": "2026-03-24T22:52:52.529Z"
 }
