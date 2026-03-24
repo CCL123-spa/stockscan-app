@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.9.5</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.9.6</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -5643,15 +5643,27 @@ function drawChart(canvasId, series, opts = {}) {
     lx += 46;
   });
 
-  // Etiquetas eje X (fechas aproximadas)
+  // Etiquetas eje X (fechas — izquierda=más antiguo, derecha=más reciente)
   const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const now = new Date();
   ctx.fillStyle = 'rgba(92,122,144,0.7)';
   ctx.font      = `9px "DM Mono", monospace`;
   ctx.textAlign = 'center';
+
+  // Calcular fecha inicial basada en las velas reales si existen, sino estimar
+  const hasRealDates = candles[0] && candles[0].t;
   [0, 0.33, 0.66, 1].forEach(frac => {
-    const d   = new Date(now - frac * 90 * 86400000);
-    const lbl = `${d.getDate()} ${months[d.getMonth()]}`;
+    let d;
+    if (hasRealDates) {
+      const idx = Math.round(frac * (n - 1));
+      d = new Date(candles[idx].t * 1000);
+    } else {
+      // Sintético: frac=0 → más antiguo, frac=1 → hoy
+      const daysAgo = series.days || 90;
+      d = new Date(Date.now() - (1 - frac) * daysAgo * 86400000);
+    }
+    const lbl = frac === 1
+      ? months[d.getMonth()]  // solo mes para el más reciente
+      : `${d.getDate()} ${months[d.getMonth()]}`;
     ctx.fillText(lbl, padL + frac * chartW, h - 6);
   });
 
