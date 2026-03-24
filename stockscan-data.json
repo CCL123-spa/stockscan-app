@@ -1,6 +1,30 @@
 {
   "diary": [
     {
+      "id": 1774392445614,
+      "source": "paper",
+      "ticker": "WFC",
+      "date": "23 de septiembre de 2025",
+      "type": "wait",
+      "price": 84.37,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": 0.5,
+      "result90": 9.7,
+      "correct": true,
+      "indicators": {
+        "rsi": 64,
+        "hist": 0.412,
+        "score": 3,
+        "golden": true
+      },
+      "feedback": "✅ Mercado lateral — mantener sin actuar fue la decisión correcta. No todas las señales requieren acción.",
+      "createdAt": "2026-03-24T22:47:25.614Z"
+    },
+    {
       "id": 1774392332318,
       "source": "paper",
       "ticker": "CVX",
@@ -390,5 +414,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:46:25.631Z"
+  "updatedAt": "2026-03-24T22:47:25.616Z"
 }
