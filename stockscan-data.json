@@ -1,6 +1,30 @@
 {
   "diary": [
     {
+      "id": 1774392029972,
+      "source": "paper",
+      "ticker": "LLY",
+      "date": "23 de septiembre de 2025",
+      "type": "sell",
+      "price": 746.98,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": 7,
+      "result90": 39.5,
+      "correct": true,
+      "indicators": {
+        "rsi": 52,
+        "hist": -0.292,
+        "score": 1,
+        "golden": false
+      },
+      "feedback": "⚠️ La acción subió 7% a pesar de indicadores bajistas (1/5). Movimiento contraintuitivo — con ese score tu decisión era técnicamente justificada.",
+      "createdAt": "2026-03-24T22:40:29.972Z"
+    },
+    {
       "id": 1774391949942,
       "source": "paper",
       "ticker": "C",
@@ -294,5 +318,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:40:02.647Z"
+  "updatedAt": "2026-03-24T22:40:29.973Z"
 }
