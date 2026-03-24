@@ -1,6 +1,30 @@
 {
   "diary": [
     {
+      "id": 1774391745497,
+      "source": "paper",
+      "ticker": "C",
+      "date": "21 de marzo de 2025",
+      "type": "buy",
+      "price": 71.98,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": -12.9,
+      "result90": 7.5,
+      "correct": false,
+      "indicators": {
+        "rsi": 45,
+        "hist": 0.506,
+        "score": 3,
+        "golden": true
+      },
+      "feedback": "❌ Entraste pero el stop saltó pronto. La zona de entrada no tenía suficiente soporte — esperar consolidación habría sido mejor.",
+      "createdAt": "2026-03-24T22:35:45.497Z"
+    },
+    {
       "id": 1774391585223,
       "source": "paper",
       "ticker": "PFE",
@@ -246,5 +270,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:34:18.592Z"
+  "updatedAt": "2026-03-24T22:35:45.500Z"
 }
