@@ -1420,10 +1420,10 @@ html, body {
 
       <div class="section-label">Mercados</div>
       <div class="market-row">
-        <div class="mchip on" data-m="ibex">🇪🇸 IBEX</div>
-        <div class="mchip on" data-m="eurostoxx">🇪🇺 Euro</div>
-        <div class="mchip on" data-m="sp500">🇺🇸 S&P</div>
-        <div class="mchip on" data-m="nasdaq">⚡ NDX</div>
+        <div class="mchip on" data-m="ibex"      onclick="toggleMarket(this,'ibex')">🇪🇸 IBEX</div>
+        <div class="mchip on" data-m="eurostoxx" onclick="toggleMarket(this,'eurostoxx')">🇪🇺 Euro</div>
+        <div class="mchip on" data-m="sp500"     onclick="toggleMarket(this,'sp500')">🇺🇸 S&P</div>
+        <div class="mchip on" data-m="nasdaq"    onclick="toggleMarket(this,'nasdaq')">⚡ NDX</div>
       </div>
 
       <div class="section-label">Filtros rápidos</div>
@@ -1689,7 +1689,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.9.6</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.9.8</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -4344,13 +4344,28 @@ document.querySelectorAll('.fpill').forEach(pill=>{
 });
 
 // ── MARKET CHIPS ────────────────────────────────────────────────────────────
+function toggleMarket(el, m) {
+  if (activeMarkets.has(m)) {
+    if (activeMarkets.size > 1) { activeMarkets.delete(m); el.classList.remove('on'); }
+  } else {
+    activeMarkets.add(m); el.classList.add('on');
+  }
+  if (results.length) {
+    const filtered = results.filter(r => activeMarkets.has(r.m));
+    renderList(applyFilters(filtered));
+  }
+}
+
 document.querySelectorAll('.mchip').forEach(chip=>{
   chip.addEventListener('click',function(){
     const m=this.dataset.m;
     if(activeMarkets.has(m)){
       if(activeMarkets.size>1){ activeMarkets.delete(m); this.classList.remove('on'); }
     } else { activeMarkets.add(m); this.classList.add('on'); }
-    if(results.length) runScan();
+    if(results.length) {
+      const filtered = results.filter(r => activeMarkets.has(r.m));
+      renderList(applyFilters(filtered));
+    }
   });
 });
 
