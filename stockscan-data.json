@@ -11,7 +11,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "",
+      "lesson": "Debería haber vendido y controlar las pérdidas porque hubo una caída fuerte antes de salir y el stop loss habría saltado ahí. ",
       "result30": 3,
       "result90": 3.8,
       "correct": true,
@@ -438,5 +438,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:49:06.289Z"
+  "updatedAt": "2026-03-24T22:50:16.066Z"
 }
