@@ -1,6 +1,30 @@
 {
   "diary": [
     {
+      "id": 1774390825687,
+      "source": "paper",
+      "ticker": "MS",
+      "date": "23 de septiembre de 2025",
+      "type": "sell",
+      "price": 160.76,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": -1,
+      "result90": 8.7,
+      "correct": true,
+      "indicators": {
+        "rsi": 76,
+        "hist": 0.509,
+        "score": 3,
+        "golden": true
+      },
+      "feedback": "⚠️ Mercado lateral tras tu análisis bajista. Sin tendencia, cualquier decisión era válida.",
+      "createdAt": "2026-03-24T22:20:25.688Z"
+    },
+    {
       "id": 1774307130194,
       "source": "paper",
       "ticker": "HD",
@@ -125,5 +149,5 @@
     "read-aprende": "2026-03-23T22:40:16.930Z",
     "understand-scan": "2026-03-24T22:18:40.584Z"
   },
-  "updatedAt": "2026-03-24T22:18:40.584Z"
+  "updatedAt": "2026-03-24T22:20:25.688Z"
 }
