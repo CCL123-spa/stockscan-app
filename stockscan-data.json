@@ -11,7 +11,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "",
+      "lesson": "Mala interpretación de la IA. Los indicadores eran positivos pero hubo una caída que habría saltado el stop loss. Fue una mala decisión desde antes pero la IA me asigno la",
       "result30": 0.5,
       "result90": 9.7,
       "correct": true,
@@ -414,5 +414,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:47:25.616Z"
+  "updatedAt": "2026-03-24T22:48:38.145Z"
 }
