@@ -324,7 +324,6 @@ html, body {
 
 .stock-item:last-child { border-bottom: none; }
 .stock-item:active { background: rgba(61,214,245,0.04); }
-.stock-item { cursor: pointer; -webkit-tap-highlight-color: rgba(61,214,245,0.1); touch-action: manipulation; }
 
 @keyframes slideUp {
   from { opacity:0; transform:translateY(6px); }
@@ -1709,8 +1708,6 @@ html, body {
         </div>
       </div>
 
-      <!-- FISCALIDAD -->
-
     </div><!-- /page-set -->
 
     <!-- ── ENTRENAMIENTO ── -->
@@ -2056,7 +2053,7 @@ html, body {
 <div class="add-sheet-overlay" id="addOverlay" onclick="closeAddSheet()"></div>
 <div class="add-sheet" id="addSheet">
   <div class="add-sheet-handle"></div>
-  <div class="add-sheet-title" id="addSheet-title">Añadir posición</div>
+  <div class="add-sheet-title">Añadir posición</div>
   <div class="add-sheet-body">
 
     <!-- Capital y riesgo (se recuerdan) -->
@@ -3357,11 +3354,6 @@ function saveGHSettings() {
   if (ri && repo)  ri.value = repo;
   if (pi && pkey)  pi.value = pkey;
   if (ai && akey)  ai.value = akey;
-  const irpfEl = document.getElementById('irpf-pct');
-  const feeEl  = document.getElementById('broker-fee-fiscal');
-  if (irpfEl) irpfEl.value = localStorage.getItem('irpf_pct') || '';
-  if (feeEl)  feeEl.value  = localStorage.getItem('broker_fee_fiscal') || '1';
-  updateIRPFPreview();
 })();
 
 // (datos inicializados más abajo)
@@ -3469,27 +3461,15 @@ let _ghSaveTimer = null;
 
 function getLocalData() {
   try {
-    const d = JSON.parse(localStorage.getItem('stockscan_data') || '{"diary":[],"guide":{},"portfolio":[],"paperPortfolio":[]}');
-    // Migrate from old separate keys if needed
-    if (!d.portfolio || d.portfolio.length === 0) {
-      const old = localStorage.getItem('stockscan_portfolio');
-      if (old) d.portfolio = JSON.parse(old);
-    }
-    if (!d.paperPortfolio || d.paperPortfolio.length === 0) {
-      const old = localStorage.getItem('stockscan_paper_portfolio');
-      if (old) d.paperPortfolio = JSON.parse(old);
-    }
-    return d;
-  } catch(e) { return { diary: [], guide: {}, portfolio: [], paperPortfolio: [] }; }
+    return JSON.parse(localStorage.getItem('stockscan_data') || '{"diary":[],"guide":{}}');
+  } catch(e) { return { diary: [], guide: {} }; }
 }
 
 function setLocalData(data) {
   localStorage.setItem('stockscan_data', JSON.stringify(data));
-  // Keep individual keys for compatibility
+  // Migrar claves antiguas por compatibilidad
   localStorage.setItem('diary_entries', JSON.stringify(data.diary || []));
   localStorage.setItem('guide_progress', JSON.stringify(data.guide || {}));
-  localStorage.setItem('stockscan_portfolio', JSON.stringify(data.portfolio || []));
-  localStorage.setItem('stockscan_paper_portfolio', JSON.stringify(data.paperPortfolio || []));
 }
 
 async function loadFromGitHub() {
@@ -3537,13 +3517,9 @@ async function loadFromGitHub() {
       // Hay entradas locales que no están en GitHub — hacer merge y subir
       remoteData.diary = [...localOnly, ...(remoteData.diary || [])];
       remoteData.guide = { ...(remoteData.guide || {}), ...guideProgress };
-      remoteData.portfolio = remoteData.portfolio || portfolio;
-      remoteData.paperPortfolio = remoteData.paperPortfolio || paperPortfolio;
       remoteData._sha = file.sha;
       diaryEntries = remoteData.diary;
       guideProgress = remoteData.guide;
-      portfolio = remoteData.portfolio;
-      paperPortfolio = remoteData.paperPortfolio;
       setLocalData(remoteData);
       await saveToGitHub(false, file.sha);
       if(statusEl) statusEl.textContent = `✅ Sincronizado · ${diaryEntries.length} entradas`;
@@ -3551,8 +3527,6 @@ async function loadFromGitHub() {
       // GitHub es la fuente de verdad
       diaryEntries = remoteData.diary || [];
       guideProgress = remoteData.guide || {};
-      portfolio = remoteData.portfolio || [];
-      paperPortfolio = remoteData.paperPortfolio || [];
       setLocalData(remoteData);
       if(statusEl) statusEl.textContent = `✅ Sincronizado · ${diaryEntries.length} entradas · ${new Date().toLocaleTimeString('es-ES')}`;
     }
@@ -4158,33 +4132,13 @@ setTimeout(testProxy, 2000); // test silencioso al arrancar
   }
 })();
 
-// ── IRPF / FISCALIDAD ────────────────────────────────────────────────────────
-function openAportacion() {
-  const amount = parseFloat(prompt('¿Cuánto capital real añades? (€)'));
-  if (!amount || isNaN(amount) || amount <= 0) return;
-  realAportaciones.push({ amount, date: new Date().toISOString() });
-  try {
-    const d = getLocalData();
-    d.realAportaciones = realAportaciones;
-    localStorage.setItem('stockscan_data', JSON.stringify(d));
-    saveToGitHub(true);
-  } catch(e) {}
-  renderPortfolio();
-}
-
-function resetPaperPortfolio() {
-  if (!confirm('¿Resetear cartera paper a 10.000€? Las posiciones cerradas se quedarán en el diario.')) return;
-  paperPortfolio = paperPortfolio.filter(p => p.status === 'closed');
-  savePaperPortfolio();
-}
-
 function navigate(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const page = document.getElementById('page-'+id);
   if (page) page.classList.add('active');
   if (el) el.classList.add('active');
-  if (id === 'portfolio') { renderPortfolio(); }
+  if (id === 'portfolio') renderPortfolio();
   if (id === 'diary') { loadFromGitHub(); }
   if (id === 'guide') {
     try {
@@ -4210,28 +4164,13 @@ document.querySelectorAll('.fpill').forEach(pill=>{
 });
 
 // ── MARKET CHIPS ────────────────────────────────────────────────────────────
-function toggleMarket(el, m) {
-  if (activeMarkets.has(m)) {
-    if (activeMarkets.size > 1) { activeMarkets.delete(m); el.classList.remove('on'); }
-  } else {
-    activeMarkets.add(m); el.classList.add('on');
-  }
-  if (results.length) {
-    const filtered = results.filter(r => activeMarkets.has(r.m));
-    renderList(applyFilters(filtered));
-  }
-}
-
 document.querySelectorAll('.mchip').forEach(chip=>{
   chip.addEventListener('click',function(){
     const m=this.dataset.m;
     if(activeMarkets.has(m)){
       if(activeMarkets.size>1){ activeMarkets.delete(m); this.classList.remove('on'); }
     } else { activeMarkets.add(m); this.classList.add('on'); }
-    if(results.length) {
-      const filtered = results.filter(r => activeMarkets.has(r.m));
-      renderList(applyFilters(filtered));
-    }
+    if(results.length) runScan();
   });
 });
 
@@ -5524,27 +5463,15 @@ function drawChart(canvasId, series, opts = {}) {
     lx += 46;
   });
 
-  // Etiquetas eje X (fechas — izquierda=más antiguo, derecha=más reciente)
+  // Etiquetas eje X (fechas aproximadas)
   const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const now = new Date();
   ctx.fillStyle = 'rgba(92,122,144,0.7)';
   ctx.font      = `9px "DM Mono", monospace`;
   ctx.textAlign = 'center';
-
-  // Calcular fecha inicial basada en las velas reales si existen, sino estimar
-  const hasRealDates = candles[0] && candles[0].t;
   [0, 0.33, 0.66, 1].forEach(frac => {
-    let d;
-    if (hasRealDates) {
-      const idx = Math.round(frac * (n - 1));
-      d = new Date(candles[idx].t * 1000);
-    } else {
-      // Sintético: frac=0 → más antiguo, frac=1 → hoy
-      const daysAgo = series.days || 90;
-      d = new Date(Date.now() - (1 - frac) * daysAgo * 86400000);
-    }
-    const lbl = frac === 1
-      ? months[d.getMonth()]  // solo mes para el más reciente
-      : `${d.getDate()} ${months[d.getMonth()]}`;
+    const d   = new Date(now - frac * 90 * 86400000);
+    const lbl = `${d.getDate()} ${months[d.getMonth()]}`;
     ctx.fillText(lbl, padL + frac * chartW, h - 6);
   });
 
@@ -5627,7 +5554,6 @@ function openSheet(ticker) {
       </div>`;
   }).join('');
 
-      const scoreBar = [1,2,3,4,5].map(n => '<div style="flex:1;height:6px;border-radius:3px;background:' + (n<=s.score?(s.score>=3?'var(--green)':'var(--red)'):'var(--border)') + '"></div>').join('');
   document.getElementById('shBody').innerHTML = `
 
     <!-- GRÁFICO DE VELAS -->
@@ -5674,7 +5600,7 @@ function openSheet(ticker) {
     </div>
 
     <div style="display:flex;gap:6px;margin-top:4px">
-      ${scoreBar}
+      ${[1,2,3,4,5].map(n=>`<div style="flex:1;height:6px;border-radius:3px;background:${n<=s.score?(s.score>=3?'var(--green)':'var(--red)'):'var(--border)'}"></div>`).join('')}
     </div>
     <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);margin-top:6px;text-align:center;margin-bottom:16px">Score ${s.score}/5 señales positivas</div>
 
@@ -5721,16 +5647,7 @@ function openSheet(ticker) {
 let portfolio = JSON.parse(localStorage.getItem('stockscan_portfolio') || '[]');
 let riskSettings = JSON.parse(localStorage.getItem('stockscan_risk') || '{"capital":0,"riskPct":1,"brokerFee":1}');
 
-function savePortfolio() {
-  localStorage.setItem('stockscan_portfolio', JSON.stringify(portfolio));
-  // Sync to GitHub unified data
-  try {
-    const d = getLocalData();
-    d.portfolio = portfolio;
-    localStorage.setItem('stockscan_data', JSON.stringify(d));
-    saveToGitHub(true);
-  } catch(e) {}
-}
+function savePortfolio() { localStorage.setItem('stockscan_portfolio', JSON.stringify(portfolio)); }
 function saveRiskSettings() {
   riskSettings.capital   = parseFloat(document.getElementById('input-capital').value) || 0;
   riskSettings.riskPct   = parseFloat(document.getElementById('input-risk-pct').value) || 1;
@@ -5998,58 +5915,18 @@ function confirmAddPosition(){
   const stopVal=parseFloat(document.getElementById('input-stop').value);
   const shares=parseFloat(document.getElementById('input-shares').value)||1;
   const buyDate=document.getElementById('input-date').value||new Date().toISOString().slice(0,10);
-  const portfolioType = document.getElementById('addSheet').dataset.portfolioType || 'real';
-
   if(!ticker||isNaN(buyPrice)||buyPrice<=0){
     document.getElementById('input-ticker').style.borderColor='var(--red)';
     setTimeout(()=>document.getElementById('input-ticker').style.borderColor='',1200); return;
   }
-
-  const comment = prompt(`Añadiendo ${ticker} a ${portfolioType==='paper'?'Paper Trading':'Cartera Real'}\n\n¿En qué te has basado para esta compra? (indicadores, contexto, noticias...)`);
-  if (comment === null) return;
-
   saveRiskSettings();
-  const tech = getTechData(ticker);
-  const position = {ticker, buyPrice, shares, buyDate, initialStop:stopVal||+(buyPrice*0.92).toFixed(2), highWaterMark:buyPrice, addedAt:Date.now(), buyComment:comment, buyIndicators:tech, portfolioType};
-
-  if (portfolioType === 'paper') {
-    const stats = calcPaperStats();
-    const cost = buyPrice * shares;
-    if (cost > stats.available) {
-      alert(`Capital insuficiente. Disponible: ${stats.available.toFixed(0)}€, necesitas: ${cost.toFixed(0)}€`);
-      return;
-    }
-    paperPortfolio.push({...position, status:'open'});
-    savePaperPortfolio();
-  } else {
-    portfolio.push(position);
-    savePortfolio();
-  }
-
-  // Save to diary
-  autoSaveDiaryEntry({
-    id: Date.now(), source: portfolioType === 'paper' ? 'paper-portfolio' : 'real-portfolio',
-    ticker, date: buyDate, type: 'buy',
-    price: buyPrice, shares, stop: stopVal || +(buyPrice*0.92).toFixed(2),
-    emotion: '', reason: comment, lesson: '',
-    indicators: tech, result30: null, correct: null,
-    createdAt: new Date().toISOString()
-  });
-
-  closeAddSheet();
-  if (portfolioType === 'paper') {
-    navigate('portfolio', document.querySelector('[onclick*="portfolio"]'));
-  } else {
-    renderPortfolio();
-    navigate('portfolio', document.querySelector('[onclick*="portfolio"]'));
-  }
+  portfolio.push({ticker,buyPrice,shares,buyDate,initialStop:stopVal||+(buyPrice*0.92).toFixed(2),highWaterMark:buyPrice,addedAt:Date.now()});
+  savePortfolio(); closeAddSheet(); renderPortfolio();
 }
 
 function removePosition(idx){
   portfolio.splice(idx,1); savePortfolio(); closePosSheet(); renderPortfolio();
 }
-
-// ── PORTFOLIO: Real vs Paper ──────────────────────────────────────────────────
 
 </script>
 </body>
