@@ -11,7 +11,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "",
+      "lesson": "Decisión correcta según indicadores. Movimiento de subida contraintuitivo ",
       "result30": 8.7,
       "result90": 19.1,
       "correct": true,
@@ -462,5 +462,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:50:51.282Z"
+  "updatedAt": "2026-03-24T22:51:35.030Z"
 }
