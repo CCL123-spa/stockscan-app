@@ -1,6 +1,30 @@
 {
   "diary": [
     {
+      "id": 1774392651280,
+      "source": "paper",
+      "ticker": "JNJ",
+      "date": "23 de septiembre de 2025",
+      "type": "sell",
+      "price": 176.58,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": 8.7,
+      "result90": 19.1,
+      "correct": true,
+      "indicators": {
+        "rsi": 54,
+        "hist": -0.558,
+        "score": 2,
+        "golden": true
+      },
+      "feedback": "⚠️ La acción subió 8.7% a pesar de indicadores bajistas (2/5). Movimiento contraintuitivo — con ese score tu decisión era técnicamente justificada.",
+      "createdAt": "2026-03-24T22:50:51.280Z"
+    },
+    {
       "id": 1774392546288,
       "source": "paper",
       "ticker": "PFE",
@@ -438,5 +462,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:50:16.066Z"
+  "updatedAt": "2026-03-24T22:50:51.282Z"
 }
