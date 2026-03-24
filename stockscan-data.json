@@ -11,7 +11,7 @@
       "target": null,
       "emotion": "",
       "reason": "",
-      "lesson": "",
+      "lesson": "Los indicadores eran positivos pero parecía haber entrado en fase lateral después de mucho crecimiento. Mejor no entrar ",
       "result30": -2.3,
       "result90": -5,
       "correct": true,
@@ -390,5 +390,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:45:32.319Z"
+  "updatedAt": "2026-03-24T22:46:25.631Z"
 }
