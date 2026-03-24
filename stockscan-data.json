@@ -1,6 +1,30 @@
 {
   "diary": [
     {
+      "id": 1774391374463,
+      "source": "paper",
+      "ticker": "WMT",
+      "date": "21 de marzo de 2025",
+      "type": "buy",
+      "price": 85.98,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": 7.5,
+      "result90": 9.6,
+      "correct": true,
+      "indicators": {
+        "rsi": 36,
+        "hist": -0.24,
+        "score": 2,
+        "golden": true
+      },
+      "feedback": "✅ Entrada correcta. La acción subió 7.5% en 30 días. Identificaste bien la oportunidad.",
+      "createdAt": "2026-03-24T22:29:34.463Z"
+    },
+    {
       "id": 1774391233806,
       "source": "paper",
       "ticker": "UNH",
@@ -197,5 +221,5 @@
     "read-aprende": "2026-03-23T22:40:16.930Z",
     "understand-scan": "2026-03-24T22:18:40.584Z"
   },
-  "updatedAt": "2026-03-24T22:28:13.887Z"
+  "updatedAt": "2026-03-24T22:29:34.463Z"
 }
