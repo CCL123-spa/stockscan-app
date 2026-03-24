@@ -1,6 +1,30 @@
 {
   "diary": [
     {
+      "id": 1774392546288,
+      "source": "paper",
+      "ticker": "PFE",
+      "date": "23 de septiembre de 2025",
+      "type": "wait",
+      "price": 24.13,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": 3,
+      "result90": 3.8,
+      "correct": true,
+      "indicators": {
+        "rsi": 44,
+        "hist": -0.045,
+        "score": 1,
+        "golden": false
+      },
+      "feedback": "✅ Mercado lateral — mantener sin actuar fue la decisión correcta. No todas las señales requieren acción.",
+      "createdAt": "2026-03-24T22:49:06.288Z"
+    },
+    {
       "id": 1774392445614,
       "source": "paper",
       "ticker": "WFC",
@@ -414,5 +438,5 @@
     "understand-scan": "2026-03-24T22:18:40.584Z",
     "review-stats": "2026-03-24T22:34:18.592Z"
   },
-  "updatedAt": "2026-03-24T22:48:38.145Z"
+  "updatedAt": "2026-03-24T22:49:06.289Z"
 }
