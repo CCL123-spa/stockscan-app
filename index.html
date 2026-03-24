@@ -324,6 +324,7 @@ html, body {
 
 .stock-item:last-child { border-bottom: none; }
 .stock-item:active { background: rgba(61,214,245,0.04); }
+.stock-item { cursor: pointer; -webkit-tap-highlight-color: rgba(61,214,245,0.1); touch-action: manipulation; }
 
 @keyframes slideUp {
   from { opacity:0; transform:translateY(6px); }
@@ -1689,7 +1690,7 @@ html, body {
       <div class="card">
         <div class="setting-row">
           <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.9.8</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">2.0.1</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2635,7 +2636,7 @@ function renderList(data) {
   el.innerHTML = data.map((s,i)=>{
     const dots=[1,2,3,4,5].map(n=>`<div class="sdot ${n<=s.score?(s.score>=3?'on-buy':'on-sell'):''}"></div>`).join('');
     const chgUp=s.chg>=0;
-    return `<div class="stock-item" style="animation-delay:${i*0.04}s" onclick="openSheet('${s.t}')">
+    return `<div class="stock-item" style="animation-delay:${i*0.04}s" onclick="openSheet('${s.t}')" role="button" tabindex="0">
       <div class="stock-avatar">${s.t.length>4?s.t.slice(0,3):s.t}</div>
       <div class="stock-main">
         <div class="stock-name">${s.n}</div>
@@ -4344,6 +4345,19 @@ document.querySelectorAll('.fpill').forEach(pill=>{
 });
 
 // ── MARKET CHIPS ────────────────────────────────────────────────────────────
+// Fix for iOS Safari - delegate touch events on stockList
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('click', function(e) {
+    const item = e.target.closest('.stock-item');
+    if (item) {
+      const onclick = item.getAttribute('onclick');
+      if (onclick) {
+        try { eval(onclick); } catch(err) { console.error(err); }
+      }
+    }
+  });
+});
+
 function toggleMarket(el, m) {
   if (activeMarkets.has(m)) {
     if (activeMarkets.size > 1) { activeMarkets.delete(m); el.classList.remove('on'); }
@@ -5697,6 +5711,7 @@ function drawChart(canvasId, series, opts = {}) {
 // ════════════════════════════════════════════════════════════════════════════
 
 function openSheet(ticker) {
+  try {
   const s = results.find(r => r.t === ticker);
   if (!s) return;
 
@@ -5815,7 +5830,7 @@ function openSheet(ticker) {
     <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em">🤖 Análisis IA · Contexto actual</div>
-        <button onclick="loadScanAI('${s.t}',${s.price},${s.rsi},'${macdBull?'alcista':'bajista'}','${s.golden?'golden':'death'}')" style="padding:5px 10px;border:1px solid var(--accent);background:transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--accent);cursor:pointer">▶ Analizar</button>
+        <button onclick="loadScanAI('${s.t}',${s.price},${s.rsi},'${macdBull?`alcista`:`bajista`}','${s.golden?`golden`:`death`}')" style="padding:5px 10px;border:1px solid var(--accent);background:transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--accent);cursor:pointer">▶ Analizar</button>
       </div>
       <div id="ai-analysis-content" style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2);line-height:1.7">
         Pulsa "Analizar" para obtener contexto de noticias recientes, análisis macro y opinión sobre si entrar ahora.
@@ -5861,6 +5876,11 @@ function openSheet(ticker) {
   document.getElementById('overlay').classList.add('open');
   document.getElementById('sheet').classList.add('open');
   document.body.style.overflow = 'hidden';
+  } catch(e) {
+    // Show error visibly for debugging
+    alert('Error abriendo tarjeta: ' + e.message);
+    console.error('openSheet error:', e);
+  }
 }
 
 // ════════════════════════════════════════════════════════════════════════════
