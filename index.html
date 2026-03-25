@@ -1691,8 +1691,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.12</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.12</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.13</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.13</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2242,7 +2242,7 @@ html, body {
   <div class="add-sheet-body">
     <div id="sell-pos-info" style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2);line-height:1.8"></div>
     <div class="field-label">Precio de venta real (€)</div>
-    <input class="field-input" id="sell-price" type="number" placeholder="Introduce el precio exacto del broker" step="0.01" min="0" oninput="calcSellPnl()">
+    <input class="field-input" id="sell-price" type="number" placeholder="Introduce el precio exacto del broker" step="0.01" min="0" oninput="typeof _paperSellIdx==='number'&&_paperSellIdx!==null&&document.getElementById('sellSheetTitle').textContent.includes('paper')?calcPaperSellPnl():calcSellPnl()">
     <div id="sell-pnl-preview" style="display:none;border-radius:10px;padding:13px 14px;margin-bottom:14px;border:1px solid var(--border);background:var(--card2)">
       <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">Resumen de la operación</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -5713,6 +5713,35 @@ function drawChart(canvasId, series, opts = {}) {
   ctx.setLineDash([2, 3]);
   ctx.beginPath(); ctx.moveTo(padL, yLast); ctx.lineTo(w - padR, yLast); ctx.stroke();
   ctx.setLineDash([]);
+
+  // Línea de precio de entrada (verde) + triángulo ▲
+  if (opts.entryPrice && opts.entryPrice > minP && opts.entryPrice < maxP) {
+    const yEntry = yOf(opts.entryPrice);
+    ctx.strokeStyle = 'rgba(34,211,160,0.7)';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(padL, yEntry); ctx.lineTo(w - padR, yEntry); ctx.stroke();
+    ctx.setLineDash([]);
+    // Triángulo en el lado derecho
+    ctx.fillStyle = 'rgba(34,211,160,0.9)';
+    ctx.font = `10px "DM Mono", monospace`;
+    ctx.textAlign = 'right';
+    ctx.fillText('▲ ' + opts.entryPrice, w - padR - 1, yEntry - 3);
+  }
+
+  // Línea de stop loss (rojo)
+  if (opts.stopPrice && opts.stopPrice > minP && opts.stopPrice < maxP) {
+    const yStop = yOf(opts.stopPrice);
+    ctx.strokeStyle = 'rgba(245,86,74,0.7)';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([4, 2]);
+    ctx.beginPath(); ctx.moveTo(padL, yStop); ctx.lineTo(w - padR, yStop); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(245,86,74,0.9)';
+    ctx.font = `9px "DM Mono", monospace`;
+    ctx.textAlign = 'right';
+    ctx.fillText('stop ' + opts.stopPrice, w - padR - 1, yStop + 10);
+  }
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -6260,22 +6289,75 @@ function openPosSheet(idx) {
   const trail=calcTrailingStop(pos,cur);
   const sim=findSimilarCase(pos,tech);
   const pnlPct=(((cur-pos.buyPrice)/pos.buyPrice)*100).toFixed(1);
+  const pnlEur=((cur-pos.buyPrice)*pos.shares).toFixed(2);
   const pnlCol=parseFloat(pnlPct)>=0?'var(--green)':'var(--red)';
   const allIssues=[...ev.alerts,...ev.warnings];
   const p30sim=(((sim.result30-sim.price)/sim.price)*100).toFixed(1);
   const p90sim=(((sim.result90-sim.price)/sim.price)*100).toFixed(1);
+  const rsiColor = tech.rsi<30?'var(--green)':tech.rsi>70?'var(--red)':'var(--orange)';
+  const rsiLabel = tech.rsi<30?'Sobreventa — posible rebote':tech.rsi>70?'Sobrecompra — posible corrección':'Zona neutral';
+  const macdBull = tech.macd==='alcista';
+  const isPaper  = activePortfolioTab==='paper';
+
   document.getElementById('posTicker').textContent=pos.ticker;
   document.getElementById('posName').textContent=`${pos.shares} acc. · Entrada ${pos.buyPrice} · ${pos.buyDate||''}`;
+
   const signalRows=allIssues.length>0
     ?allIssues.map(a=>`<div class="signal-explain-row"><div class="ser-icon">${a.type==='bad'?'🚨':'⚠️'}</div><div class="ser-text"><h4>${a.label}</h4><p>${a.detail}</p></div></div>`).join('')
     :`<div class="signal-explain-row"><div class="ser-icon">✅</div><div class="ser-text"><h4>Señales en orden</h4><p>Sin alertas activas. Continuar siguiendo el plan.</p></div></div>`;
+
   document.getElementById('posBody').innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px">
-      <div><div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);margin-bottom:4px">PRECIO ACTUAL (demo)</div>
-      <div style="font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:500">${cur}</div></div>
-      <div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:${pnlCol}">${parseFloat(pnlPct)>=0?'+':''}${pnlPct}%</div>
-      <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2)">desde entrada (${pos.buyPrice})</div></div>
+    <!-- GRÁFICO CON MARCA DE ENTRADA Y STOP -->
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 0">
+        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em">Gráfico actualizado</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span style="font-family:'DM Mono',monospace;font-size:0.52rem;color:#f59e2a">— MA50</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.52rem;color:#9b7aff">- MA200</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--green)">▲ Entrada</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--red)">— Stop</span>
+        </div>
+      </div>
+      <canvas id="chart-pos" style="width:100%;height:160px;display:block"></canvas>
     </div>
+
+    <!-- PRECIO Y P&L -->
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);margin-bottom:4px">PRECIO ACTUAL</div>
+        <div style="font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:500">${cur}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-top:2px">entrada: ${pos.buyPrice}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:${pnlCol}">${parseFloat(pnlPct)>=0?'+':''}${pnlPct}%</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:500;color:${pnlCol}">${parseFloat(pnlEur)>=0?'+':''}${pnlEur}€</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-top:2px">${pos.shares} acc.</div>
+      </div>
+    </div>
+
+    <!-- INDICADORES ACTUALES -->
+    <div class="pos-detail-section">
+      <div class="pos-detail-label">Indicadores actuales</div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
+        <div class="ind-row" style="margin-bottom:10px">
+          <div class="ind-top"><span class="ind-name">RSI (14)</span><span class="ind-value" style="color:${rsiColor}">${tech.rsi}</span></div>
+          <div class="ind-bar-track"><div class="ind-bar-fill" style="width:${tech.rsi}%;background:${rsiColor}"></div></div>
+          <div class="ind-desc">${rsiLabel}</div>
+        </div>
+        <div class="ind-row" style="margin-bottom:10px">
+          <div class="ind-top"><span class="ind-name">MACD</span><span class="ind-value" style="color:${macdBull?'var(--green)':'var(--red)'}">${macdBull?'ALCISTA':'BAJISTA'}</span></div>
+          <div class="ind-bar-track"><div class="ind-bar-fill" style="width:${Math.min(Math.abs((tech.mv||0)-(tech.ms||0))*20+40,95)}%;background:${macdBull?'var(--green)':'var(--red)'}"></div></div>
+          <div class="ind-desc">${macdBull?'Momentum positivo — tendencia al alza':'Momentum negativo — tendencia a la baja'}</div>
+        </div>
+        <div class="ind-row">
+          <div class="ind-top"><span class="ind-name">Medias Móviles</span><span class="ind-value" style="color:${tech.ma.includes('golden')?'var(--orange)':'var(--red)'}">${tech.ma.includes('golden')?'✦ GOLDEN':'☠ DEATH'}</span></div>
+          <div class="ind-bar-track"><div class="ind-bar-fill" style="width:${tech.ma.includes('golden')?75:30}%;background:${tech.ma.includes('golden')?'var(--orange)':'var(--red)'}"></div></div>
+          <div class="ind-desc">Precio ${tech.aboveMa50?'por encima':'por debajo'} de MA50 · Score ${tech.score}/5</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STOP LOSS DINÁMICO -->
     <div class="pos-detail-section">
       <div class="pos-detail-label">Stop loss dinámico (trailing stop)</div>
       <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
@@ -6298,10 +6380,14 @@ function openPosSheet(idx) {
         <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);line-height:1.7;margin-top:6px">${trail.advice}</div>
       </div>
     </div>
+
+    <!-- ALERTAS TÉCNICAS -->
     <div class="pos-detail-section">
       <div class="pos-detail-label">Señales técnicas</div>
       <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:4px 12px">${signalRows}</div>
     </div>
+
+    <!-- CASO HISTÓRICO SIMILAR -->
     <div class="pos-detail-section">
       <div class="pos-detail-label">Situación histórica más similar</div>
       <div class="similar-case-box">
@@ -6314,21 +6400,96 @@ function openPosSheet(idx) {
         </div>
       </div>
     </div>
-    <button class="btn-remove-pos" onclick="${activePortfolioTab === 'real' ? 'closePosSheet();openSellSheet(' + idx + ')' : 'removePosition(' + idx + ')'}">
-      ${activePortfolioTab === 'real' ? '💰 Registrar venta' : '🗑 Eliminar posición'}
+
+    <!-- BOTONES ACCIÓN -->
+    <button class="btn-remove-pos" onclick="${isPaper ? 'openPaperSellSheet('+idx+')' : 'closePosSheet();openSellSheet('+idx+')'}">
+      💰 Registrar venta
     </button>
     <button onclick="removePosition(${idx})" style="width:100%;margin-top:8px;padding:13px;background:transparent;border:1px solid var(--border);border-radius:12px;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text3);cursor:pointer">
       🗑 Eliminar entrada por error
     </button>`;
+
   document.getElementById('posOverlay').classList.add('open');
   document.getElementById('posSheet').classList.add('open');
   document.body.style.overflow='hidden';
+
+  // Dibujar gráfico con marca de entrada y línea de stop
+  requestAnimationFrame(() => {
+    const scanResult = results.find(r => r.t === pos.ticker);
+    let series;
+    if (scanResult && scanResult.candles && scanResult.candles.length > 10) {
+      const closes = scanResult.candles.map(c => c.c);
+      series = { candles: scanResult.candles, ma50: calcSMA(closes, Math.min(50, closes.length)), ma200: calcSMA(closes, Math.min(200, closes.length)) };
+    } else {
+      series = generatePriceSeries({ price: cur, rsi: tech.rsi, macdBull, golden: tech.ma.includes('golden'), aboveMa50: tech.aboveMa50, seed: pos.ticker.split('').reduce((a,c)=>a+c.charCodeAt(0),0) });
+    }
+    drawChart('chart-pos', series, { entryPrice: pos.buyPrice, stopPrice: trail.trailingStop });
+  });
 }
 
 function closePosSheet(){
   document.getElementById('posOverlay').classList.remove('open');
   document.getElementById('posSheet').classList.remove('open');
   document.body.style.overflow='';
+}
+
+// ── Sheet de venta paper (usa precio de referencia, sin tocar efectivo real) ──
+let _paperSellIdx = null;
+
+function openPaperSellSheet(idx) {
+  _paperSellIdx = idx;
+  const pos = paperPortfolio[idx]; if (!pos) return;
+  const tech = getTechData(pos.ticker);
+  document.getElementById('sellSheetTitle').textContent = '🎮 Vender ' + pos.ticker + ' (paper)';
+  document.getElementById('sell-pos-info').innerHTML =
+    pos.shares + ' acciones · Entrada: ' + pos.buyPrice + '€ · Precio actual (ref): ' + tech.price + '€';
+  document.getElementById('sell-price').value = tech.price; // pre-rellena con precio actual
+  document.getElementById('sell-date').value  = new Date().toISOString().slice(0,10);
+  document.getElementById('sell-pnl-preview').style.display = 'none';
+  // Cambiar el botón de confirmar para que llame a confirmPaperSell
+  document.getElementById('sell-confirm-btn').onclick = confirmPaperSell;
+  calcPaperSellPnl();
+  document.getElementById('sellOverlay').classList.add('open');
+  document.getElementById('sellSheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('sell-price').focus(), 350);
+}
+
+function calcPaperSellPnl() {
+  const pos = paperPortfolio[_paperSellIdx]; if (!pos) return;
+  const sellPrice = parseFloat(document.getElementById('sell-price').value);
+  if (!sellPrice || sellPrice <= 0) { document.getElementById('sell-pnl-preview').style.display = 'none'; return; }
+  const income = sellPrice * pos.shares;
+  const pnl    = income - pos.buyPrice * pos.shares;
+  const pnlCol = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('sell-preview-income').textContent = income.toFixed(2) + '€';
+  document.getElementById('sell-preview-pnl').textContent    = (pnl >= 0 ? '+' : '') + pnl.toFixed(2) + '€';
+  document.getElementById('sell-preview-pnl').style.color    = pnlCol;
+  document.getElementById('sell-pnl-preview').style.display  = '';
+}
+
+function confirmPaperSell() {
+  const pos = paperPortfolio[_paperSellIdx]; if (!pos) return;
+  const sellPrice = parseFloat(document.getElementById('sell-price').value);
+  const sellDate  = document.getElementById('sell-date').value || new Date().toISOString().slice(0,10);
+  if (!sellPrice || sellPrice <= 0) {
+    document.getElementById('sell-price').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('sell-price').style.borderColor = '', 1200); return;
+  }
+  const pnl = (sellPrice - pos.buyPrice) * pos.shares;
+  // Actualizar stats paper
+  paperSettings.closedPnl    = (paperSettings.closedPnl || 0) + pnl;
+  paperSettings.closedTrades = (paperSettings.closedTrades || 0) + 1;
+  if (pnl > 0) paperSettings.closedWins = (paperSettings.closedWins || 0) + 1;
+  savePaperSettings();
+  // Registrar en diario
+  autoSaveDiaryEntry({ id: Date.now(), ticker: pos.ticker, date: sellDate, type: 'sell', price: sellPrice, buyPrice: pos.buyPrice, shares: pos.shares, pnl: pnl.toFixed(2), portfolioType: 'paper', source: 'portfolio' });
+  // Eliminar posición paper
+  paperPortfolio.splice(_paperSellIdx, 1);
+  savePaperPortfolio();
+  // Restaurar botón de confirmar para venta real
+  document.getElementById('sell-confirm-btn').onclick = confirmSell;
+  closeSellSheet(); closePosSheet(); renderPortfolio();
 }
 
 // ── Sheet de venta (cartera real) ─────────────────────────────────────────────
@@ -6445,8 +6606,11 @@ function confirmAddPosition(){
     saveRealFunds();
     portfolio.push(newPos); savePortfolio();
   }
+  // Capturar indicadores en el momento de la compra
+  const techSnap = getTechData(ticker);
+  const indicators = { rsi: techSnap.rsi, macd: techSnap.macd, ma: techSnap.ma, aboveMa50: techSnap.aboveMa50, score: techSnap.score, priceAtBuy: cur || buyPrice };
   // Registrar en diario automáticamente
-  autoSaveDiaryEntry({ id: Date.now(), ticker, date: buyDate, type: 'buy', price: buyPrice, shares, stop: stopVal||+(buyPrice*0.92).toFixed(2), portfolioType: activePortfolioTab, source: 'portfolio' });
+  autoSaveDiaryEntry({ id: Date.now(), ticker, date: buyDate, type: 'buy', price: buyPrice, shares, stop: stopVal||+(buyPrice*0.92).toFixed(2), portfolioType: activePortfolioTab, source: 'portfolio', indicators });
   closeAddSheet(); renderPortfolio();
 }
 
