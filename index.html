@@ -553,6 +553,12 @@ html, body {
 
 .sheet-body { padding: 16px 20px; }
 
+/* ── Range selector ── */
+.chart-range-bar { display:flex; gap:4px; padding:8px 14px 6px; }
+.chart-range-btn { flex:1; padding:5px 0; border-radius:6px; border:1px solid var(--border); background:transparent; font-family:'DM Mono',monospace; font-size:0.55rem; color:var(--text2); cursor:pointer; transition:all 0.15s; }
+.chart-range-btn.active { background:var(--accent); border-color:var(--accent); color:var(--bg); font-weight:600; }
+.chart-range-btn:active { transform:scale(0.96); }
+
 /* Indicator rows */
 .ind-row {
   background: var(--card2);
@@ -1691,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.14</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.14</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.15</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.15</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2828,7 +2834,10 @@ function renderPaperTradeCard(session) {
 
       <!-- GRÁFICO -->
       <div style="background:var(--card);padding:8px 12px 0">
-        <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:2px">ÚLTIMOS ${Math.min(pastCandles.length, 90)} DÍAS ANTES DE LA FECHA · DATOS REALES</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div id="chart-pt-label" style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:2px">DATOS REALES · ANTES DE LA FECHA</div>
+        </div>
+        <div class="chart-range-bar" id="range-pt" style="padding:4px 0 4px"></div>
         <canvas id="chart-pt" style="width:100%;height:150px;display:block"></canvas>
       </div>
 
@@ -2903,11 +2912,9 @@ function renderPaperTradeCard(session) {
 
   // Dibujar gráfico
   requestAnimationFrame(() => {
-    const slice = pastCandles.slice(-90);
-    const closes = slice.map(c => c.c);
-    const ma50arr  = calcSMA(closes, Math.min(50,  closes.length));
-    const ma200arr = calcSMA(closes, Math.min(200, closes.length));
-    drawChart('chart-pt', { candles: slice, ma50: ma50arr, ma200: ma200arr, days: slice.length });
+    const lbl = document.getElementById('chart-pt-label');
+    if (lbl) lbl.textContent = pastCandles.length + ' días disponibles · datos reales';
+    initRangeSelector('range-pt', 'chart-pt', pastCandles, { defaultDays: 90 });
   });
 }
 
@@ -3275,6 +3282,7 @@ function resolvePT(decision, stopLevel) {
 
     ${futureSlice.length > 5 ? `
     <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-bottom:4px">PRECIO REAL ANTES Y DESPUÉS · LÍNEA BLANCA = FECHA DE DECISIÓN${stopLevel ? ' · LÍNEA ROJA = STOP LOSS' : ''}</div>
+    <div class="chart-range-bar" id="range-pt-full"></div>
     <canvas id="chart-pt-full" style="width:100%;height:130px;display:block;border-radius:8px;overflow:hidden"></canvas>` : ''}
 
     <button onclick="resetPaperTrade()" style="width:100%;margin-top:12px;padding:11px;background:var(--card2);border:1px solid var(--border);border-radius:10px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2);cursor:pointer">
@@ -3284,10 +3292,33 @@ function resolvePT(decision, stopLevel) {
 
   if (futureSlice.length > 5) {
     requestAnimationFrame(() => {
-      const closes = allCandles.map(c => c.c);
+      const bar = document.getElementById('range-pt-full');
+      if (!bar) return;
+      const closes   = allCandles.map(c => c.c);
       const ma50arr  = calcSMA(closes, Math.min(50, closes.length));
       const ma200arr = calcSMA(closes, Math.min(200, closes.length));
-      drawChartWithSplit('chart-pt-full', { candles: allCandles, ma50: ma50arr, ma200: ma200arr }, splitIdx, stopLevel);
+
+      function renderWithSplit(days) {
+        const slice    = days >= allCandles.length ? allCandles : allCandles.slice(-days);
+        // Recalcular splitIdx relativo al slice
+        const newSplitIdx = slice.length - (allCandles.length - splitIdx);
+        const cl2    = slice.map(c => c.c);
+        const ma50s  = calcSMA(cl2, Math.min(50, cl2.length));
+        const ma200s = calcSMA(cl2, Math.min(200, cl2.length));
+        drawChartWithSplit('chart-pt-full', { candles: slice, ma50: ma50s, ma200: ma200s }, Math.max(0, newSplitIdx), stopLevel);
+        bar.querySelectorAll('.chart-range-btn').forEach(b => {
+          b.classList.toggle('active', parseInt(b.dataset.days) === days || (days >= allCandles.length && b === bar.lastElementChild));
+        });
+      }
+
+      bar.innerHTML = RANGES.map(r => {
+        const available = allCandles.length >= r.days;
+        return `<button class="chart-range-btn${r.days === 90 ? ' active' : ''}" data-days="${r.days}"
+          onclick="this.closest('.chart-range-bar').__renderRange(${r.days})"
+          style="${!available ? 'opacity:0.3;cursor:default;pointer-events:none' : ''}">${r.label}</button>`;
+      }).join('');
+      bar.__renderRange = renderWithSplit;
+      renderWithSplit(allCandles.length); // mostrar todo por defecto en el resultado
     });
   }
 }
@@ -5152,12 +5183,13 @@ function renderCase(c, position) {
         <!-- GRÁFICO DE VELAS ENTRENAMIENTO -->
         <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px 0">
-            <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em">Situación hasta ${c.date} · 90 días</div>
+            <div id="chart-train-label" style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em">Situación hasta ${c.date}</div>
             <div style="display:flex;gap:8px">
               <span style="font-family:'DM Mono',monospace;font-size:0.52rem;color:#f59e2a">— MA50</span>
               <span style="font-family:'DM Mono',monospace;font-size:0.52rem;color:#9b7aff">- MA200</span>
             </div>
           </div>
+          <div class="chart-range-bar" id="range-train"></div>
           <canvas id="chart-train" style="width:100%;height:140px;display:block"></canvas>
         </div>
 
@@ -5195,13 +5227,15 @@ function renderCase(c, position) {
   requestAnimationFrame(() => {
     const macdBull = c.macd === 'alcista';
     const golden   = c.ma.includes('golden');
-    const series   = generatePriceSeries({
+    const sim      = generatePriceSeries({
       price: c.price, rsi: c.rsi,
       macdBull, golden,
       aboveMa50: c.aboveMa50,
       seed: c.ticker.split('').reduce((a,ch)=>a+ch.charCodeAt(0),0) + Math.floor(c.price)
     });
-    drawChart('chart-train', series);
+    const lbl = document.getElementById('chart-train-label');
+    if (lbl) lbl.textContent = 'Situación hasta ' + c.date;
+    initRangeSelector('range-train', 'chart-train', sim.candles, { defaultDays: 90 });
   });
 }
 
@@ -5662,6 +5696,58 @@ function generatePriceSeries(opts) {
   return { candles, ma50, ma200, days };
 }
 
+// ── Selector de rango para gráficos ──────────────────────────────────────────
+const RANGES = [
+  { label:'1D',  days:1   },
+  { label:'5D',  days:5   },
+  { label:'1M',  days:30  },
+  { label:'3M',  days:90  },
+  { label:'6M',  days:180 },
+  { label:'1A',  days:365 },
+];
+
+function initRangeSelector(barId, canvasId, allCandles, opts = {}) {
+  const bar = document.getElementById(barId);
+  if (!bar) return;
+  // Default: el rango más largo disponible pero máx 3M para no saturar
+  const defaultDays = allCandles.length >= 90 ? 90 : allCandles.length;
+  let activeDays = opts.defaultDays || defaultDays;
+
+  function renderRange(days) {
+    activeDays = days;
+    const slice = days >= allCandles.length ? allCandles : allCandles.slice(-days);
+    const closes   = slice.map(c => c.c);
+    const ma50arr  = calcSMA(closes, Math.min(50,  closes.length));
+    const ma200arr = calcSMA(closes, Math.min(200, closes.length));
+    const series   = { candles: slice, ma50: ma50arr, ma200: ma200arr };
+    drawChart(canvasId, series, opts.drawOpts || {});
+    // Actualizar etiqueta si existe
+    const lbl = document.getElementById(canvasId.replace('chart-', 'chart-') + '-label') ||
+                document.getElementById(canvasId + '-label');
+    if (lbl) lbl.textContent = slice.length + ' días · datos reales';
+    // Actualizar botones
+    bar.querySelectorAll('.chart-range-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.days) === days || (days >= allCandles.length && b.dataset.days === 'all'));
+    });
+  }
+
+  // Generar botones
+  bar.innerHTML = RANGES.map(r => {
+    const available = allCandles.length >= r.days;
+    return `<button class="chart-range-btn${r.days === activeDays ? ' active' : ''}"
+      data-days="${r.days}"
+      onclick="this.closest('.chart-range-bar').__renderRange(${r.days})"
+      style="${!available ? 'opacity:0.3;cursor:default;pointer-events:none' : ''}"
+    >${r.label}</button>`;
+  }).join('');
+
+  // Exponer renderRange en el elemento para que los botones puedan llamarla
+  bar.__renderRange = renderRange;
+
+  // Dibujar inicial
+  renderRange(activeDays);
+}
+
 function drawChart(canvasId, series, opts = {}) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
@@ -5901,12 +5987,13 @@ function openSheet(ticker) {
     <!-- GRÁFICO DE VELAS -->
     <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 0">
-        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em">90 días · sintético</div>
+        <div id="chart-scan-label" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em">Cargando…</div>
         <div style="display:flex;gap:10px">
           <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:#f59e2a">— MA50</span>
           <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:#9b7aff">- MA200</span>
         </div>
       </div>
+      <div class="chart-range-bar" id="range-scan"></div>
       <canvas id="chart-scan" style="width:100%;height:160px;display:block"></canvas>
     </div>
 
@@ -5976,23 +6063,20 @@ function openSheet(ticker) {
 
   // Dibujar gráfico tras render — usa datos reales si están disponibles
   requestAnimationFrame(() => {
-    let series;
+    let allCandles;
     if (s.candles && s.candles.length > 10) {
-      // Datos reales del proxy — calcular MAs sobre los cierres reales
-      const closes = s.candles.map(c => c.c);
-      const ma50arr  = calcSMA(closes, Math.min(50,  closes.length));
-      const ma200arr = calcSMA(closes, Math.min(200, closes.length));
-      series = { candles: s.candles, ma50: ma50arr, ma200: ma200arr, days: s.candles.length };
+      allCandles = s.candles;
     } else {
-      // Datos simulados coherentes con indicadores
-      series = generatePriceSeries({
-        price: s.price, rsi: s.rsi,
-        macdBull, golden: s.golden,
+      const sim = generatePriceSeries({
+        price: s.price, rsi: s.rsi, macdBull, golden: s.golden,
         aboveMa50: s.aboveMa50,
         seed: s.t.split('').reduce((a,c)=>a+c.charCodeAt(0),0)
       });
+      allCandles = sim.candles;
     }
-    drawChart('chart-scan', series);
+    const lbl = document.getElementById('chart-scan-label');
+    if (lbl) lbl.textContent = allCandles[0]?.t ? (allCandles.length + ' días · datos reales') : 'Datos simulados';
+    initRangeSelector('range-scan', 'chart-scan', allCandles, { defaultDays: 90 });
   });
 
   document.getElementById('overlay').classList.add('open');
@@ -6393,7 +6477,7 @@ function openPosSheet(idx) {
     <!-- GRÁFICO CON MARCA DE ENTRADA Y STOP -->
     <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 0">
-        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em">Gráfico actualizado</div>
+        <div id="chart-pos-label" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em">Cargando…</div>
         <div style="display:flex;gap:10px;align-items:center">
           <span style="font-family:'DM Mono',monospace;font-size:0.52rem;color:#f59e2a">— MA50</span>
           <span style="font-family:'DM Mono',monospace;font-size:0.52rem;color:#9b7aff">- MA200</span>
@@ -6401,6 +6485,7 @@ function openPosSheet(idx) {
           <span style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--red)">— Stop</span>
         </div>
       </div>
+      <div class="chart-range-bar" id="range-pos"></div>
       <canvas id="chart-pos" style="width:100%;height:160px;display:block"></canvas>
     </div>
 
@@ -6511,14 +6596,19 @@ function openPosSheet(idx) {
   // Dibujar gráfico con marca de entrada y línea de stop
   requestAnimationFrame(() => {
     const scanResult = results.find(r => r.t === pos.ticker);
-    let series;
+    let allCandles;
     if (scanResult && scanResult.candles && scanResult.candles.length > 10) {
-      const closes = scanResult.candles.map(c => c.c);
-      series = { candles: scanResult.candles, ma50: calcSMA(closes, Math.min(50, closes.length)), ma200: calcSMA(closes, Math.min(200, closes.length)) };
+      allCandles = scanResult.candles;
     } else {
-      series = generatePriceSeries({ price: cur, rsi: tech.rsi, macdBull, golden: tech.ma.includes('golden'), aboveMa50: tech.aboveMa50, seed: pos.ticker.split('').reduce((a,c)=>a+c.charCodeAt(0),0) });
+      const sim = generatePriceSeries({ price: cur, rsi: tech.rsi, macdBull, golden: tech.ma.includes('golden'), aboveMa50: tech.aboveMa50, seed: pos.ticker.split('').reduce((a,c)=>a+c.charCodeAt(0),0) });
+      allCandles = sim.candles;
     }
-    drawChart('chart-pos', series, { entryPrice: pos.buyPrice, stopPrice: trail.trailingStop });
+    const lbl = document.getElementById('chart-pos-label');
+    if (lbl) lbl.textContent = allCandles[0]?.t ? (allCandles.length + ' días · datos reales') : 'Datos simulados';
+    initRangeSelector('range-pos', 'chart-pos', allCandles, {
+      defaultDays: 90,
+      drawOpts: { entryPrice: pos.buyPrice, stopPrice: trail.trailingStop }
+    });
   });
 }
 
