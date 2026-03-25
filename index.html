@@ -1691,8 +1691,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.8</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.8</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.9</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.9</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2121,7 +2121,7 @@ html, body {
         <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3)">se guarda automáticamente</div>
       </div>
       <div>
-        <div class="field-label" style="margin-bottom:6px">Capital a invertir (€)</div>
+        <div class="field-label" style="margin-bottom:6px">Capital disponible (€)</div>
         <input class="field-input" id="input-capital" type="number" placeholder="Ej: 1000" min="0" step="100" style="margin-bottom:0" oninput="saveRiskSettings();calcRisk()">
       </div>
       <!-- Comisión broker -->
@@ -2175,7 +2175,7 @@ html, body {
         </div>
         <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 6px">
           <div id="rc-capital" style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--text)">—</div>
-          <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text2);margin-top:3px">CAPITAL USADO</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text2);margin-top:3px">CAPITAL INVERTIDO</div>
         </div>
         <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 6px">
           <div id="rc-risk-eur" style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--red)">—</div>
@@ -5966,39 +5966,56 @@ function calcRisk() {
   const capital  = parseFloat(document.getElementById('input-capital').value) || riskSettings.capital;
   const fee      = parseFloat(document.getElementById('input-broker-fee').value) || riskSettings.brokerFee || 0;
   const box      = document.getElementById('risk-calc');
+  const warn     = document.getElementById('rc-warning');
 
   if (!price || !capital || price <= 0 || capital <= 0) { box.style.display = 'none'; return; }
 
-  // Calcular acciones: capital disponible menos comisiones de entrada y salida
-  const capitalNet = capital - fee * 2;
-  const shares     = Math.max(1, Math.floor(capitalNet / price));
-  const capitalUsed = shares * price + fee * 2;
+  // ¿Capital suficiente para al menos 1 acción (incluyendo comisión de entrada)?
+  if (price + fee > capital) {
+    document.getElementById('rc-shares').textContent   = '0';
+    document.getElementById('rc-capital').textContent  = '—';
+    document.getElementById('rc-risk-eur').textContent = '—';
+    document.getElementById('rc-port-pct').textContent = '—';
+    warn.innerHTML = '⚠️ Capital insuficiente. Necesitas al menos <strong>' + (price + fee).toFixed(0) + '€</strong> para comprar 1 acción de ' + (document.getElementById('input-ticker').value || 'este valor') + ' (precio ' + price + '€ + comisión ' + fee + '€).';
+    warn.style.display = 'block';
+    box.style.display = 'block';
+    const sharesInput = document.getElementById('input-shares');
+    if (sharesInput && !sharesInput._manualEdit) sharesInput.value = '';
+    return;
+  }
 
-  // Riesgo máximo: si toca el stop loss
-  const riskEur = stop > 0 && stop < price
-    ? shares * (price - stop) + fee * 2
-    : null;
+  // Máximo de acciones enteras comprables con el capital disponible
+  // Reservar comisión de entrada y salida
+  const capitalForShares = capital - fee * 2;
+  const shares           = Math.max(1, Math.floor(capitalForShares / price));
+  const capitalInvested  = shares * price + fee * 2;   // lo que realmente se gasta
+  const capitalLeftover  = capital - capitalInvested;   // sobrante en efectivo
 
-  // % riesgo sobre capital total de la cartera real
+  // Riesgo máximo si toca el stop loss
+  const riskEur  = stop > 0 && stop < price ? shares * (price - stop) + fee : null;
+
+  // % riesgo sobre capital total de cartera real (o capital disponible si no hay cartera)
   const totalCash = realFunds.cash > 0 ? realFunds.cash : capital;
   const riskPct   = riskEur !== null ? (riskEur / totalCash * 100).toFixed(1) : null;
 
   document.getElementById('rc-shares').textContent  = shares;
-  document.getElementById('rc-capital').textContent = capitalUsed.toFixed(0) + '€';
-  document.getElementById('rc-risk-eur').textContent = riskEur !== null ? riskEur.toFixed(0) + '€' : '— (sin stop)';
+  document.getElementById('rc-capital').textContent = capitalInvested.toFixed(0) + '€';
+  document.getElementById('rc-risk-eur').textContent = riskEur !== null ? riskEur.toFixed(0) + '€' : '— (pon stop)';
   document.getElementById('rc-port-pct').textContent = riskPct !== null ? riskPct + '%' : '—';
 
-  // Rellenar nº acciones si el campo está vacío o fue calculado antes
+  // Rellenar nº acciones si el campo no fue tocado manualmente
   const sharesInput = document.getElementById('input-shares');
   if (sharesInput && !sharesInput._manualEdit) sharesInput.value = shares;
 
   // Avisos
-  const warn = document.getElementById('rc-warning');
   const ws = [];
+  if (capitalLeftover > 0)
+    ws.push('💡 Sobrante: <strong>' + capitalLeftover.toFixed(0) + '€</strong> (no invertido — ' + shares + ' acc. × ' + price + '€).');
   if (riskPct !== null && parseFloat(riskPct) > 5)
     ws.push('⚠️ Riesgo del ' + riskPct + '% del capital total — por encima del 2% recomendado.');
-  if (fee * 2 > capitalUsed * 0.02)
-    ws.push('⚠️ Comisiones (' + (fee*2).toFixed(0) + '€) = ' + ((fee*2/capitalUsed)*100).toFixed(0) + '% del capital — posición muy pequeña.');
+  if (fee * 2 > capitalInvested * 0.02)
+    ws.push('⚠️ Comisiones (' + (fee*2).toFixed(0) + '€) = ' + ((fee*2/capitalInvested)*100).toFixed(0) + '% del capital — posición muy pequeña.');
+
   if (ws.length) { warn.innerHTML = ws.join('<br>'); warn.style.display = 'block'; }
   else { warn.style.display = 'none'; }
 
