@@ -1,6 +1,17 @@
 {
   "diary": [
     {
+      "id": 1774447551201,
+      "ticker": "JPM",
+      "date": "2026-03-25",
+      "type": "buy",
+      "price": 292.4,
+      "shares": 3,
+      "stop": 263.16,
+      "portfolioType": "paper",
+      "source": "portfolio"
+    },
+    {
       "id": 1774429366003,
       "source": "paper",
       "ticker": "LLY",
@@ -523,6 +534,16 @@
       "highWaterMark": 415,
       "addedAt": 1774445186084,
       "portfolioType": "paper"
+    },
+    {
+      "ticker": "JPM",
+      "buyPrice": 292.4,
+      "shares": 3,
+      "buyDate": "2026-03-25",
+      "initialStop": 263.16,
+      "highWaterMark": 292.4,
+      "addedAt": 1774447551195,
+      "portfolioType": "paper"
     }
   ],
   "paperSettings": {
@@ -565,5 +586,5 @@
       }
     ]
   },
-  "updatedAt": "2026-03-25T13:26:26.085Z"
+  "updatedAt": "2026-03-25T14:05:51.202Z"
 }
