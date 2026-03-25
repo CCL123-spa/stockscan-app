@@ -558,16 +558,6 @@
   "portfolio": [],
   "paperPortfolio": [
     {
-      "ticker": "JPM",
-      "buyPrice": 292.4,
-      "shares": 3,
-      "buyDate": "2026-03-25",
-      "initialStop": 263.16,
-      "highWaterMark": 292.4,
-      "addedAt": 1774447551195,
-      "portfolioType": "paper"
-    },
-    {
       "ticker": "UNH",
       "buyPrice": 100,
       "shares": 9,
@@ -1032,5 +1022,5 @@
     "retencionesPendientes": 0,
     "year": 2026
   },
-  "updatedAt": "2026-03-25T22:18:12.293Z"
+  "updatedAt": "2026-03-25T22:19:04.618Z"
 }
