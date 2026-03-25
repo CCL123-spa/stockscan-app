@@ -512,7 +512,18 @@
     "define-entry": "2026-03-24T22:53:09.580Z",
     "define-exit": "2026-03-24T22:53:18.204Z"
   },
-  "portfolio": [],
+  "portfolio": [
+    {
+      "ticker": "ITX",
+      "buyPrice": 47.8,
+      "shares": 4,
+      "buyDate": "2026-03-25",
+      "initialStop": 43.02,
+      "highWaterMark": 47.8,
+      "addedAt": 1774439838214,
+      "portfolioType": "real"
+    }
+  ],
   "paperPortfolio": [],
   "paperSettings": {
     "initialCapital": 10000,
@@ -522,8 +533,15 @@
     "closedWins": 0
   },
   "realFunds": {
-    "cash": 1000,
+    "cash": 808.8,
     "movements": [
+      {
+        "type": "withdraw",
+        "amount": 191.2,
+        "date": "2026-03-25",
+        "note": "Compra ITX × 4 acc.",
+        "id": 1774439838214
+      },
       {
         "type": "add",
         "amount": 1000,
@@ -533,5 +551,5 @@
       }
     ]
   },
-  "updatedAt": "2026-03-25T10:02:58.808Z"
+  "updatedAt": "2026-03-25T11:57:18.218Z"
 }
