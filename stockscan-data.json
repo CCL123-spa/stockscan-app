@@ -827,6 +827,76 @@
       "highWaterMark": 100,
       "addedAt": 1774476486834,
       "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476491118,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476491648,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476492267,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476492882,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476493030,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476493448,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476493599,
+      "portfolioType": "paper"
     }
   ],
   "paperSettings": {
@@ -873,5 +943,5 @@
     "retencionesPendientes": 0,
     "year": 2026
   },
-  "updatedAt": "2026-03-25T22:08:06.836Z"
+  "updatedAt": "2026-03-25T22:08:13.600Z"
 }
