@@ -949,13 +949,16 @@ html, body {
   transform: translateY(100%);
   transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
   padding-bottom: calc(20px + var(--safe-bottom));
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
 }
 .add-sheet.open { transform: translateY(0); }
 
-.add-sheet-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:12px auto 0; }
-.add-sheet-title { padding:14px 20px 12px; font-size:1rem; font-weight:700; letter-spacing:-0.02em; border-bottom:1px solid var(--border); }
+.add-sheet-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:12px auto 0; flex-shrink:0; }
+.add-sheet-title { padding:14px 20px 12px; font-size:1rem; font-weight:700; letter-spacing:-0.02em; border-bottom:1px solid var(--border); flex-shrink:0; }
 
-.add-sheet-body { padding: 16px 20px; }
+.add-sheet-body { padding: 16px 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
 .field-label { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
 
