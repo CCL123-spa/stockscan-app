@@ -1691,8 +1691,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.10</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.10</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.11</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.11</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -3534,7 +3534,92 @@ Usando los resultados de búsqueda, describe en 3-4 frases el contexto real de e
 }
 
 
-// ── DIARIO DE TRADING ─────────────────────────────────────────────────────────
+// ── Análisis IA en tarjeta SCAN ───────────────────────────────────────────────
+async function fetchScanAnalysis(ticker, name, market, rsi, macdBullInt, goldenInt, score, price) {
+  const btnEl     = document.getElementById('scan-ai-btn');
+  const spinnerEl = document.getElementById('scan-ai-spinner');
+  const contentEl = document.getElementById('scan-ai-content');
+  if (!contentEl) return;
+
+  const anthropicKey = localStorage.getItem('anthropic_api_key');
+  if (!anthropicKey) {
+    contentEl.style.color = 'var(--text3)';
+    contentEl.textContent = 'Añade tu Anthropic API key en Ajustes para usar esta función.';
+    return;
+  }
+
+  // UI: loading
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Analizando…'; }
+  if (spinnerEl) spinnerEl.style.display = 'block';
+  contentEl.style.color = 'var(--text3)';
+  contentEl.textContent = '';
+
+  const macdBull = macdBullInt === 1;
+  const golden   = goldenInt === 1;
+  const today    = new Date().toLocaleDateString('es-ES', { day:'numeric', month:'long', year:'numeric' });
+
+  const prompt = `Analiza ${ticker} (${name}, mercado: ${market}) a fecha de hoy ${today}. Precio actual: ${price}.
+
+Señales técnicas actuales: RSI ${rsi} (${rsi<30?'sobreventa':rsi>70?'sobrecompra':'neutral'}), MACD ${macdBull?'alcista':'bajista'}, ${golden?'Golden Cross activo':'Death Cross activo'}, Score técnico ${score}/5.
+
+Busca en internet información actual y proporciona un análisis estructurado con:
+1. NOTICIAS RECIENTES: 2-3 noticias relevantes de las últimas semanas
+2. CONTEXTO SECTOR: situación del sector y posición competitiva
+3. RESULTADOS: últimos resultados trimestrales o guidance relevante
+4. EVENTOS CORPORATIVOS: dividendos próximos, splits, M&A, cambios directivos
+5. OPINIÓN TÉCNICA: ¿confirman o contradicen las señales técnicas del SCAN el contexto fundamental?
+
+Responde en español, de forma concisa y directa. Cada sección en 1-2 frases máximo.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        tool_choice: { type: 'any' },
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => ({}));
+      throw new Error(`API ${response.status}: ${errBody.error?.message || JSON.stringify(errBody)}`);
+    }
+
+    const data = await response.json();
+    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join(' ').trim();
+
+    if (spinnerEl) spinnerEl.style.display = 'none';
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = '↺ Actualizar'; }
+
+    if (text) {
+      // Renderizar secciones con formato visual
+      contentEl.style.color = 'var(--text)';
+      contentEl.innerHTML = text
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>')
+        .replace(/\*\*(.*?)\*\*/g, '<span style="color:var(--accent);font-weight:600">$1</span>')
+        .replace(/^(\d\.\s[A-ZÁÉÍÓÚ\s]+:)/gm, '<span style="color:var(--accent);font-weight:600">$1</span>');
+    } else {
+      contentEl.textContent = 'No se encontró información suficiente.';
+    }
+  } catch(err) {
+    if (spinnerEl) spinnerEl.style.display = 'none';
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = '▶ Reintentar'; }
+    contentEl.style.color = 'var(--red)';
+    contentEl.textContent = 'Error: ' + err.message;
+  }
+}
+
+
 
 let diaryEntries = [];
 let selectedEmotion = '';
@@ -5754,9 +5839,27 @@ function openSheet(ticker) {
     </div>
     ${simHtml}
 
-    <button onclick="closeSheet();openAddSheet('${s.t}',${s.price})" style="width:100%;margin-top:8px;padding:14px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer">
-      + Añadir a cartera
-    </button>
+    <!-- ANÁLISIS IA -->
+    <div style="margin-top:16px;margin-bottom:16px;background:var(--card2);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)">
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em">Análisis IA · Contexto actual</div>
+        <button id="scan-ai-btn" onclick="fetchScanAnalysis('${s.t}','${s.n}','${s.m}',${s.rsi},${macdBull?1:0},${s.golden?1:0},${s.score},${s.price})" style="padding:5px 12px;border-radius:7px;border:1px solid var(--accent);background:transparent;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:5px">▶ Analizar</button>
+      </div>
+      <div style="padding:12px 14px">
+        <div id="scan-ai-spinner" style="display:none;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text3);text-align:center;padding:8px 0">⏳ Buscando contexto en internet…</div>
+        <div id="scan-ai-content" style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text3);line-height:1.7">Pulsa ▶ Analizar para obtener contexto actual de la empresa usando IA + búsqueda web.</div>
+      </div>
+    </div>
+
+    <!-- BOTONES AÑADIR A CARTERA -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+      <button onclick="closeSheet();activePortfolioTab='real';openAddSheet('${s.t}',${s.price})" style="padding:13px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">
+        💼 Cartera Real
+      </button>
+      <button onclick="closeSheet();activePortfolioTab='paper';openAddSheet('${s.t}',${s.price})" style="padding:13px;background:var(--purple);color:var(--bg);border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">
+        🎮 Paper
+      </button>
+    </div>
   `;
 
   // Dibujar gráfico tras render — usa datos reales si están disponibles
