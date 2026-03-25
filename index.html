@@ -1691,8 +1691,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.11</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.11</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.12</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.12</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -6439,13 +6439,14 @@ function confirmAddPosition(){
   if(activePortfolioTab==='paper'){
     paperPortfolio.push(newPos); savePaperPortfolio();
   } else {
-    // Descontar del efectivo disponible
     const cost = buyPrice * shares;
     realFunds.cash -= cost;
     realFunds.movements.unshift({ type: 'withdraw', amount: cost, date: buyDate, note: 'Compra ' + ticker + ' × ' + shares + ' acc.', id: Date.now() });
     saveRealFunds();
     portfolio.push(newPos); savePortfolio();
   }
+  // Registrar en diario automáticamente
+  autoSaveDiaryEntry({ id: Date.now(), ticker, date: buyDate, type: 'buy', price: buyPrice, shares, stop: stopVal||+(buyPrice*0.92).toFixed(2), portfolioType: activePortfolioTab, source: 'portfolio' });
   closeAddSheet(); renderPortfolio();
 }
 
