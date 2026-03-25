@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.20</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.20</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.28</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.28</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -4538,10 +4538,6 @@ setTimeout(testProxy, 2000); // test silencioso al arrancar
     diaryEntries = [];
     guideProgress = {};
   }
-  // Arrancar timer de refresco de precios desde el inicio de la app
-  startPortfolioAutoRefresh();
-  // Refresco inmediato al abrir la app (con pequeño delay para que cargue el DOM)
-  setTimeout(() => refreshPortfolioPrices(), 2000);
 })();
 
 function navigate(id, el) {
@@ -4552,11 +4548,6 @@ function navigate(id, el) {
   if (el) el.classList.add('active');
   if (id === 'portfolio') {
     renderPortfolio();
-    // Refrescar al entrar si han pasado más de 5 minutos desde el último refresco
-    const fiveMins = 5 * 60 * 1000;
-    if (!_lastPortfolioRefresh || Date.now() - _lastPortfolioRefresh > fiveMins) {
-      refreshPortfolioPrices();
-    }
   }
   if (id === 'diary') { loadFromGitHub(); }
   if (id === 'guide') {
@@ -6250,51 +6241,63 @@ function updateRefreshIndicator(status) {
   if (btnEl) btnEl.textContent = status ? '⏳' : '↺';
 }
 
-async function refreshPortfolioPrices() {
-  // Obtener todos los tickers únicos de ambas carteras
+function refreshPortfolioPrices() {
   const allPos = [...portfolio, ...paperPortfolio];
-  if (allPos.length === 0) return;
+  if (allPos.length === 0) {
+    _lastPortfolioRefresh = new Date();
+    updateRefreshIndicator(null);
+    return;
+  }
   const tickers = [...new Set(allPos.map(p => p.ticker))];
-
   updateRefreshIndicator('⏳');
 
-  try {
-    // Usar fetchRealData para cada ticker — con caché de 5 min ya integrado
-    await Promise.allSettled(tickers.map(t => {
-      const proxyTicker = INTERNAL_TO_PROXY[t] || t;
-      // Forzar refresco limpiando caché de este ticker
-      const cacheKey = `${proxyTicker}_1y`;
-      delete realDataCache[cacheKey];
-      return fetchRealData(t, '1y').then(data => {
+  let completed = 0;
+  const total = tickers.length;
+
+  tickers.forEach(t => {
+    const proxyTicker = INTERNAL_TO_PROXY[t] || t;
+    const cacheKey = `${proxyTicker}_1y`;
+    delete realDataCache[cacheKey];
+
+    const proxyBase  = localStorage.getItem('stockscan_proxy_url') || PROXY_URL;
+    const polygonKey = localStorage.getItem('polygon_api_key') || '';
+    const keyParam   = polygonKey ? `&apikey=${encodeURIComponent(polygonKey)}` : '';
+    const url = `${proxyBase}/quote?ticker=${encodeURIComponent(proxyTicker)}&range=1y&interval=1d${keyParam}`;
+
+    fetch(url)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
         if (data && data.candles && data.candles.length > 0) {
-          // Actualizar el resultado en el array de resultados del SCAN si existe
+          realDataCache[cacheKey] = { data, expiry: Date.now() + CACHE_TTL };
           const scanRes = results.find(r => r.t === t);
           if (scanRes) {
-            const closes = data.candles.map(c => c.c);
-            const lastClose = closes[closes.length - 1];
-            const prevClose = closes[closes.length - 2] || lastClose;
-            scanRes.price = lastClose;
-            scanRes.chg   = +((lastClose - prevClose) / prevClose * 100).toFixed(2);
+            const closes  = data.candles.map(c => c.c);
+            const last    = closes[closes.length - 1];
+            const prev    = closes[closes.length - 2] || last;
+            scanRes.price   = last;
+            scanRes.chg     = +((last - prev) / prev * 100).toFixed(2);
             scanRes.candles = data.candles;
           }
         }
-      }).catch(() => {});
-    }));
-
-    _lastPortfolioRefresh = new Date();
-    updateRefreshIndicator(null);
-    renderPortfolio();
-  } catch(e) {
-    updateRefreshIndicator('Error');
-    setTimeout(() => updateRefreshIndicator(null), 3000);
-  }
+      })
+      .catch(() => {})
+      .finally(() => {
+        completed++;
+        if (completed === total) {
+          _lastPortfolioRefresh = new Date();
+          updateRefreshIndicator(null);
+          const portPage = document.getElementById('page-portfolio');
+          if (portPage && portPage.classList.contains('active')) {
+            renderPortfolio();
+          }
+        }
+      });
+  });
 }
 
 function startPortfolioAutoRefresh() {
-  if (_portfolioRefreshTimer) clearInterval(_portfolioRefreshTimer);
-  _portfolioRefreshTimer = setInterval(() => {
-    refreshPortfolioPrices();
-  }, 5 * 60 * 1000); // cada 5 minutos, independientemente de la pestaña activa
+  // Desactivado — Safari iOS no soporta fetch asíncrono en background
+  // Usar botón ↺ para actualizar precios manualmente
 }
 
 
