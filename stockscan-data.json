@@ -1,6 +1,18 @@
 {
   "diary": [
     {
+      "id": 1774453959485,
+      "ticker": "MSFT",
+      "date": "2026-03-25",
+      "type": "sell",
+      "price": 445.3,
+      "buyPrice": 415,
+      "shares": 2,
+      "pnl": "60.60",
+      "portfolioType": "paper",
+      "source": "portfolio"
+    },
+    {
       "id": 1774447551201,
       "ticker": "JPM",
       "date": "2026-03-25",
@@ -527,16 +539,6 @@
   "portfolio": [],
   "paperPortfolio": [
     {
-      "ticker": "MSFT",
-      "buyPrice": 415,
-      "shares": 2,
-      "buyDate": "2026-03-25",
-      "initialStop": 373.5,
-      "highWaterMark": 445.3,
-      "addedAt": 1774445186084,
-      "portfolioType": "paper"
-    },
-    {
       "ticker": "JPM",
       "buyPrice": 292.4,
       "shares": 3,
@@ -550,9 +552,9 @@
   "paperSettings": {
     "initialCapital": 10000,
     "spentCapital": 0,
-    "closedPnl": 0,
-    "closedTrades": 0,
-    "closedWins": 0
+    "closedPnl": 60.60000000000002,
+    "closedTrades": 1,
+    "closedWins": 1
   },
   "realFunds": {
     "cash": 0,
@@ -587,5 +589,5 @@
       }
     ]
   },
-  "updatedAt": "2026-03-25T14:40:12.120Z"
+  "updatedAt": "2026-03-25T15:52:39.491Z"
 }
