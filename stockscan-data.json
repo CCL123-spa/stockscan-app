@@ -1,6 +1,30 @@
 {
   "diary": [
     {
+      "id": 1774429366003,
+      "source": "paper",
+      "ticker": "LLY",
+      "date": "24 de septiembre de 2025",
+      "type": "sell",
+      "price": 741.85,
+      "stop": null,
+      "target": null,
+      "emotion": "",
+      "reason": "",
+      "lesson": "",
+      "result30": 9.5,
+      "result90": 42.5,
+      "correct": false,
+      "indicators": {
+        "rsi": 49,
+        "hist": -1.367,
+        "score": 2,
+        "golden": false
+      },
+      "feedback": "❌ Saliste demasiado pronto. La acción subió 9.5% después de tu venta. El pánico puede hacer vender en mínimos.",
+      "createdAt": "2026-03-25T09:02:46.003Z"
+    },
+    {
       "id": 1774392733328,
       "source": "paper",
       "ticker": "HD",
@@ -488,5 +512,5 @@
     "define-entry": "2026-03-24T22:53:09.580Z",
     "define-exit": "2026-03-24T22:53:18.204Z"
   },
-  "updatedAt": "2026-03-24T22:53:18.204Z"
+  "updatedAt": "2026-03-25T09:02:46.005Z"
 }
