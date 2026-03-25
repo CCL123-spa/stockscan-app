@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.17</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.17</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.20</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.20</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -1895,6 +1895,8 @@ html, body {
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
             <div id="port-summary" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);flex:1">Sin posiciones</div>
+            <div id="port-refresh-status" style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text3);white-space:nowrap">—</div>
+            <button onclick="refreshPortfolioPrices()" id="port-refresh-btn" style="padding:5px 8px;border-radius:8px;border:1px solid var(--border);background:var(--card);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);cursor:pointer;white-space:nowrap" title="Actualizar precios">↺</button>
             <button onclick="openFundsSheet()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);cursor:pointer;white-space:nowrap">💶 Fondos</button>
             <button class="btn-add-position" onclick="openAddSheet()" style="font-size:0.62rem;padding:6px 12px">+ Posición</button>
           </div>
@@ -1922,8 +1924,10 @@ html, body {
               <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">WIN RATE</div>
             </div>
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div id="port-paper-summary" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2)">Capital paper</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+            <div id="port-paper-summary" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);flex:1">Capital paper</div>
+            <div id="port-refresh-status-paper" style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text3);white-space:nowrap">—</div>
+            <button onclick="refreshPortfolioPrices()" style="padding:5px 8px;border-radius:8px;border:1px solid var(--border);background:var(--card);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);cursor:pointer" title="Actualizar precios">↺</button>
             <button class="btn-add-position" onclick="openAddSheet()" style="font-size:0.62rem;padding:6px 12px">+ Añadir</button>
           </div>
         </div>
@@ -4534,6 +4538,10 @@ setTimeout(testProxy, 2000); // test silencioso al arrancar
     diaryEntries = [];
     guideProgress = {};
   }
+  // Arrancar timer de refresco de precios desde el inicio de la app
+  startPortfolioAutoRefresh();
+  // Refresco inmediato al abrir la app (con pequeño delay para que cargue el DOM)
+  setTimeout(() => refreshPortfolioPrices(), 2000);
 })();
 
 function navigate(id, el) {
@@ -4542,7 +4550,14 @@ function navigate(id, el) {
   const page = document.getElementById('page-'+id);
   if (page) page.classList.add('active');
   if (el) el.classList.add('active');
-  if (id === 'portfolio') renderPortfolio();
+  if (id === 'portfolio') {
+    renderPortfolio();
+    // Refrescar al entrar si han pasado más de 5 minutos desde el último refresco
+    const fiveMins = 5 * 60 * 1000;
+    if (!_lastPortfolioRefresh || Date.now() - _lastPortfolioRefresh > fiveMins) {
+      refreshPortfolioPrices();
+    }
+  }
   if (id === 'diary') { loadFromGitHub(); }
   if (id === 'guide') {
     try {
@@ -6219,7 +6234,70 @@ function calcFiscalSummary() {
 // Estado fiscal — retenciones pendientes aplicadas al efectivo
 let taxData = JSON.parse(localStorage.getItem('stockscan_tax_data') || '{"retencionesPendientes":0,"year":' + new Date().getFullYear() + '}');
 
-// ── Fondos cartera real ───────────────────────────────────────────────────────
+// ── Auto-refresco de precios en cartera ──────────────────────────────────────
+let _portfolioRefreshTimer = null;
+let _lastPortfolioRefresh  = null;
+
+function updateRefreshIndicator(status) {
+  const statusEl  = document.getElementById('port-refresh-status');
+  const statusElP = document.getElementById('port-refresh-status-paper');
+  const btnEl     = document.getElementById('port-refresh-btn');
+  const txt = status || (_lastPortfolioRefresh
+    ? _lastPortfolioRefresh.toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' })
+    : '—');
+  if (statusEl)  statusEl.textContent  = txt;
+  if (statusElP) statusElP.textContent = txt;
+  if (btnEl) btnEl.textContent = status ? '⏳' : '↺';
+}
+
+async function refreshPortfolioPrices() {
+  // Obtener todos los tickers únicos de ambas carteras
+  const allPos = [...portfolio, ...paperPortfolio];
+  if (allPos.length === 0) return;
+  const tickers = [...new Set(allPos.map(p => p.ticker))];
+
+  updateRefreshIndicator('⏳');
+
+  try {
+    // Usar fetchRealData para cada ticker — con caché de 5 min ya integrado
+    await Promise.allSettled(tickers.map(t => {
+      const proxyTicker = INTERNAL_TO_PROXY[t] || t;
+      // Forzar refresco limpiando caché de este ticker
+      const cacheKey = `${proxyTicker}_1y`;
+      delete realDataCache[cacheKey];
+      return fetchRealData(t, '1y').then(data => {
+        if (data && data.candles && data.candles.length > 0) {
+          // Actualizar el resultado en el array de resultados del SCAN si existe
+          const scanRes = results.find(r => r.t === t);
+          if (scanRes) {
+            const closes = data.candles.map(c => c.c);
+            const lastClose = closes[closes.length - 1];
+            const prevClose = closes[closes.length - 2] || lastClose;
+            scanRes.price = lastClose;
+            scanRes.chg   = +((lastClose - prevClose) / prevClose * 100).toFixed(2);
+            scanRes.candles = data.candles;
+          }
+        }
+      }).catch(() => {});
+    }));
+
+    _lastPortfolioRefresh = new Date();
+    updateRefreshIndicator(null);
+    renderPortfolio();
+  } catch(e) {
+    updateRefreshIndicator('Error');
+    setTimeout(() => updateRefreshIndicator(null), 3000);
+  }
+}
+
+function startPortfolioAutoRefresh() {
+  if (_portfolioRefreshTimer) clearInterval(_portfolioRefreshTimer);
+  _portfolioRefreshTimer = setInterval(() => {
+    refreshPortfolioPrices();
+  }, 5 * 60 * 1000); // cada 5 minutos, independientemente de la pestaña activa
+}
+
+
 let _activeFundsTab = 'add';
 
 function openFundsSheet() {
@@ -6510,6 +6588,46 @@ function renderPortfolio() {
     listArea.innerHTML='<div class="empty-state"><div class="empty-icon">'+emptyIcon+'</div><div class="empty-title">'+emptyTitle+'</div><div class="empty-sub">'+emptySub+'</div></div>';
     if(summary) summary.textContent='Sin posiciones'; if(badge) badge.style.display='none'; return;
   }
+
+  // ── Ejecutar stop losses automáticamente ─────────────────────────────────
+  const stopsExecuted = [];
+  for (let i = activePort.length - 1; i >= 0; i--) {
+    const pos  = activePort[i];
+    const tech = getTechData(pos.ticker);
+    const cur  = tech.price;
+    const trail = calcTrailingStop(pos, cur);
+    if (cur <= trail.trailingStop) {
+      const sellPrice = trail.trailingStop;
+      const sellDate  = new Date().toISOString().slice(0,10);
+      const fee       = riskSettings.brokerFee || 0;
+      const pnl       = (sellPrice - pos.buyPrice) * pos.shares - fee * 2;
+      if (activePortfolioTab === 'real') {
+        const retencion = pnl > 0 ? +(pnl * 0.19).toFixed(2) : 0;
+        const neto      = sellPrice * pos.shares - retencion;
+        realFunds.cash += neto;
+        realFunds.movements.unshift({ type:'add', amount:neto, date:sellDate, note:'🔴 Stop loss ' + pos.ticker + ' × ' + pos.shares + ' acc. a ' + sellPrice + (retencion>0?' (ret. −'+retencion.toFixed(2)+'€)':''), id:Date.now() });
+        saveRealFunds();
+        autoSaveDiaryEntry({ id:Date.now(), ticker:pos.ticker, date:sellDate, type:'sell', price:sellPrice, buyPrice:pos.buyPrice, shares:pos.shares, pnl:pnl.toFixed(2), retencion:(pnl>0?(pnl*0.19).toFixed(2):'0'), fee, portfolioType:'real', source:'stop_loss', note:'Stop loss automático' });
+        portfolio.splice(i, 1); savePortfolio();
+      } else {
+        paperSettings.closedPnl    = (paperSettings.closedPnl||0) + pnl;
+        paperSettings.closedTrades = (paperSettings.closedTrades||0) + 1;
+        if (pnl > 0) paperSettings.closedWins = (paperSettings.closedWins||0) + 1;
+        savePaperSettings();
+        autoSaveDiaryEntry({ id:Date.now(), ticker:pos.ticker, date:sellDate, type:'sell', price:sellPrice, buyPrice:pos.buyPrice, shares:pos.shares, pnl:pnl.toFixed(2), retencion:'0', fee, portfolioType:'paper', source:'stop_loss', note:'Stop loss automático (paper)' });
+        paperPortfolio.splice(i, 1); savePaperPortfolio();
+      }
+      stopsExecuted.push({ ticker: pos.ticker, price: sellPrice, pnl: pnl.toFixed(2) });
+    }
+  }
+  // Notificar stops ejecutados
+  if (stopsExecuted.length > 0) {
+    const msgs = stopsExecuted.map(s => `${s.ticker} vendido a ${s.price} (P&L: ${parseFloat(s.pnl)>=0?'+':''}${s.pnl}€)`).join('\n');
+    const tipo  = activePortfolioTab === 'real' ? '⚠️ AVISO: Ejecuta también la venta en tu broker.' : '';
+    setTimeout(() => alert('🔴 Stop loss ejecutado:\n' + msgs + (tipo ? '\n\n' + tipo : '')), 100);
+    renderFiscal();
+  }
+
   let totalAlerts=0,alertBanners='',cards='',totalValue=0,totalCost=0;
   activePort.forEach((pos,idx)=>{
     const ev=evaluateAlerts(pos), tech=ev.tech, cur=tech.price;
