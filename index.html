@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.15</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.15</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.16</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.16</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -1935,6 +1935,63 @@ html, body {
           <div class="empty-icon">💼</div>
           <div class="empty-title">Cartera vacía</div>
           <div class="empty-sub">Añade las acciones que tienes<br>y vigilaremos las señales por ti</div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN FISCAL — solo visible en cartera Real -->
+      <div id="port-fiscal-section" style="display:none;margin-top:14px">
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">
+          📊 Fiscal · Año <span id="fiscal-year"></span>
+        </div>
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px">
+          <!-- Fila 1: Ganancias / Pérdidas / Base neta -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 4px">
+              <div id="fiscal-gains" style="font-family:'DM Mono',monospace;font-size:0.9rem;font-weight:500;color:var(--green)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text2);margin-top:2px">GANANCIAS</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 4px">
+              <div id="fiscal-losses" style="font-family:'DM Mono',monospace;font-size:0.9rem;font-weight:500;color:var(--red)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text2);margin-top:2px">PÉRDIDAS</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 4px">
+              <div id="fiscal-base" style="font-family:'DM Mono',monospace;font-size:0.9rem;font-weight:500;color:var(--text)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text2);margin-top:2px">BASE NETA</div>
+            </div>
+          </div>
+          <!-- Fila 2: Retenciones / Impuesto estimado / Resultado declaración -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+            <div style="text-align:center;background:var(--card);border:1px solid rgba(245,86,74,0.2);border-radius:8px;padding:9px 4px">
+              <div id="fiscal-retenciones" style="font-family:'DM Mono',monospace;font-size:0.9rem;font-weight:500;color:var(--red)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text2);margin-top:2px">RETENIDO</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 4px">
+              <div id="fiscal-impuesto" style="font-family:'DM Mono',monospace;font-size:0.9rem;font-weight:500;color:var(--orange)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text2);margin-top:2px">IMPUESTO EST.</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 4px">
+              <div id="fiscal-resultado" style="font-family:'DM Mono',monospace;font-size:0.9rem;font-weight:500">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text2);margin-top:2px">DECLARACIÓN</div>
+            </div>
+          </div>
+          <!-- Nota explicativa -->
+          <div id="fiscal-nota" style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);line-height:1.6;padding-top:8px;border-top:1px solid var(--border)"></div>
+        </div>
+
+        <!-- Paper: impuesto educativo -->
+        <div id="port-fiscal-paper" style="display:none;margin-top:10px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--purple);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">🎮 Paper · Impuesto simulado</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+              <div id="fiscal-paper-base" style="font-family:'DM Mono',monospace;font-size:0.9rem;font-weight:500;color:var(--text)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text2);margin-top:2px">BASE NETA</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+              <div id="fiscal-paper-impuesto" style="font-family:'DM Mono',monospace;font-size:0.9rem;font-weight:500;color:var(--orange)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text2);margin-top:2px">HABRÍAS PAGADO</div>
+            </div>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text3);margin-top:8px">Simulación educativa — no real</div>
         </div>
       </div>
 
@@ -2260,7 +2317,16 @@ html, body {
           <div id="sell-preview-pnl" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500">—</div>
           <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">P&amp;L NETO</div>
         </div>
+        <div style="text-align:center;background:var(--card);border:1px solid rgba(245,86,74,0.3);border-radius:8px;padding:9px 6px">
+          <div id="sell-preview-retencion" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--red)">—</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">RETENCIÓN 19%</div>
+        </div>
+        <div style="text-align:center;background:var(--card);border:1px solid rgba(61,214,245,0.3);border-radius:8px;padding:9px 6px">
+          <div id="sell-preview-neto" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--accent)">—</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">EFECTIVO NETO</div>
+        </div>
       </div>
+      <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);margin-top:8px;line-height:1.5">La retención (19%) queda apartada hasta la declaración anual. El efectivo neto es lo que se añade a tu capital disponible.</div>
     </div>
     <div class="field-label">Fecha de venta</div>
     <input class="field-input" id="sell-date" type="date">
@@ -3785,6 +3851,7 @@ function setLocalData(data) {
   if (data.paperPortfolio) { paperPortfolio = data.paperPortfolio; localStorage.setItem('stockscan_paper_portfolio', JSON.stringify(paperPortfolio)); }
   if (data.paperSettings)  { paperSettings  = data.paperSettings;  localStorage.setItem('stockscan_paper_settings',  JSON.stringify(paperSettings)); }
   if (data.realFunds)      { realFunds      = data.realFunds;       localStorage.setItem('stockscan_real_funds',      JSON.stringify(realFunds)); }
+  if (data.taxData)        { taxData        = data.taxData;         localStorage.setItem('stockscan_tax_data',        JSON.stringify(taxData)); }
 }
 
 async function loadFromGitHub() {
@@ -3859,7 +3926,7 @@ async function saveToGitHub(silent = false, knownSha = null) {
   const repo  = localStorage.getItem('gh_repo') || 'CCL123-spa/stockscan-app';
   const statusEl = document.getElementById('diary-sync-status');
 
-  const dataToSave = { diary: diaryEntries, guide: guideProgress, portfolio, paperPortfolio, paperSettings, realFunds, updatedAt: new Date().toISOString() };
+  const dataToSave = { diary: diaryEntries, guide: guideProgress, portfolio, paperPortfolio, paperSettings, realFunds, taxData, updatedAt: new Date().toISOString() };
   setLocalData(dataToSave);
 
   if (!token) {
@@ -6099,6 +6166,58 @@ function savePortfolio()      { localStorage.setItem('stockscan_portfolio',     
 function savePaperPortfolio() { localStorage.setItem('stockscan_paper_portfolio', JSON.stringify(paperPortfolio)); saveToGitHub(true); }
 function savePaperSettings()  { localStorage.setItem('stockscan_paper_settings',  JSON.stringify(paperSettings));  saveToGitHub(true); }
 function saveRealFunds()      { localStorage.setItem('stockscan_real_funds',       JSON.stringify(realFunds));      saveToGitHub(true); }
+function saveTaxData()        { localStorage.setItem('stockscan_tax_data',         JSON.stringify(taxData));        saveToGitHub(true); }
+
+// ── Motor fiscal España — Base del ahorro ────────────────────────────────────
+// Tramos IRPF base del ahorro 2024
+const TAX_BRACKETS = [
+  { limit: 6000,   rate: 0.19 },
+  { limit: 50000,  rate: 0.21 },
+  { limit: 200000, rate: 0.23 },
+  { limit: Infinity, rate: 0.27 },
+];
+
+function calcTax(baseImponible) {
+  // Calcula el impuesto total sobre una base imponible neta positiva
+  if (baseImponible <= 0) return 0;
+  let tax = 0, prev = 0;
+  for (const { limit, rate } of TAX_BRACKETS) {
+    if (baseImponible <= prev) break;
+    const tramo = Math.min(baseImponible, limit) - prev;
+    tax += tramo * rate;
+    prev = limit;
+  }
+  return tax;
+}
+
+function calcFiscalSummary() {
+  // Recalcula el resumen fiscal del año en curso a partir del historial de ventas reales
+  const year = new Date().getFullYear();
+  const yearSells = diaryEntries.filter(e =>
+    e.source === 'portfolio' && e.portfolioType === 'real' && e.type === 'sell' &&
+    e.date && e.date.startsWith(String(year))
+  );
+  let gains = 0, losses = 0, retenciones = 0;
+  for (const e of yearSells) {
+    const pnl = parseFloat(e.pnl) || 0;
+    const fee = parseFloat(e.fee) || 0;
+    const pnlNetFee = pnl - fee * 2; // comisión entrada + salida
+    if (pnlNetFee > 0) {
+      gains += pnlNetFee;
+      retenciones += pnlNetFee * 0.19;
+    } else {
+      losses += Math.abs(pnlNetFee);
+    }
+  }
+  const baseNeta    = Math.max(0, gains - losses);
+  const impuesto    = calcTax(baseNeta);
+  const porPagar    = Math.max(0, impuesto - retenciones); // lo que queda en declaración
+  const devolucion  = Math.max(0, retenciones - impuesto); // lo que devuelve Hacienda
+  return { gains, losses, baseNeta, impuesto, retenciones, porPagar, devolucion, numOps: yearSells.length };
+}
+
+// Estado fiscal — retenciones pendientes aplicadas al efectivo
+let taxData = JSON.parse(localStorage.getItem('stockscan_tax_data') || '{"retencionesPendientes":0,"year":' + new Date().getFullYear() + '}');
 
 // ── Fondos cartera real ───────────────────────────────────────────────────────
 let _activeFundsTab = 'add';
@@ -6442,9 +6561,75 @@ function renderPortfolio() {
   if(activePortfolioTab==='real' && summary) summary.innerHTML=`${portfolio.length} pos. · <span style="color:${tCol}">${parseFloat(tPnlPct)>=0?'+':''}${tPnlPct}%</span>`;
   alertArea.innerHTML=alertBanners; listArea.innerHTML=cards||'<div style="height:8px"></div>';
   if(badge) badge.style.display=totalAlerts>0?'block':'none';
+  renderFiscal();
 }
 
-// ── Detalle de posición ───────────────────────────────────────────────────────
+// ── Sección fiscal ────────────────────────────────────────────────────────────
+function renderFiscal() {
+  const section = document.getElementById('port-fiscal-section');
+  if (!section) return;
+
+  // Mostrar siempre en cartera real, ocultar paper fiscal si estamos en real
+  const isReal  = activePortfolioTab === 'real';
+  const isPaper = activePortfolioTab === 'paper';
+  section.style.display = '';
+
+  // Año fiscal
+  const year = new Date().getFullYear();
+  const yearEl = document.getElementById('fiscal-year');
+  if (yearEl) yearEl.textContent = year;
+
+  // ── Cartera Real ──
+  const f = calcFiscalSummary();
+  const resultadoCol = f.porPagar > 0 ? 'var(--red)' : f.devolucion > 0 ? 'var(--green)' : 'var(--text2)';
+  const resultadoTxt = f.porPagar > 0
+    ? '−' + f.porPagar.toFixed(0) + '€ a pagar'
+    : f.devolucion > 0 ? '+' + f.devolucion.toFixed(0) + '€ a devolver' : '0€';
+
+  document.getElementById('fiscal-gains').textContent      = f.gains > 0 ? '+' + f.gains.toFixed(0) + '€' : '0€';
+  document.getElementById('fiscal-losses').textContent     = f.losses > 0 ? '−' + f.losses.toFixed(0) + '€' : '0€';
+  document.getElementById('fiscal-base').textContent       = f.baseNeta.toFixed(0) + '€';
+  document.getElementById('fiscal-base').style.color       = f.baseNeta > 0 ? 'var(--green)' : f.baseNeta < 0 ? 'var(--red)' : 'var(--text2)';
+  document.getElementById('fiscal-retenciones').textContent = f.retenciones > 0 ? '−' + f.retenciones.toFixed(0) + '€' : '0€';
+  document.getElementById('fiscal-impuesto').textContent   = f.impuesto > 0 ? f.impuesto.toFixed(0) + '€' : '0€';
+  document.getElementById('fiscal-resultado').textContent  = resultadoTxt;
+  document.getElementById('fiscal-resultado').style.color  = resultadoCol;
+
+  // Nota explicativa
+  const nota = document.getElementById('fiscal-nota');
+  if (nota) {
+    if (f.numOps === 0) {
+      nota.textContent = 'Sin operaciones cerradas este año. Los datos aparecerán al registrar tu primera venta.';
+    } else {
+      const tramo = f.baseNeta <= 6000 ? '19%' : f.baseNeta <= 50000 ? '21%' : f.baseNeta <= 200000 ? '23%' : '27%';
+      nota.textContent = f.numOps + ' operac. cerradas · Tramo aplicable: ' + tramo +
+        (f.porPagar > 0 ? ' · Pendiente de pagar en declaración: ' + f.porPagar.toFixed(0) + '€' :
+         f.devolucion > 0 ? ' · Hacienda te devolverá aprox. ' + f.devolucion.toFixed(0) + '€' : ' · Sin deuda adicional');
+    }
+  }
+
+  // ── Paper educativo ──
+  const paperSection = document.getElementById('port-fiscal-paper');
+  if (paperSection) {
+    paperSection.style.display = isPaper ? '' : 'none';
+    if (isPaper) {
+      // Calcular fiscal paper desde diario
+      const yearPaperSells = diaryEntries.filter(e =>
+        e.source === 'portfolio' && e.portfolioType === 'paper' && e.type === 'sell' &&
+        e.date && e.date.startsWith(String(year))
+      );
+      let pg = 0, pl = 0;
+      for (const e of yearPaperSells) {
+        const pnl = parseFloat(e.pnl) || 0;
+        if (pnl > 0) pg += pnl; else pl += Math.abs(pnl);
+      }
+      const pb = Math.max(0, pg - pl);
+      const pi = calcTax(pb);
+      document.getElementById('fiscal-paper-base').textContent    = pb.toFixed(0) + '€';
+      document.getElementById('fiscal-paper-impuesto').textContent = pi.toFixed(0) + '€';
+    }
+  }
+}
 function findSimilarCase(pos,tech){
   return CASES.map(c=>{let s=0;if(Math.abs(c.rsi-tech.rsi)<10)s+=3;if(c.macd===tech.macd)s+=3;if((c.ma.includes('golden'))===(tech.ma.includes('golden')))s+=2;if(c.aboveMa50===tech.aboveMa50)s+=2;if(c.ticker===pos.ticker)s+=1;return{c,s};}).sort((a,b)=>b.s-a.s)[0].c;
 }
@@ -6661,18 +6846,23 @@ function confirmPaperSell() {
     document.getElementById('sell-price').style.borderColor = 'var(--red)';
     setTimeout(() => document.getElementById('sell-price').style.borderColor = '', 1200); return;
   }
-  const pnl = (sellPrice - pos.buyPrice) * pos.shares;
+  const fee       = riskSettings.brokerFee || 0;
+  const pnl       = (sellPrice - pos.buyPrice) * pos.shares - fee * 2;
+  const retencion = pnl > 0 ? +(pnl * 0.19).toFixed(2) : 0;
   // Actualizar stats paper
   paperSettings.closedPnl    = (paperSettings.closedPnl || 0) + pnl;
   paperSettings.closedTrades = (paperSettings.closedTrades || 0) + 1;
   if (pnl > 0) paperSettings.closedWins = (paperSettings.closedWins || 0) + 1;
   savePaperSettings();
-  // Registrar en diario
-  autoSaveDiaryEntry({ id: Date.now(), ticker: pos.ticker, date: sellDate, type: 'sell', price: sellPrice, buyPrice: pos.buyPrice, shares: pos.shares, pnl: pnl.toFixed(2), portfolioType: 'paper', source: 'portfolio' });
-  // Eliminar posición paper
+  // Registrar en diario con impuesto educativo
+  autoSaveDiaryEntry({
+    id: Date.now(), ticker: pos.ticker, date: sellDate, type: 'sell',
+    price: sellPrice, buyPrice: pos.buyPrice, shares: pos.shares,
+    pnl: pnl.toFixed(2), retencion: retencion.toFixed(2), fee: fee,
+    portfolioType: 'paper', source: 'portfolio'
+  });
   paperPortfolio.splice(_paperSellIdx, 1);
   savePaperPortfolio();
-  // Restaurar botón de confirmar para venta real
   document.getElementById('sell-confirm-btn').onclick = confirmSell;
   closeSellSheet(); closePosSheet(); renderPortfolio();
 }
@@ -6706,14 +6896,19 @@ function calcSellPnl() {
   const pos = portfolio[_sellIdx]; if (!pos) return;
   const sellPrice = parseFloat(document.getElementById('sell-price').value);
   if (!sellPrice || sellPrice <= 0) { document.getElementById('sell-pnl-preview').style.display = 'none'; return; }
-  const income = sellPrice * pos.shares;
-  const cost   = pos.buyPrice * pos.shares;
-  const pnl    = income - cost;
-  const pnlCol = pnl >= 0 ? 'var(--green)' : 'var(--red)';
-  document.getElementById('sell-preview-income').textContent = income.toFixed(2) + '€';
-  document.getElementById('sell-preview-pnl').textContent    = (pnl >= 0 ? '+' : '') + pnl.toFixed(2) + '€';
-  document.getElementById('sell-preview-pnl').style.color    = pnlCol;
-  document.getElementById('sell-pnl-preview').style.display  = '';
+  const fee       = riskSettings.brokerFee || 0;
+  const income    = sellPrice * pos.shares;
+  const cost      = pos.buyPrice * pos.shares;
+  const pnl       = income - cost - fee * 2;
+  const retencion = pnl > 0 ? +(pnl * 0.19).toFixed(2) : 0;
+  const neto      = income - retencion;
+  const pnlCol    = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('sell-preview-income').textContent    = income.toFixed(2) + '€';
+  document.getElementById('sell-preview-pnl').textContent       = (pnl >= 0 ? '+' : '') + pnl.toFixed(2) + '€';
+  document.getElementById('sell-preview-pnl').style.color       = pnlCol;
+  document.getElementById('sell-preview-retencion').textContent = retencion > 0 ? '−' + retencion.toFixed(2) + '€' : '0€';
+  document.getElementById('sell-preview-neto').textContent      = neto.toFixed(2) + '€';
+  document.getElementById('sell-pnl-preview').style.display     = '';
 }
 
 function confirmSell() {
@@ -6724,19 +6919,35 @@ function confirmSell() {
     document.getElementById('sell-price').style.borderColor = 'var(--red)';
     setTimeout(() => document.getElementById('sell-price').style.borderColor = '', 1200); return;
   }
-  const income = sellPrice * pos.shares;
-  const pnl    = income - pos.buyPrice * pos.shares;
-  // Devolver el efectivo al fondo
-  realFunds.cash += income;
-  realFunds.movements.unshift({ type: 'add', amount: income, date: sellDate, note: 'Venta ' + pos.ticker + ' × ' + pos.shares + ' acc.', id: Date.now() });
+  const fee       = riskSettings.brokerFee || 0;
+  const income    = sellPrice * pos.shares;
+  const cost      = pos.buyPrice * pos.shares;
+  const pnl       = income - cost - fee * 2;
+  const retencion = pnl > 0 ? +(pnl * 0.19).toFixed(2) : 0;
+  const neto      = income - retencion;  // lo que entra al efectivo disponible
+
+  // Añadir solo el neto al efectivo (retención queda apartada)
+  realFunds.cash += neto;
+  realFunds.movements.unshift({
+    type: 'add', amount: neto, date: sellDate,
+    note: 'Venta ' + pos.ticker + ' × ' + pos.shares + ' acc.' + (retencion > 0 ? ' (ret. −' + retencion.toFixed(2) + '€)' : ''),
+    id: Date.now()
+  });
   saveRealFunds();
-  // Registrar en diario automáticamente
-  autoSaveDiaryEntry({ id: Date.now(), ticker: pos.ticker, date: sellDate, type: 'sell', price: sellPrice, buyPrice: pos.buyPrice, shares: pos.shares, pnl: pnl.toFixed(2), portfolioType: 'real', source: 'portfolio' });
-  // Eliminar posición
+
+  // Registrar en diario con fee y retención
+  autoSaveDiaryEntry({
+    id: Date.now(), ticker: pos.ticker, date: sellDate, type: 'sell',
+    price: sellPrice, buyPrice: pos.buyPrice, shares: pos.shares,
+    pnl: pnl.toFixed(2), retencion: retencion.toFixed(2), fee: fee,
+    portfolioType: 'real', source: 'portfolio'
+  });
+
   portfolio.splice(_sellIdx, 1);
   savePortfolio();
   closeSellSheet();
   renderPortfolio();
+  renderFiscal();
 }
 
 
