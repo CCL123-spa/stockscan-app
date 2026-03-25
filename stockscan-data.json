@@ -577,6 +577,86 @@
       "highWaterMark": 100,
       "addedAt": 1774476467592,
       "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476470186,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476470545,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476471295,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476472765,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476473296,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476473464,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476474082,
+      "portfolioType": "paper"
+    },
+    {
+      "ticker": "UNH",
+      "buyPrice": 100,
+      "shares": 9,
+      "buyDate": "2026-03-25",
+      "initialStop": 90,
+      "highWaterMark": 100,
+      "addedAt": 1774476474232,
+      "portfolioType": "paper"
     }
   ],
   "paperSettings": {
@@ -623,5 +703,5 @@
     "retencionesPendientes": 0,
     "year": 2026
   },
-  "updatedAt": "2026-03-25T22:07:47.592Z"
+  "updatedAt": "2026-03-25T22:07:54.233Z"
 }
