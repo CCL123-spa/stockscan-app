@@ -1688,8 +1688,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.5</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.5</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.6</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.6</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -5469,8 +5469,15 @@ function drawChart(canvasId, series, opts = {}) {
   ctx.fillStyle = 'rgba(92,122,144,0.7)';
   ctx.font      = `9px "DM Mono", monospace`;
   ctx.textAlign = 'center';
+  const hasRealDates = candles[0] && candles[0].t;
   [0, 0.33, 0.66, 1].forEach(frac => {
-    const d   = new Date(now - frac * 90 * 86400000);
+    let d;
+    if (hasRealDates) {
+      const idx = Math.round(frac * (n - 1));
+      d = new Date(candles[idx].t * 1000);
+    } else {
+      d = new Date(now - (1 - frac) * 90 * 86400000);
+    }
     const lbl = `${d.getDate()} ${months[d.getMonth()]}`;
     ctx.fillText(lbl, padL + frac * chartW, h - 6);
   });
