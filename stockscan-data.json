@@ -9,7 +9,8 @@
       "shares": 3,
       "stop": 263.16,
       "portfolioType": "paper",
-      "source": "portfolio"
+      "source": "portfolio",
+      "lesson": "Compra test en paper. Indicadores positivos. Stop loss conservador. "
     },
     {
       "id": 1774429366003,
@@ -586,5 +587,5 @@
       }
     ]
   },
-  "updatedAt": "2026-03-25T14:05:51.202Z"
+  "updatedAt": "2026-03-25T14:06:47.307Z"
 }
