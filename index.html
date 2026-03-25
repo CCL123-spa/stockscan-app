@@ -1691,8 +1691,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.7</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.7</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.8</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.8</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2114,26 +2114,15 @@ html, body {
   <div class="add-sheet-title">Añadir posición</div>
   <div class="add-sheet-body">
 
-    <!-- Capital y riesgo (se recuerdan) -->
+    <!-- Capital y comisión (se recuerdan) -->
     <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em">Gestión del riesgo</div>
         <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3)">se guarda automáticamente</div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div>
-          <div class="field-label" style="margin-bottom:6px">Capital total (€)</div>
-          <input class="field-input" id="input-capital" type="number" placeholder="Ej: 5000" min="0" step="100" style="margin-bottom:0" oninput="saveRiskSettings();calcRisk()">
-        </div>
-        <div>
-          <div class="field-label" style="margin-bottom:6px">Riesgo por op.</div>
-          <select class="field-input" id="input-risk-pct" style="margin-bottom:0" onchange="saveRiskSettings();calcRisk()">
-            <option value="0.5">0.5% — Muy conservador</option>
-            <option value="1" selected>1% — Conservador</option>
-            <option value="2">2% — Moderado</option>
-            <option value="3">3% — Agresivo</option>
-          </select>
-        </div>
+      <div>
+        <div class="field-label" style="margin-bottom:6px">Capital a invertir (€)</div>
+        <input class="field-input" id="input-capital" type="number" placeholder="Ej: 1000" min="0" step="100" style="margin-bottom:0" oninput="saveRiskSettings();calcRisk()">
       </div>
       <!-- Comisión broker -->
       <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
@@ -2178,7 +2167,7 @@ html, body {
 
     <!-- Calculadora de riesgo en tiempo real -->
     <div id="risk-calc" style="display:none;border-radius:10px;padding:13px 14px;margin-bottom:14px;border:1px solid var(--border);background:var(--card2)">
-      <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Calculadora de posición</div>
+      <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Resumen de la operación</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 6px">
           <div id="rc-shares" style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--accent)">—</div>
@@ -2186,22 +2175,22 @@ html, body {
         </div>
         <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 6px">
           <div id="rc-capital" style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--text)">—</div>
-          <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text2);margin-top:3px">CAPITAL</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text2);margin-top:3px">CAPITAL USADO</div>
         </div>
         <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 6px">
           <div id="rc-risk-eur" style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--red)">—</div>
-          <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text2);margin-top:3px">RIESGO MAX</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text2);margin-top:3px">RIESGO MÁX.</div>
         </div>
         <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 6px">
           <div id="rc-port-pct" style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--orange)">—</div>
-          <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text2);margin-top:3px">% CARTERA</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--text2);margin-top:3px">% RIESGO</div>
         </div>
       </div>
       <div id="rc-warning" style="display:none;margin-top:10px;padding:8px 10px;background:rgba(245,158,42,0.1);border:1px solid rgba(245,158,42,0.25);border-radius:7px;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--orange);line-height:1.6"></div>
     </div>
 
-    <div class="field-label">Nº acciones <span style="color:var(--text3);font-size:0.85em">(calculado automáticamente)</span></div>
-    <input class="field-input" id="input-shares" type="number" placeholder="Se rellena solo con la calculadora" step="1" min="1" oninput="calcRisk()">
+    <div class="field-label">Nº acciones</div>
+    <input class="field-input" id="input-shares" type="number" placeholder="Se calcula automáticamente con el capital" step="1" min="1" oninput="this._manualEdit=true;calcRisk()">
 
     <div class="field-label">Fecha de compra</div>
     <input class="field-input" id="input-date" type="date">
@@ -5917,7 +5906,6 @@ function switchPortfolioTab(tab) {
 
 function saveRiskSettings() {
   riskSettings.capital   = parseFloat(document.getElementById('input-capital').value) || 0;
-  riskSettings.riskPct   = parseFloat(document.getElementById('input-risk-pct').value) || 1;
   riskSettings.brokerFee = parseFloat(document.getElementById('input-broker-fee').value) || 1;
   localStorage.setItem('stockscan_risk', JSON.stringify(riskSettings));
 }
@@ -5971,33 +5959,50 @@ function evaluateAlerts(pos) {
   return {tech,alerts,warnings,hasAlert:alerts.length>0,hasWarning:warnings.length>0};
 }
 
-// ── Calculadora de riesgo ─────────────────────────────────────────────────────
+// ── Calculadora de riesgo (bottom-up) ────────────────────────────────────────
 function calcRisk() {
-  const price=parseFloat(document.getElementById('input-price').value);
-  const stop=parseFloat(document.getElementById('input-stop').value);
-  const capital=parseFloat(document.getElementById('input-capital').value)||riskSettings.capital;
-  const riskPct=parseFloat(document.getElementById('input-risk-pct').value)||riskSettings.riskPct;
-  const fee=parseFloat(document.getElementById('input-broker-fee').value)||riskSettings.brokerFee||1;
-  const box=document.getElementById('risk-calc');
-  if(!price||!stop||!capital||stop>=price){box.style.display='none';return;}
-  const maxRiskEur=capital*(riskPct/100);
-  const riskPerShare=price-stop;
-  const shares=Math.max(1,Math.floor(maxRiskEur/riskPerShare));
-  const capitalUsed=shares*price+fee*2;
-  const portPct=(capitalUsed/capital*100).toFixed(1);
-  const realRisk=shares*riskPerShare+fee*2;
-  document.getElementById('rc-shares').textContent=shares;
-  document.getElementById('rc-capital').textContent=capitalUsed.toFixed(0)+'€';
-  document.getElementById('rc-risk-eur').textContent=realRisk.toFixed(0)+'€';
-  document.getElementById('rc-port-pct').textContent=portPct+'%';
-  const sharesInput=document.getElementById('input-shares');
-  if(sharesInput) sharesInput.value=shares;
-  const warn=document.getElementById('rc-warning');
-  const ws=[];
-  if(parseFloat(portPct)>20) ws.push(`Esta posición representa el ${portPct}% de tu cartera — considera reducir tamaño.`);
-  if(fee*2>realRisk*0.1) ws.push(`Comisiones (${(fee*2).toFixed(0)}€) = ${((fee*2/realRisk)*100).toFixed(0)}% del riesgo. La posición puede ser demasiado pequeña.`);
-  if(ws.length){warn.textContent='⚠️ '+ws.join(' ');warn.style.display='block';}else{warn.style.display='none';}
-  box.style.display='block';
+  const price    = parseFloat(document.getElementById('input-price').value);
+  const stop     = parseFloat(document.getElementById('input-stop').value);
+  const capital  = parseFloat(document.getElementById('input-capital').value) || riskSettings.capital;
+  const fee      = parseFloat(document.getElementById('input-broker-fee').value) || riskSettings.brokerFee || 0;
+  const box      = document.getElementById('risk-calc');
+
+  if (!price || !capital || price <= 0 || capital <= 0) { box.style.display = 'none'; return; }
+
+  // Calcular acciones: capital disponible menos comisiones de entrada y salida
+  const capitalNet = capital - fee * 2;
+  const shares     = Math.max(1, Math.floor(capitalNet / price));
+  const capitalUsed = shares * price + fee * 2;
+
+  // Riesgo máximo: si toca el stop loss
+  const riskEur = stop > 0 && stop < price
+    ? shares * (price - stop) + fee * 2
+    : null;
+
+  // % riesgo sobre capital total de la cartera real
+  const totalCash = realFunds.cash > 0 ? realFunds.cash : capital;
+  const riskPct   = riskEur !== null ? (riskEur / totalCash * 100).toFixed(1) : null;
+
+  document.getElementById('rc-shares').textContent  = shares;
+  document.getElementById('rc-capital').textContent = capitalUsed.toFixed(0) + '€';
+  document.getElementById('rc-risk-eur').textContent = riskEur !== null ? riskEur.toFixed(0) + '€' : '— (sin stop)';
+  document.getElementById('rc-port-pct').textContent = riskPct !== null ? riskPct + '%' : '—';
+
+  // Rellenar nº acciones si el campo está vacío o fue calculado antes
+  const sharesInput = document.getElementById('input-shares');
+  if (sharesInput && !sharesInput._manualEdit) sharesInput.value = shares;
+
+  // Avisos
+  const warn = document.getElementById('rc-warning');
+  const ws = [];
+  if (riskPct !== null && parseFloat(riskPct) > 5)
+    ws.push('⚠️ Riesgo del ' + riskPct + '% del capital total — por encima del 2% recomendado.');
+  if (fee * 2 > capitalUsed * 0.02)
+    ws.push('⚠️ Comisiones (' + (fee*2).toFixed(0) + '€) = ' + ((fee*2/capitalUsed)*100).toFixed(0) + '% del capital — posición muy pequeña.');
+  if (ws.length) { warn.innerHTML = ws.join('<br>'); warn.style.display = 'block'; }
+  else { warn.style.display = 'none'; }
+
+  box.style.display = 'block';
 }
 
 function setStopPct(pct) {
@@ -6270,15 +6275,15 @@ function confirmSell() {
 
 function openAddSheet(ticker, price) {
   if(riskSettings.capital) document.getElementById('input-capital').value=riskSettings.capital;
-  document.getElementById('input-risk-pct').value=riskSettings.riskPct||1;
   document.getElementById('input-broker-fee').value=riskSettings.brokerFee||1;
   document.getElementById('input-ticker').value=ticker||'';
   document.getElementById('input-price').value=price||'';
   document.getElementById('input-stop').value='';
-  document.getElementById('input-shares').value='';
+  const sharesInput=document.getElementById('input-shares');
+  sharesInput.value=''; sharesInput._manualEdit=false;
   document.getElementById('input-date').value=new Date().toISOString().slice(0,10);
   document.getElementById('risk-calc').style.display='none';
-  if(ticker&&price) setStopPct(0.08);
+  if(ticker&&price) { setTimeout(()=>calcRisk(),50); }
   document.getElementById('addOverlay').classList.add('open');
   document.getElementById('addSheet').classList.add('open');
   document.body.style.overflow='hidden';
