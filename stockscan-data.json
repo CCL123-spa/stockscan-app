@@ -532,7 +532,7 @@
       "shares": 2,
       "buyDate": "2026-03-25",
       "initialStop": 373.5,
-      "highWaterMark": 415,
+      "highWaterMark": 445.3,
       "addedAt": 1774445186084,
       "portfolioType": "paper"
     },
@@ -587,5 +587,5 @@
       }
     ]
   },
-  "updatedAt": "2026-03-25T14:06:47.307Z"
+  "updatedAt": "2026-03-25T14:40:12.120Z"
 }
