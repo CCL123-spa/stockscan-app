@@ -1857,12 +1857,67 @@ html, body {
     <!-- ── CARTERA ── -->
     <div class="page" id="page-portfolio">
 
-      <div class="port-header-row">
-        <div>
-          <div class="section-label" style="margin-bottom:2px">Mi cartera</div>
-          <div id="port-summary" style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2)">Sin posiciones</div>
+      <!-- Pestañas Real / Paper -->
+      <div style="display:flex;gap:6px;padding:0 0 12px 0">
+        <button id="port-tab-real" onclick="switchPortfolioTab('real')" style="flex:1;padding:8px 0;border-radius:9px;border:1px solid var(--accent);background:var(--accent);font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:500;color:var(--bg);cursor:pointer;transition:all 0.18s">💼 Real</button>
+        <button id="port-tab-paper" onclick="switchPortfolioTab('paper')" style="flex:1;padding:8px 0;border-radius:9px;border:1px solid var(--border);background:transparent;font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.18s">🎮 Paper</button>
+      </div>
+
+      <!-- Cabecera Real -->
+      <div id="port-header-real">
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+              <div id="real-cash-disp" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--accent)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">EFECTIVO</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+              <div id="real-invested-disp" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">INVERTIDO</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+              <div id="real-pnl-disp" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">P&amp;L ABIERTO</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+              <div id="real-total-disp" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">TOTAL</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+            <div id="port-summary" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2);flex:1">Sin posiciones</div>
+            <button onclick="openFundsSheet()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);cursor:pointer;white-space:nowrap">💶 Fondos</button>
+            <button class="btn-add-position" onclick="openAddSheet()" style="font-size:0.62rem;padding:6px 12px">+ Posición</button>
+          </div>
         </div>
-        <button class="btn-add-position" onclick="openAddSheet()">+ Añadir</button>
+      </div>
+
+      <!-- Cabecera Paper -->
+      <div id="port-header-paper" style="display:none">
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+              <div id="paper-capital-disp" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--accent)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">DISPONIBLE</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+              <div id="paper-pnl-disp" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">P&amp;L TOTAL</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+              <div id="paper-pos-disp" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">POSICIONES</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+              <div id="paper-wr-disp" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--text)">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">WIN RATE</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div id="port-paper-summary" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text2)">Capital paper</div>
+            <button class="btn-add-position" onclick="openAddSheet()" style="font-size:0.62rem;padding:6px 12px">+ Añadir</button>
+          </div>
+        </div>
       </div>
 
       <div id="port-alerts-area"></div>
@@ -2151,8 +2206,71 @@ html, body {
   </div>
 </div>
 
-<!-- POSITION DETAIL SHEET -->
-<div class="sheet-overlay" id="posOverlay" onclick="closePosSheet()"></div>
+<!-- FUNDS SHEET -->
+<div class="add-sheet-overlay" id="fundsOverlay" onclick="closeFundsSheet()"></div>
+<div class="add-sheet" id="fundsSheet">
+  <div class="add-sheet-handle"></div>
+  <div class="add-sheet-title">💶 Gestión de fondos</div>
+  <div class="add-sheet-body">
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button id="funds-tab-add" onclick="switchFundsTab('add')" style="flex:1;padding:9px 0;border-radius:9px;border:1px solid var(--green);background:var(--green);font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:500;color:var(--bg);cursor:pointer">＋ Añadir fondos</button>
+      <button id="funds-tab-withdraw" onclick="switchFundsTab('withdraw')" style="flex:1;padding:9px 0;border-radius:9px;border:1px solid var(--border);background:transparent;font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:500;color:var(--text2);cursor:pointer">－ Retirar fondos</button>
+    </div>
+    <div id="funds-panel-add">
+      <div class="field-label">Importe a ingresar (€)</div>
+      <input class="field-input" id="funds-amount-add" type="number" placeholder="Ej: 2000" min="0" step="100">
+      <div class="field-label">Fecha</div>
+      <input class="field-input" id="funds-date-add" type="date">
+      <div class="field-label">Nota <span style="color:var(--text3);font-size:0.85em">(opcional)</span></div>
+      <input class="field-input" id="funds-note-add" type="text" placeholder="Ej: Aportación mensual">
+      <button class="btn-confirm-add" onclick="confirmFunds('add')">Confirmar ingreso</button>
+    </div>
+    <div id="funds-panel-withdraw" style="display:none">
+      <div class="field-label">Importe a retirar (€)</div>
+      <input class="field-input" id="funds-amount-withdraw" type="number" placeholder="Ej: 500" min="0" step="100">
+      <div class="field-label">Fecha</div>
+      <input class="field-input" id="funds-date-withdraw" type="date">
+      <div class="field-label">Nota <span style="color:var(--text3);font-size:0.85em">(opcional)</span></div>
+      <input class="field-input" id="funds-note-withdraw" type="text" placeholder="Ej: Retirada parcial">
+      <button class="btn-confirm-add" style="background:var(--red)" onclick="confirmFunds('withdraw')">Confirmar retirada</button>
+    </div>
+    <!-- Historial de movimientos -->
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Historial de movimientos</div>
+      <div id="funds-history-list" style="max-height:200px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SELL POSITION SHEET (solo cartera real) -->
+<div class="add-sheet-overlay" id="sellOverlay" onclick="closeSellSheet()"></div>
+<div class="add-sheet" id="sellSheet">
+  <div class="add-sheet-handle"></div>
+  <div class="add-sheet-title" id="sellSheetTitle">Cerrar posición</div>
+  <div class="add-sheet-body">
+    <div id="sell-pos-info" style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2);line-height:1.8"></div>
+    <div class="field-label">Precio de venta real (€)</div>
+    <input class="field-input" id="sell-price" type="number" placeholder="Introduce el precio exacto del broker" step="0.01" min="0" oninput="calcSellPnl()">
+    <div id="sell-pnl-preview" style="display:none;border-radius:10px;padding:13px 14px;margin-bottom:14px;border:1px solid var(--border);background:var(--card2)">
+      <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">Resumen de la operación</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+          <div id="sell-preview-income" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--accent)">—</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">INGRESO BRUTO</div>
+        </div>
+        <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 6px">
+          <div id="sell-preview-pnl" style="font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500">—</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--text2);margin-top:2px">P&amp;L NETO</div>
+        </div>
+      </div>
+    </div>
+    <div class="field-label">Fecha de venta</div>
+    <input class="field-input" id="sell-date" type="date">
+    <button class="btn-confirm-add" id="sell-confirm-btn" onclick="confirmSell()">Confirmar venta</button>
+  </div>
+</div>
+
+
 <div class="sheet" id="posSheet">
   <div class="sheet-handle"></div>
   <div class="sheet-header">
@@ -3470,6 +3588,11 @@ function setLocalData(data) {
   // Migrar claves antiguas por compatibilidad
   localStorage.setItem('diary_entries', JSON.stringify(data.diary || []));
   localStorage.setItem('guide_progress', JSON.stringify(data.guide || {}));
+  // Sincronizar carteras si vienen del servidor
+  if (data.portfolio)      { portfolio      = data.portfolio;      localStorage.setItem('stockscan_portfolio',       JSON.stringify(portfolio)); }
+  if (data.paperPortfolio) { paperPortfolio = data.paperPortfolio; localStorage.setItem('stockscan_paper_portfolio', JSON.stringify(paperPortfolio)); }
+  if (data.paperSettings)  { paperSettings  = data.paperSettings;  localStorage.setItem('stockscan_paper_settings',  JSON.stringify(paperSettings)); }
+  if (data.realFunds)      { realFunds      = data.realFunds;       localStorage.setItem('stockscan_real_funds',      JSON.stringify(realFunds)); }
 }
 
 async function loadFromGitHub() {
@@ -3544,7 +3667,7 @@ async function saveToGitHub(silent = false, knownSha = null) {
   const repo  = localStorage.getItem('gh_repo') || 'CCL123-spa/stockscan-app';
   const statusEl = document.getElementById('diary-sync-status');
 
-  const dataToSave = { diary: diaryEntries, guide: guideProgress, updatedAt: new Date().toISOString() };
+  const dataToSave = { diary: diaryEntries, guide: guideProgress, portfolio, paperPortfolio, paperSettings, realFunds, updatedAt: new Date().toISOString() };
   setLocalData(dataToSave);
 
   if (!token) {
@@ -3687,7 +3810,29 @@ function toggleDiaryDetail(i) {
 }
 
 function deleteDiaryEntry(i) {
-  if (!confirm('¿Eliminar esta entrada?')) return;
+  const e = diaryEntries[i];
+  const label = e.ticker ? (e.type === 'sell' ? 'venta de ' + e.ticker : 'compra de ' + e.ticker) : 'esta entrada';
+  if (!confirm('¿Eliminar ' + label + ' del diario? Si pertenece a cartera real, los efectos sobre el efectivo y cartera se revertirán.')) return;
+  // Revertir efecto en efectivo y cartera si es entrada de cartera real
+  if (e.portfolioType === 'real' && e.source === 'portfolio') {
+    if (e.type === 'sell') {
+      const income = (parseFloat(e.price) || 0) * (parseFloat(e.shares) || 0);
+      if (income > 0) {
+        realFunds.cash -= income;
+        const sellNote = 'Venta ' + e.ticker + ' × ' + e.shares + ' acc.';
+        const fIdx = realFunds.movements.findIndex(m => m.type === 'add' && m.note === sellNote);
+        if (fIdx !== -1) realFunds.movements.splice(fIdx, 1);
+        else realFunds.movements.unshift({ type: 'withdraw', amount: income, date: new Date().toISOString().slice(0,10), note: '↩ Eliminación por error: venta ' + e.ticker, id: Date.now() });
+        saveRealFunds();
+      }
+      // Restaurar posición en cartera
+      if (e.ticker && e.buyPrice && e.shares) {
+        portfolio.push({ ticker: e.ticker, buyPrice: parseFloat(e.buyPrice), shares: parseFloat(e.shares), buyDate: e.date || '', initialStop: +(parseFloat(e.buyPrice) * 0.92).toFixed(2), highWaterMark: parseFloat(e.buyPrice), addedAt: Date.now(), portfolioType: 'real', restoredFromDiary: true });
+        savePortfolio();
+        if (document.getElementById('page-portfolio')?.classList.contains('active')) renderPortfolio();
+      }
+    }
+  }
   diaryEntries.splice(i, 1);
   saveDiaryToGitHub();
   updateDiaryStats();
@@ -5652,9 +5797,121 @@ function openSheet(ticker) {
 // ════════════════════════════════════════════════════════════════════════════
 
 let portfolio = JSON.parse(localStorage.getItem('stockscan_portfolio') || '[]');
+let paperPortfolio = JSON.parse(localStorage.getItem('stockscan_paper_portfolio') || '[]');
+let paperSettings = JSON.parse(localStorage.getItem('stockscan_paper_settings') || '{"initialCapital":10000,"spentCapital":0,"closedPnl":0,"closedTrades":0,"closedWins":0}');
+let realFunds = JSON.parse(localStorage.getItem('stockscan_real_funds') || '{"cash":0,"movements":[]}');
+let activePortfolioTab = 'real';
 let riskSettings = JSON.parse(localStorage.getItem('stockscan_risk') || '{"capital":0,"riskPct":1,"brokerFee":1}');
 
-function savePortfolio() { localStorage.setItem('stockscan_portfolio', JSON.stringify(portfolio)); }
+function savePortfolio()      { localStorage.setItem('stockscan_portfolio',       JSON.stringify(portfolio));      saveToGitHub(true); }
+function savePaperPortfolio() { localStorage.setItem('stockscan_paper_portfolio', JSON.stringify(paperPortfolio)); saveToGitHub(true); }
+function savePaperSettings()  { localStorage.setItem('stockscan_paper_settings',  JSON.stringify(paperSettings));  saveToGitHub(true); }
+function saveRealFunds()      { localStorage.setItem('stockscan_real_funds',       JSON.stringify(realFunds));      saveToGitHub(true); }
+
+// ── Fondos cartera real ───────────────────────────────────────────────────────
+let _activeFundsTab = 'add';
+
+function openFundsSheet() {
+  document.getElementById('funds-date-add').value      = new Date().toISOString().slice(0,10);
+  document.getElementById('funds-date-withdraw').value = new Date().toISOString().slice(0,10);
+  document.getElementById('funds-amount-add').value      = '';
+  document.getElementById('funds-amount-withdraw').value = '';
+  document.getElementById('funds-note-add').value      = '';
+  document.getElementById('funds-note-withdraw').value = '';
+  renderFundsHistory();
+  switchFundsTab('add');
+  document.getElementById('fundsOverlay').classList.add('open');
+  document.getElementById('fundsSheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFundsSheet() {
+  document.getElementById('fundsOverlay').classList.remove('open');
+  document.getElementById('fundsSheet').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function switchFundsTab(tab) {
+  _activeFundsTab = tab;
+  const isAdd = tab === 'add';
+  document.getElementById('funds-panel-add').style.display      = isAdd ? '' : 'none';
+  document.getElementById('funds-panel-withdraw').style.display = isAdd ? 'none' : '';
+  document.getElementById('funds-tab-add').style.background      = isAdd ? 'var(--green)' : 'transparent';
+  document.getElementById('funds-tab-add').style.borderColor     = isAdd ? 'var(--green)'  : 'var(--border)';
+  document.getElementById('funds-tab-add').style.color           = isAdd ? 'var(--bg)'     : 'var(--text2)';
+  document.getElementById('funds-tab-withdraw').style.background  = isAdd ? 'transparent' : 'var(--red)';
+  document.getElementById('funds-tab-withdraw').style.borderColor = isAdd ? 'var(--border)': 'var(--red)';
+  document.getElementById('funds-tab-withdraw').style.color       = isAdd ? 'var(--text2)' : 'var(--bg)';
+}
+
+function confirmFunds(type) {
+  const amountEl = document.getElementById(type === 'add' ? 'funds-amount-add' : 'funds-amount-withdraw');
+  const dateEl   = document.getElementById(type === 'add' ? 'funds-date-add'   : 'funds-date-withdraw');
+  const noteEl   = document.getElementById(type === 'add' ? 'funds-note-add'   : 'funds-note-withdraw');
+  const amount   = parseFloat(amountEl.value);
+  if (!amount || amount <= 0) { amountEl.style.borderColor = 'var(--red)'; setTimeout(() => amountEl.style.borderColor = '', 1200); return; }
+  if (type === 'withdraw' && amount > realFunds.cash) {
+    amountEl.style.borderColor = 'var(--red)';
+    alert('No puedes retirar más efectivo del disponible (' + realFunds.cash.toFixed(2) + '€)');
+    setTimeout(() => amountEl.style.borderColor = '', 1200); return;
+  }
+  const movement = { type, amount, date: dateEl.value || new Date().toISOString().slice(0,10), note: noteEl.value.trim(), id: Date.now() };
+  realFunds.movements.unshift(movement);
+  realFunds.cash = type === 'add' ? realFunds.cash + amount : realFunds.cash - amount;
+  saveRealFunds();
+  renderFundsHistory();
+  amountEl.value = ''; noteEl.value = '';
+  renderPortfolio();
+}
+
+function renderFundsHistory() {
+  const list = document.getElementById('funds-history-list');
+  if (!list) return;
+  if (!realFunds.movements.length) {
+    list.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:0.6rem;color:var(--text3);text-align:center;padding:12px 0">Sin movimientos aún</div>';
+    return;
+  }
+  list.innerHTML = realFunds.movements.slice(0, 20).map(m => {
+    const col  = m.type === 'add' ? 'var(--green)' : 'var(--red)';
+    const sign = m.type === 'add' ? '+' : '−';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:${col};font-weight:500">${sign}${m.amount.toFixed(2)}€</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3)">${m.date}${m.note ? ' · ' + m.note : ''}</div>
+      </div>
+      <button onclick="deleteFundsMovement(${m.id})" style="background:none;border:none;color:var(--text3);font-size:0.75rem;cursor:pointer;padding:4px">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteFundsMovement(id) {
+  const mv = realFunds.movements.find(m => m.id === id);
+  if (!mv) return;
+  realFunds.cash = mv.type === 'add' ? realFunds.cash - mv.amount : realFunds.cash + mv.amount;
+  realFunds.movements = realFunds.movements.filter(m => m.id !== id);
+  saveRealFunds();
+  renderFundsHistory();
+  renderPortfolio();
+}
+
+function switchPortfolioTab(tab) {
+  activePortfolioTab = tab;
+  const btnReal  = document.getElementById('port-tab-real');
+  const btnPaper = document.getElementById('port-tab-paper');
+  const hReal    = document.getElementById('port-header-real');
+  const hPaper   = document.getElementById('port-header-paper');
+  if (tab === 'real') {
+    btnReal.style.background  = 'var(--accent)'; btnReal.style.borderColor  = 'var(--accent)'; btnReal.style.color  = 'var(--bg)';
+    btnPaper.style.background = 'transparent';   btnPaper.style.borderColor = 'var(--border)'; btnPaper.style.color = 'var(--text2)';
+    hReal.style.display  = ''; hPaper.style.display = 'none';
+  } else {
+    btnPaper.style.background = 'var(--purple)'; btnPaper.style.borderColor = 'var(--purple)'; btnPaper.style.color = 'var(--bg)';
+    btnReal.style.background  = 'transparent';   btnReal.style.borderColor  = 'var(--border)'; btnReal.style.color  = 'var(--text2)';
+    hPaper.style.display = ''; hReal.style.display  = 'none';
+  }
+  renderPortfolio();
+}
+
 function saveRiskSettings() {
   riskSettings.capital   = parseFloat(document.getElementById('input-capital').value) || 0;
   riskSettings.riskPct   = parseFloat(document.getElementById('input-risk-pct').value) || 1;
@@ -5749,24 +6006,78 @@ function setStopPct(pct) {
 
 // ── Renderizar cartera ────────────────────────────────────────────────────────
 function renderPortfolio() {
+  const activePort = activePortfolioTab === 'paper' ? paperPortfolio : portfolio;
   const alertArea=document.getElementById('port-alerts-area');
   const listArea=document.getElementById('port-list-area');
   const summary=document.getElementById('port-summary');
   const badge=document.getElementById('portfolio-badge');
-  if(portfolio.length===0){
+
+  // Actualizar métricas paper si está activa
+  if (activePortfolioTab === 'paper') {
+    const ic = paperSettings.initialCapital || 10000;
+    let invested = 0;
+    paperPortfolio.forEach(p => { invested += p.buyPrice * p.shares; });
+    let openPnl = 0;
+    paperPortfolio.forEach(p => { const tech = getTechData(p.ticker); openPnl += (tech.price - p.buyPrice) * p.shares; });
+    const totalPnl = paperSettings.closedPnl + openPnl;
+    const available = ic - invested;
+    const totalTrades = paperSettings.closedTrades || 0;
+    const wr = totalTrades > 0 ? Math.round((paperSettings.closedWins / totalTrades) * 100) + '%' : '—';
+    const pnlCol = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('paper-capital-disp').textContent = available.toFixed(0) + '€';
+    document.getElementById('paper-pnl-disp').style.color = pnlCol;
+    document.getElementById('paper-pnl-disp').textContent = (totalPnl >= 0 ? '+' : '') + totalPnl.toFixed(0) + '€';
+    document.getElementById('paper-pos-disp').textContent = paperPortfolio.length;
+    document.getElementById('paper-wr-disp').textContent = wr;
+    document.getElementById('port-paper-summary').textContent = 'Capital inicial: ' + ic.toFixed(0) + '€';
+  } else {
+    // Métricas cartera real — 4 cifras: Efectivo | Invertido | P&L abierto | Total
+    let invested = 0;
+    portfolio.forEach(p => { invested += p.buyPrice * p.shares; });
+    let openPnl = 0;
+    portfolio.forEach(p => { const tech = getTechData(p.ticker); openPnl += (tech.price - p.buyPrice) * p.shares; });
+    const valoracion = invested + openPnl;                    // valor actual de las posiciones
+    const total      = realFunds.cash + valoracion;           // efectivo + lo que valen las acciones ahora
+    const pnlCol     = openPnl >= 0 ? 'var(--green)' : 'var(--red)';
+    const totalCol   = total >= (realFunds.cash + invested) ? 'var(--green)' : 'var(--red)';
+    // Win rate desde entradas del diario etiquetadas como real
+    const realClosed = diaryEntries.filter(e => e.type === 'sell' && e.portfolioType !== 'paper');
+    const realWins   = realClosed.filter(e => (parseFloat(e.pnl) || 0) > 0);
+    const wrReal     = realClosed.length > 0 ? Math.round((realWins.length / realClosed.length) * 100) + '%' : '—';
+    document.getElementById('real-cash-disp').textContent     = realFunds.cash.toFixed(0) + '€';
+    document.getElementById('real-invested-disp').textContent = portfolio.length > 0 ? invested.toFixed(0) + '€' : '—';
+    document.getElementById('real-pnl-disp').style.color      = pnlCol;
+    document.getElementById('real-pnl-disp').textContent      = portfolio.length > 0 ? (openPnl >= 0 ? '+' : '') + openPnl.toFixed(0) + '€' : '—';
+    document.getElementById('real-total-disp').style.color    = total > 0 ? totalCol : 'var(--text)';
+    document.getElementById('real-total-disp').textContent    = total > 0 ? total.toFixed(0) + '€' : '—';
+    if(summary) summary.textContent = realFunds.cash > 0
+      ? portfolio.length + ' pos. · Efectivo ' + realFunds.cash.toFixed(0) + '€'
+      : 'Sin fondos — usa el botón 💶 Fondos para añadir capital';
+  }
+
+  const emptyIcon  = activePortfolioTab === 'paper' ? '🎮' : '💼';
+  const emptyTitle = activePortfolioTab === 'paper' ? 'Cartera paper vacía' : 'Cartera vacía';
+  const emptySub   = activePortfolioTab === 'paper'
+    ? 'Añade posiciones de práctica sin<br>arriesgar dinero real'
+    : 'Añade las acciones que tienes<br>y vigilaremos las señales por ti';
+
+  if(activePort.length===0){
     alertArea.innerHTML='';
-    listArea.innerHTML='<div class="empty-state"><div class="empty-icon">💼</div><div class="empty-title">Cartera vacía</div><div class="empty-sub">Añade las acciones que tienes<br>y vigilaremos las señales por ti</div></div>';
-    summary.textContent='Sin posiciones'; badge.style.display='none'; return;
+    listArea.innerHTML='<div class="empty-state"><div class="empty-icon">'+emptyIcon+'</div><div class="empty-title">'+emptyTitle+'</div><div class="empty-sub">'+emptySub+'</div></div>';
+    if(summary) summary.textContent='Sin posiciones'; if(badge) badge.style.display='none'; return;
   }
   let totalAlerts=0,alertBanners='',cards='',totalValue=0,totalCost=0;
-  portfolio.forEach((pos,idx)=>{
+  activePort.forEach((pos,idx)=>{
     const ev=evaluateAlerts(pos), tech=ev.tech, cur=tech.price;
     const trail=calcTrailingStop(pos,cur);
     const pnlPct=(((cur-pos.buyPrice)/pos.buyPrice)*100).toFixed(1);
     const pnlEur=((cur-pos.buyPrice)*pos.shares).toFixed(0);
     const pnlCol=parseFloat(pnlPct)>=0?'var(--green)':'var(--red)';
     totalValue+=cur*pos.shares; totalCost+=pos.buyPrice*pos.shares;
-    if(cur>(pos.highWaterMark||pos.buyPrice)){portfolio[idx].highWaterMark=cur;savePortfolio();}
+    if(cur>(pos.highWaterMark||pos.buyPrice)){
+      if(activePortfolioTab==='paper') paperPortfolio[idx].highWaterMark=cur; else portfolio[idx].highWaterMark=cur;
+      if(activePortfolioTab==='paper') savePaperPortfolio(); else savePortfolio();
+    }
     // Alertas
     if(cur<=trail.trailingStop){
       totalAlerts++;
@@ -5803,9 +6114,9 @@ function renderPortfolio() {
   const tPnlPct=(((totalValue-totalCost)/totalCost)*100).toFixed(1);
   const tPnlEur=(totalValue-totalCost).toFixed(0);
   const tCol=parseFloat(tPnlPct)>=0?'var(--green)':'var(--red)';
-  summary.innerHTML=`${portfolio.length} posiciones · <span style="color:${tCol}">${parseFloat(tPnlPct)>=0?'+':''}${tPnlPct}% (${parseFloat(tPnlEur)>=0?'+':''}${tPnlEur}€)</span>`;
+  if(activePortfolioTab==='real' && summary) summary.innerHTML=`${portfolio.length} pos. · <span style="color:${tCol}">${parseFloat(tPnlPct)>=0?'+':''}${tPnlPct}%</span>`;
   alertArea.innerHTML=alertBanners; listArea.innerHTML=cards||'<div style="height:8px"></div>';
-  badge.style.display=totalAlerts>0?'block':'none';
+  if(badge) badge.style.display=totalAlerts>0?'block':'none';
 }
 
 // ── Detalle de posición ───────────────────────────────────────────────────────
@@ -5814,7 +6125,8 @@ function findSimilarCase(pos,tech){
 }
 
 function openPosSheet(idx) {
-  const pos=portfolio[idx]; if(!pos) return;
+  const activePort = activePortfolioTab === 'paper' ? paperPortfolio : portfolio;
+  const pos=activePort[idx]; if(!pos) return;
   const ev=evaluateAlerts(pos), tech=ev.tech, cur=tech.price;
   const trail=calcTrailingStop(pos,cur);
   const sim=findSimilarCase(pos,tech);
@@ -5873,7 +6185,12 @@ function openPosSheet(idx) {
         </div>
       </div>
     </div>
-    <button class="btn-remove-pos" onclick="removePosition(${idx})">🗑 Eliminar posición</button>`;
+    <button class="btn-remove-pos" onclick="${activePortfolioTab === 'real' ? 'closePosSheet();openSellSheet(' + idx + ')' : 'removePosition(' + idx + ')'}">
+      ${activePortfolioTab === 'real' ? '💰 Registrar venta' : '🗑 Eliminar posición'}
+    </button>
+    <button onclick="removePosition(${idx})" style="width:100%;margin-top:8px;padding:13px;background:transparent;border:1px solid var(--border);border-radius:12px;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text3);cursor:pointer">
+      🗑 Eliminar entrada por error
+    </button>`;
   document.getElementById('posOverlay').classList.add('open');
   document.getElementById('posSheet').classList.add('open');
   document.body.style.overflow='hidden';
@@ -5885,7 +6202,69 @@ function closePosSheet(){
   document.body.style.overflow='';
 }
 
-// ── Formulario añadir posición ────────────────────────────────────────────────
+// ── Sheet de venta (cartera real) ─────────────────────────────────────────────
+let _sellIdx = null;
+
+function openSellSheet(idx) {
+  _sellIdx = idx;
+  const pos = portfolio[idx]; if (!pos) return;
+  const tech = getTechData(pos.ticker);
+  document.getElementById('sellSheetTitle').textContent = 'Vender ' + pos.ticker;
+  document.getElementById('sell-pos-info').innerHTML =
+    pos.shares + ' acciones · Entrada: ' + pos.buyPrice + '€ · Precio actual (ref): ' + tech.price + '€';
+  document.getElementById('sell-price').value = '';
+  document.getElementById('sell-date').value  = new Date().toISOString().slice(0,10);
+  document.getElementById('sell-pnl-preview').style.display = 'none';
+  document.getElementById('sellOverlay').classList.add('open');
+  document.getElementById('sellSheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('sell-price').focus(), 350);
+}
+
+function closeSellSheet() {
+  document.getElementById('sellOverlay').classList.remove('open');
+  document.getElementById('sellSheet').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function calcSellPnl() {
+  const pos = portfolio[_sellIdx]; if (!pos) return;
+  const sellPrice = parseFloat(document.getElementById('sell-price').value);
+  if (!sellPrice || sellPrice <= 0) { document.getElementById('sell-pnl-preview').style.display = 'none'; return; }
+  const income = sellPrice * pos.shares;
+  const cost   = pos.buyPrice * pos.shares;
+  const pnl    = income - cost;
+  const pnlCol = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('sell-preview-income').textContent = income.toFixed(2) + '€';
+  document.getElementById('sell-preview-pnl').textContent    = (pnl >= 0 ? '+' : '') + pnl.toFixed(2) + '€';
+  document.getElementById('sell-preview-pnl').style.color    = pnlCol;
+  document.getElementById('sell-pnl-preview').style.display  = '';
+}
+
+function confirmSell() {
+  const pos = portfolio[_sellIdx]; if (!pos) return;
+  const sellPrice = parseFloat(document.getElementById('sell-price').value);
+  const sellDate  = document.getElementById('sell-date').value || new Date().toISOString().slice(0,10);
+  if (!sellPrice || sellPrice <= 0) {
+    document.getElementById('sell-price').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('sell-price').style.borderColor = '', 1200); return;
+  }
+  const income = sellPrice * pos.shares;
+  const pnl    = income - pos.buyPrice * pos.shares;
+  // Devolver el efectivo al fondo
+  realFunds.cash += income;
+  realFunds.movements.unshift({ type: 'add', amount: income, date: sellDate, note: 'Venta ' + pos.ticker + ' × ' + pos.shares + ' acc.', id: Date.now() });
+  saveRealFunds();
+  // Registrar en diario automáticamente
+  autoSaveDiaryEntry({ id: Date.now(), ticker: pos.ticker, date: sellDate, type: 'sell', price: sellPrice, buyPrice: pos.buyPrice, shares: pos.shares, pnl: pnl.toFixed(2), portfolioType: 'real', source: 'portfolio' });
+  // Eliminar posición
+  portfolio.splice(_sellIdx, 1);
+  savePortfolio();
+  closeSellSheet();
+  renderPortfolio();
+}
+
+
 function openAddSheet(ticker, price) {
   if(riskSettings.capital) document.getElementById('input-capital').value=riskSettings.capital;
   document.getElementById('input-risk-pct').value=riskSettings.riskPct||1;
@@ -5927,12 +6306,45 @@ function confirmAddPosition(){
     setTimeout(()=>document.getElementById('input-ticker').style.borderColor='',1200); return;
   }
   saveRiskSettings();
-  portfolio.push({ticker,buyPrice,shares,buyDate,initialStop:stopVal||+(buyPrice*0.92).toFixed(2),highWaterMark:buyPrice,addedAt:Date.now()});
-  savePortfolio(); closeAddSheet(); renderPortfolio();
+  const newPos = {ticker,buyPrice,shares,buyDate,initialStop:stopVal||+(buyPrice*0.92).toFixed(2),highWaterMark:buyPrice,addedAt:Date.now(),portfolioType:activePortfolioTab};
+  if(activePortfolioTab==='paper'){
+    paperPortfolio.push(newPos); savePaperPortfolio();
+  } else {
+    // Descontar del efectivo disponible
+    const cost = buyPrice * shares;
+    realFunds.cash -= cost;
+    realFunds.movements.unshift({ type: 'withdraw', amount: cost, date: buyDate, note: 'Compra ' + ticker + ' × ' + shares + ' acc.', id: Date.now() });
+    saveRealFunds();
+    portfolio.push(newPos); savePortfolio();
+  }
+  closeAddSheet(); renderPortfolio();
 }
 
 function removePosition(idx){
-  portfolio.splice(idx,1); savePortfolio(); closePosSheet(); renderPortfolio();
+  const activePort = activePortfolioTab === 'paper' ? paperPortfolio : portfolio;
+  const pos = activePort[idx]; if (!pos) return;
+  if (!confirm('¿Eliminar la posición ' + pos.ticker + ' por error?\n\nEsto revertirá todos los efectos como si la entrada nunca hubiera existido.')) return;
+
+  if (activePortfolioTab === 'paper') {
+    paperPortfolio.splice(idx, 1); savePaperPortfolio();
+  } else {
+    // Devolver el coste de compra al efectivo
+    const cost = pos.buyPrice * pos.shares;
+    realFunds.cash += cost;
+    realFunds.movements.unshift({
+      type: 'add', amount: cost,
+      date: new Date().toISOString().slice(0,10),
+      note: '↩ Eliminación por error: compra ' + pos.ticker + ' × ' + pos.shares + ' acc.',
+      id: Date.now()
+    });
+    // Eliminar también el movimiento de fondos original de la compra (si existe)
+    const buyNoteMatch = 'Compra ' + pos.ticker + ' × ' + pos.shares + ' acc.';
+    const origIdx = realFunds.movements.findIndex(m => m.type === 'withdraw' && m.note === buyNoteMatch);
+    if (origIdx !== -1) realFunds.movements.splice(origIdx, 1);
+    saveRealFunds();
+    portfolio.splice(idx, 1); savePortfolio();
+  }
+  closePosSheet(); renderPortfolio();
 }
 
 </script>
