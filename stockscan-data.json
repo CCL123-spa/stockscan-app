@@ -522,8 +522,15 @@
     "closedWins": 0
   },
   "realFunds": {
-    "cash": 1000,
+    "cash": 0,
     "movements": [
+      {
+        "type": "withdraw",
+        "amount": 1000,
+        "date": "2026-03-25",
+        "note": "Test",
+        "id": 1774441880181
+      },
       {
         "type": "add",
         "amount": 192.20000000000002,
@@ -547,5 +554,5 @@
       }
     ]
   },
-  "updatedAt": "2026-03-25T12:04:39.841Z"
+  "updatedAt": "2026-03-25T12:31:20.181Z"
 }
