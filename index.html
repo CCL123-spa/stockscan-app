@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.28</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.28</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.29</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.29</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -5928,22 +5928,52 @@ function drawChart(canvasId, series, opts = {}) {
     lx += 46;
   });
 
-  // Etiquetas eje X (fechas aproximadas)
+  // Etiquetas eje X — se adaptan al rango mostrado
   const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const now = new Date();
   ctx.fillStyle = 'rgba(92,122,144,0.7)';
   ctx.font      = `9px "DM Mono", monospace`;
   ctx.textAlign = 'center';
   const hasRealDates = candles[0] && candles[0].t;
-  [0, 0.33, 0.66, 1].forEach(frac => {
-    let d;
-    if (hasRealDates) {
-      const idx = Math.round(frac * (n - 1));
-      d = new Date(candles[idx].t * 1000);
+
+  // Decidir cuántas etiquetas y qué formato según el nº de velas
+  let fracs, fmt;
+  if (n <= 2) {
+    fracs = [0, 1];
+    fmt = c => { const d = new Date(c.t * 1000); return `${d.getDate()} ${months[d.getMonth()]}`; };
+  } else if (n <= 10) {
+    // 1D o 5D: mostrar cada vela si caben, máx 5 etiquetas
+    const step = Math.max(1, Math.floor(n / 4));
+    fracs = [];
+    for (let i = 0; i < n; i += step) fracs.push(i / (n - 1));
+    if (fracs[fracs.length - 1] < 0.99) fracs.push(1);
+    fmt = c => { const d = new Date(c.t * 1000); return `${d.getDate()} ${months[d.getMonth()]}`; };
+  } else if (n <= 35) {
+    fracs = [0, 0.25, 0.5, 0.75, 1];
+    fmt = c => { const d = new Date(c.t * 1000); return `${d.getDate()} ${months[d.getMonth()]}`; };
+  } else if (n <= 100) {
+    fracs = [0, 0.33, 0.66, 1];
+    fmt = c => { const d = new Date(c.t * 1000); return `${d.getDate()} ${months[d.getMonth()]}`; };
+  } else {
+    fracs = [0, 0.25, 0.5, 0.75, 1];
+    fmt = c => { const d = new Date(c.t * 1000); return `${months[d.getMonth()]} ${d.getFullYear().toString().slice(2)}`; };
+  }
+
+  if (!hasRealDates) {
+    // Datos simulados — usar fechas aproximadas
+    fracs = [0, 0.33, 0.66, 1];
+    fmt = null;
+  }
+
+  fracs.forEach(frac => {
+    const idx = Math.min(n - 1, Math.round(frac * (n - 1)));
+    let lbl;
+    if (hasRealDates && fmt) {
+      lbl = fmt(candles[idx]);
     } else {
-      d = new Date(now - (1 - frac) * 90 * 86400000);
+      const d = new Date(now - (1 - frac) * 90 * 86400000);
+      lbl = `${d.getDate()} ${months[d.getMonth()]}`;
     }
-    const lbl = `${d.getDate()} ${months[d.getMonth()]}`;
     ctx.fillText(lbl, padL + frac * chartW, h - 6);
   });
 
