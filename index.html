@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.30-debug</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.30-debug</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.30</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.30</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -5732,7 +5732,9 @@ function generatePriceSeries(opts) {
   const scale = price / raw[raw.length - 1];
   const normalised = raw.map(v => v * scale);
 
-  // Generamos velas OHLC desde los cierres
+  // Generamos velas OHLC desde los cierres — con timestamps reales hacia atrás desde hoy
+  const nowTs = Math.floor(Date.now() / 1000);
+  const DAY   = 86400;
   const candles = normalised.map((close, i) => {
     const prev  = i > 0 ? normalised[i-1] : close;
     const range = close * vol * (0.5 + r() * 1.5);
@@ -5740,7 +5742,9 @@ function generatePriceSeries(opts) {
     const bull  = close >= open;
     const high  = Math.max(open, close) + range * (0.3 + r() * 0.4);
     const low   = Math.min(open, close) - range * (0.3 + r() * 0.4);
-    return { o: +open.toFixed(2), h: +high.toFixed(2), l: +low.toFixed(2), c: +close.toFixed(2), bull };
+    // t = timestamp del día correspondiente (días - i días atrás desde hoy)
+    const t = nowTs - (days - 1 - i) * DAY;
+    return { t, o: +open.toFixed(2), h: +high.toFixed(2), l: +low.toFixed(2), c: +close.toFixed(2), bull };
   });
 
   // MA50 y MA200 (calculadas sobre los cierres)
@@ -5935,12 +5939,6 @@ function drawChart(canvasId, series, opts = {}) {
   ctx.font      = `9px "DM Mono", monospace`;
   ctx.textAlign = 'center';
   const hasRealDates = candles[0] && candles[0].t;
-  // DEBUG: mostrar info en el gráfico
-  ctx.fillStyle = 'rgba(255,255,0,0.9)';
-  ctx.textAlign = 'left';
-  ctx.fillText('n='+n+' t='+(hasRealDates?'SI':'NO')+' first='+(candles[0]?.t||'?'), padL+2, padT+20);
-  ctx.fillStyle = 'rgba(92,122,144,0.7)';
-  ctx.textAlign = 'center';
 
   // Decidir cuántas etiquetas y qué formato según el nº de velas
   let fracs, fmt;
