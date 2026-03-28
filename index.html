@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.30</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.30</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.31</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.31</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2437,9 +2437,12 @@ const STOCKS = [
 
 const PRICES = {
   SAN:6.2,ITX:47.8,BBVA:9.1,IBE:11.4,TEF:4.3,REP:13.8,AMS:68.5,CABK:5.6,FER:38.2,MAP:2.1,
-  ASML:680,LVMH:620,SAP:185,NOVO:92,SIE:172,AXA:34,BAS:41,ALV:256,VOW:98,DTE:22,
+  ACS:42,ELE:22,SAB:1.9,GRF:8.5,MEL:5.1,
+  ASML:680,LVMH:620,SAP:185,NOVO:92,SIE:172,AXA:34,BAS:41,ALV:256,VOW:98,DTE:22,AIR:165,
   AAPL:213,MSFT:415,JPM:198,JNJ:155,XOM:112,WMT:168,PG:162,BAC:38,KO:62,DIS:98,
-  NVDA:875,AMZN:192,GOOGL:175,META:520,TSLA:248,NFLX:645,AMD:168,INTC:22,ADBE:448,PYPL:72
+  CVX:155,V:275,UNH:485,HD:380,MRK:128,
+  NVDA:875,AMZN:192,GOOGL:175,META:520,TSLA:248,NFLX:645,AMD:168,INTC:22,ADBE:448,PYPL:72,
+  QCOM:168,CSCO:48,SBUX:82,ABNB:132,CRM:295
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -4548,6 +4551,41 @@ function navigate(id, el) {
   if (el) el.classList.add('active');
   if (id === 'portfolio') {
     renderPortfolio();
+    // Hacer fetch de precios reales para los tickers en cartera que no están en results
+    const allPos = [...portfolio, ...paperPortfolio];
+    if (allPos.length > 0) {
+      const missing = [...new Set(allPos.map(p => p.ticker))].filter(t => !results.find(r => r.t === t));
+      if (missing.length > 0) {
+        missing.forEach(t => {
+          const proxyTicker = INTERNAL_TO_PROXY[t] || t;
+          const proxyBase   = localStorage.getItem('stockscan_proxy_url') || PROXY_URL;
+          const url = `${proxyBase}/quote?ticker=${encodeURIComponent(proxyTicker)}&range=1y&interval=1d`;
+          fetch(url)
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+              if (data && data.candles && data.candles.length > 0) {
+                const closes = data.candles.map(c => c.c);
+                const last   = closes[closes.length - 1];
+                const prev   = closes[closes.length - 2] || last;
+                // Añadir a results para que getTechData lo encuentre
+                const existing = results.find(r => r.t === t);
+                if (existing) {
+                  existing.price = last;
+                  existing.chg   = +((last - prev) / prev * 100).toFixed(2);
+                  existing.candles = data.candles;
+                } else {
+                  results.push({ t, price: last, chg: +((last-prev)/prev*100).toFixed(2), candles: data.candles,
+                    rsi: 50, mv: 1, ms: 0, golden: false, aboveMa50: true, score: 2, hist: 0, n: t, m: 'sp500', s: '', sig: 'neutral' });
+                }
+                realDataCache[`${proxyTicker}_1y`] = { data, expiry: Date.now() + CACHE_TTL };
+                // Re-renderizar cuando lleguen los datos
+                const portPage = document.getElementById('page-portfolio');
+                if (portPage && portPage.classList.contains('active')) renderPortfolio();
+              }
+            }).catch(() => {});
+        });
+      }
+    }
   }
   if (id === 'diary') { loadFromGitHub(); }
   if (id === 'guide') {
@@ -6303,14 +6341,18 @@ function refreshPortfolioPrices() {
       .then(data => {
         if (data && data.candles && data.candles.length > 0) {
           realDataCache[cacheKey] = { data, expiry: Date.now() + CACHE_TTL };
+          const closes = data.candles.map(c => c.c);
+          const last   = closes[closes.length - 1];
+          const prev   = closes[closes.length - 2] || last;
+          // Actualizar o añadir en results
           const scanRes = results.find(r => r.t === t);
           if (scanRes) {
-            const closes  = data.candles.map(c => c.c);
-            const last    = closes[closes.length - 1];
-            const prev    = closes[closes.length - 2] || last;
             scanRes.price   = last;
             scanRes.chg     = +((last - prev) / prev * 100).toFixed(2);
             scanRes.candles = data.candles;
+          } else {
+            results.push({ t, price: last, chg: +((last-prev)/prev*100).toFixed(2), candles: data.candles,
+              rsi: 50, mv: 1, ms: 0, golden: false, aboveMa50: true, score: 2, hist: 0, n: t, m: 'sp500', s: '', sig: 'neutral' });
           }
         }
       })
