@@ -1,6 +1,21 @@
 {
   "diary": [
     {
+      "id": 1774867371759,
+      "ticker": "CVX",
+      "date": "2026-03-30",
+      "type": "sell",
+      "price": 187.01,
+      "buyPrice": 100,
+      "shares": 9,
+      "pnl": "781.09",
+      "retencion": "0",
+      "fee": 1,
+      "portfolioType": "paper",
+      "source": "stop_loss",
+      "note": "Stop loss automático (paper)"
+    },
+    {
       "id": 1774477306485,
       "ticker": "CVX",
       "date": "2026-03-25",
@@ -576,24 +591,13 @@
     "define-exit": "2026-03-24T22:53:18.204Z"
   },
   "portfolio": [],
-  "paperPortfolio": [
-    {
-      "ticker": "CVX",
-      "buyPrice": 100,
-      "shares": 9,
-      "buyDate": "2026-03-25",
-      "initialStop": 90,
-      "highWaterMark": 207.79,
-      "addedAt": 1774477306483,
-      "portfolioType": "paper"
-    }
-  ],
+  "paperPortfolio": [],
   "paperSettings": {
     "initialCapital": 10000,
     "spentCapital": 0,
-    "closedPnl": 60.60000000000002,
-    "closedTrades": 1,
-    "closedWins": 1
+    "closedPnl": 841.6899999999999,
+    "closedTrades": 2,
+    "closedWins": 2
   },
   "realFunds": {
     "cash": 0,
@@ -632,5 +636,5 @@
     "retencionesPendientes": 0,
     "year": 2026
   },
-  "updatedAt": "2026-03-27T16:00:18.909Z"
+  "updatedAt": "2026-03-30T10:42:51.766Z"
 }
