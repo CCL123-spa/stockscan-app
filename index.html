@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.31</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.31</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.32</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.32</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -4031,41 +4031,131 @@ function renderDiaryEntries() {
   const el = document.getElementById('diary-entries-list');
   if (!el) return;
   if (!diaryEntries.length) {
-    el.innerHTML = `<div style="text-align:center;padding:40px 20px"><div style="font-size:2rem;margin-bottom:12px">📓</div><div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">Tu diario está vacío</div><div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-top:6px">Las operaciones del paper trading<br>se guardarán aquí automáticamente</div></div>`;
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px"><div style="font-size:2rem;margin-bottom:12px">📓</div><div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">Tu diario está vacío</div><div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-top:6px">Las operaciones de cartera se guardarán aquí automáticamente</div></div>`;
     return;
   }
   el.innerHTML = diaryEntries.map((e, i) => {
-    const correctIcon = e.correct === true ? '✅' : e.correct === false ? '❌' : '⏳';
-    const pnlColor    = e.result30 > 0 ? 'var(--green)' : e.result30 < 0 ? 'var(--red)' : 'var(--text3)';
-    const sourceBadge = e.source === 'paper' ? '<span style="background:var(--accent);color:var(--bg);border-radius:4px;padding:1px 5px;font-size:0.45rem;font-weight:700;margin-left:4px">PAPER</span>' : '<span style="background:var(--orange);color:var(--bg);border-radius:4px;padding:1px 5px;font-size:0.45rem;font-weight:700;margin-left:4px">MANUAL</span>';
-    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px" onclick="toggleDiaryDetail(${i})">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--accent)">${e.ticker}</span>
-          ${sourceBadge}
+    const isPortfolio = e.source === 'portfolio' || e.source === 'stop_loss';
+    const isStopLoss  = e.source === 'stop_loss';
+    const isPaper     = e.portfolioType === 'paper';
+    const isBuy       = e.type === 'buy';
+    const isSell      = e.type === 'sell';
+
+    const typeBadge = isBuy
+      ? '<span style="background:rgba(34,211,160,0.15);color:var(--green);border:1px solid rgba(34,211,160,0.3);border-radius:5px;padding:2px 7px;font-size:0.5rem;font-weight:700">📈 COMPRA</span>'
+      : isStopLoss
+      ? '<span style="background:rgba(245,86,74,0.15);color:var(--red);border:1px solid rgba(245,86,74,0.3);border-radius:5px;padding:2px 7px;font-size:0.5rem;font-weight:700">🔴 STOP LOSS</span>'
+      : isSell
+      ? '<span style="background:rgba(245,86,74,0.1);color:var(--orange);border:1px solid rgba(245,158,42,0.3);border-radius:5px;padding:2px 7px;font-size:0.5rem;font-weight:700">📉 VENTA</span>'
+      : '<span style="background:var(--card2);color:var(--text2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;font-size:0.5rem">' + (TYPE_LABELS[e.type]||e.type) + '</span>';
+
+    const portfolioBadge = isPaper
+      ? '<span style="background:var(--purple);color:var(--bg);border-radius:4px;padding:1px 5px;font-size:0.45rem;font-weight:700">PAPER</span>'
+      : isPortfolio
+      ? '<span style="background:var(--accent);color:var(--bg);border-radius:4px;padding:1px 5px;font-size:0.45rem;font-weight:700">REAL</span>'
+      : '<span style="background:var(--orange);color:var(--bg);border-radius:4px;padding:1px 5px;font-size:0.45rem;font-weight:700">MANUAL</span>';
+
+    const pnl      = parseFloat(e.pnl);
+    const hasPnl   = isSell && isPortfolio && !isNaN(pnl);
+    const pnlColor = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+    const pnlPct   = e.buyPrice && e.price ? (((parseFloat(e.price) - parseFloat(e.buyPrice)) / parseFloat(e.buyPrice)) * 100).toFixed(1) : null;
+    const retencion = parseFloat(e.retencion || 0);
+
+    // Duración de la operación (solo en ventas con fecha de compra en el diario)
+    let duracion = '';
+    if (isSell && e.buyPrice) {
+      // Buscar la entrada de compra correspondiente
+      const buyEntry = diaryEntries.find(b => b.ticker === e.ticker && b.type === 'buy' && b.date <= e.date);
+      if (buyEntry && buyEntry.date) {
+        const days = Math.round((new Date(e.date) - new Date(buyEntry.date)) / 86400000);
+        duracion = days > 0 ? days + (days === 1 ? ' día' : ' días') : '';
+      }
+    }
+
+    // Bloque de métricas para operaciones de cartera
+    let metricsHtml = '';
+    if (isPortfolio && isBuy && e.price && e.shares) {
+      const total = (parseFloat(e.price) * parseFloat(e.shares)).toFixed(0);
+      metricsHtml = `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px" onclick="toggleDiaryDetail(${i})">
+        <div style="text-align:center;background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:7px 4px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.8rem;font-weight:500;color:var(--text)">${parseFloat(e.price).toFixed(2)}€</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text3);margin-top:2px">PRECIO</div>
         </div>
-        <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3)">${e.date}</span>
+        <div style="text-align:center;background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:7px 4px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.8rem;font-weight:500;color:var(--text)">${e.shares} acc.</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text3);margin-top:2px">ACCIONES</div>
+        </div>
+        <div style="text-align:center;background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:7px 4px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.8rem;font-weight:500;color:var(--accent)">${total}€</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text3);margin-top:2px">INVERTIDO</div>
+        </div>
+      </div>`;
+    } else if (isPortfolio && isSell && e.price && e.shares) {
+      metricsHtml = `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr ${!isPaper && retencion > 0 ? '1fr' : ''};gap:6px;margin-bottom:8px" onclick="toggleDiaryDetail(${i})">
+        <div style="text-align:center;background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:7px 4px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.8rem;font-weight:500;color:var(--text)">${parseFloat(e.buyPrice||0).toFixed(2)}€</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text3);margin-top:2px">COMPRA</div>
+        </div>
+        <div style="text-align:center;background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:7px 4px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.8rem;font-weight:500;color:var(--text)">${parseFloat(e.price).toFixed(2)}€</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text3);margin-top:2px">VENTA</div>
+        </div>
+        <div style="text-align:center;background:var(--card2);border:1px solid ${pnl>=0?'rgba(34,211,160,0.3)':'rgba(245,86,74,0.3)'};border-radius:7px;padding:7px 4px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.75rem;font-weight:500;color:${pnlColor}">${pnl>=0?'+':''}${pnl.toFixed(0)}€</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:${pnlColor};margin-top:2px">${pnlPct?((pnlPct>=0?'+':'')+pnlPct+'%'):'P&L'}</div>
+        </div>
+        ${!isPaper && retencion > 0 ? `
+        <div style="text-align:center;background:var(--card2);border:1px solid rgba(245,86,74,0.2);border-radius:7px;padding:7px 4px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.8rem;font-weight:500;color:var(--red)">-${retencion.toFixed(0)}€</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--text3);margin-top:2px">RETENCIÓN</div>
+        </div>` : ''}
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="display:flex;gap:8px;align-items:center">
-          <span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text2)">${TYPE_LABELS[e.type]||e.type}</span>
-          ${e.emotion ? `<span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3)">${EMOTION_LABELS[e.emotion]||''}</span>` : ''}
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          ${e.result30 !== null ? `<span style="font-family:'DM Mono',monospace;font-size:0.75rem;font-weight:700;color:${pnlColor}">${e.result30>0?'+':''}${e.result30}%</span>` : ''}
-          <span style="font-size:0.9rem">${correctIcon}</span>
-        </div>
-      </div>
-      <div id="diary-detail-${i}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-        ${e.reason ? `<div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-bottom:3px">RAZONAMIENTO</div><div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text);margin-bottom:8px;line-height:1.5">${e.reason}</div>` : ''}
-        ${e.indicators ? `<div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-bottom:3px">INDICADORES</div><div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text2);margin-bottom:8px">RSI ${e.indicators.rsi} · MACD ${e.indicators.hist>0?'Alcista':'Bajista'} · Score ${e.indicators.score}/5</div>` : ''}
-        ${e.stop ? `<div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text3)">Stop: ${e.stop} · Objetivo: ${e.target||'—'}</div>` : ''}
-        ${e.lesson ? `<div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-top:8px;margin-bottom:3px">APRENDIZAJE</div><div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--green);line-height:1.5">${e.lesson}</div>` : ''}
-        <div style="margin-top:10px">
+      ${isStopLoss ? `<div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--red);margin-bottom:8px;padding:6px 10px;background:rgba(245,86,74,0.08);border:1px solid rgba(245,86,74,0.2);border-radius:7px">🔴 Stop loss ejecutado automáticamente al precio ${parseFloat(e.price).toFixed(2)}€${duracion?' · Posición mantenida '+duracion:''}</div>` : ''}`;
+    }
+
+    // Detalle expandible
+    const expandDetail = `
+      <div id="diary-detail-${i}" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        ${isSell && e.shares ? `
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+          <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Resumen completo</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-family:'DM Mono',monospace;font-size:0.6rem;line-height:1.8">
+            <div><span style="color:var(--text3)">Acciones: </span><span style="color:var(--text)">${e.shares}</span></div>
+            <div><span style="color:var(--text3)">Coste total: </span><span style="color:var(--text)">${(parseFloat(e.buyPrice||0)*parseFloat(e.shares||0)).toFixed(0)}€</span></div>
+            <div><span style="color:var(--text3)">Ingreso bruto: </span><span style="color:var(--text)">${(parseFloat(e.price||0)*parseFloat(e.shares||0)).toFixed(0)}€</span></div>
+            ${e.fee ? `<div><span style="color:var(--text3)">Comisiones: </span><span style="color:var(--text2)">${(parseFloat(e.fee)*2).toFixed(0)}€</span></div>` : ''}
+            ${retencion > 0 ? `<div><span style="color:var(--text3)">Retención IRPF: </span><span style="color:var(--red)">-${retencion.toFixed(2)}€</span></div>` : ''}
+            ${duracion ? `<div><span style="color:var(--text3)">Duración: </span><span style="color:var(--text)">${duracion}</span></div>` : ''}
+            ${e.stop ? `<div><span style="color:var(--text3)">Stop inicial: </span><span style="color:var(--text)">${e.stop}€</span></div>` : ''}
+          </div>
+        </div>` : ''}
+        ${e.indicators ? `
+        <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Indicadores al entrar</div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text2);margin-bottom:8px">RSI ${e.indicators.rsi} · MACD ${e.indicators.macd||''} · Score ${e.indicators.score}/5</div>` : ''}
+        ${e.reason ? `<div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">Razonamiento</div><div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--text);margin-bottom:8px;line-height:1.5">${e.reason}</div>` : ''}
+        ${e.note ? `<div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-bottom:6px;font-style:italic">${e.note}</div>` : ''}
+        ${e.lesson ? `<div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">Aprendizaje</div><div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--green);line-height:1.5;margin-bottom:8px">${e.lesson}</div>` : ''}
+        ${e.emotion ? `<div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--text3);margin-bottom:8px">${EMOTION_LABELS[e.emotion]||''}</div>` : ''}
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
           <button onclick="event.stopPropagation();deleteDiaryEntry(${i})" style="padding:5px 10px;border:1px solid var(--red);background:transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--red);cursor:pointer">🗑 Eliminar</button>
-          ${!e.lesson ? `<button onclick="event.stopPropagation();editLesson(${i})" style="margin-left:6px;padding:5px 10px;border:1px solid var(--border);background:transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text2);cursor:pointer">✏️ Añadir aprendizaje</button>` : ''}
+          <button onclick="event.stopPropagation();editLesson(${i})" style="padding:5px 10px;border:1px solid var(--border);background:transparent;border-radius:6px;font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--text2);cursor:pointer">${e.lesson ? '✏️ Editar aprendizaje' : '✏️ Añadir aprendizaje'}</button>
         </div>
+      </div>`;
+
+    return `<div style="background:var(--card);border:1px solid ${isStopLoss?'rgba(245,86,74,0.4)':hasPnl&&pnl>=0?'rgba(34,211,160,0.2)':hasPnl?'rgba(245,86,74,0.2)':'var(--border)'};border-radius:12px;padding:12px 14px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px" onclick="toggleDiaryDetail(${i})">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-family:'DM Mono',monospace;font-size:0.9rem;font-weight:700;color:var(--accent)">${e.ticker||'—'}</span>
+          ${typeBadge}
+          ${portfolioBadge}
+          ${duracion ? `<span style="font-family:'DM Mono',monospace;font-size:0.48rem;color:var(--text3)">${duracion}</span>` : ''}
+        </div>
+        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text3);white-space:nowrap;margin-left:8px">${e.date||''}</span>
       </div>
+      ${metricsHtml}
+      ${expandDetail}
     </div>`;
   }).join('');
 }
