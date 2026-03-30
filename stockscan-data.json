@@ -1,26 +1,6 @@
 {
   "diary": [
     {
-      "id": 1774477306485,
-      "ticker": "CVX",
-      "date": "2026-03-25",
-      "type": "buy",
-      "price": 100,
-      "shares": 9,
-      "stop": 90,
-      "portfolioType": "paper",
-      "source": "portfolio",
-      "indicators": {
-        "rsi": 38,
-        "macd": "alcista",
-        "ma": "golden cross",
-        "aboveMa50": true,
-        "score": 4,
-        "priceAtBuy": 100
-      },
-      "lesson": "Compré por indicadores correctos aunque tendencia venía bajando desde hace tiempo. Más por probar el paper trading que por interés en la acción "
-    },
-    {
       "id": 1774477092292,
       "ticker": "UNH",
       "date": "2026-03-25",
@@ -621,5 +601,5 @@
     "retencionesPendientes": 0,
     "year": 2026
   },
-  "updatedAt": "2026-03-30T12:28:04.587Z"
+  "updatedAt": "2026-03-30T12:28:07.639Z"
 }
