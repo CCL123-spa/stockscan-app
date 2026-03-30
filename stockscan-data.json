@@ -1,21 +1,6 @@
 {
   "diary": [
     {
-      "id": 1774867371759,
-      "ticker": "CVX",
-      "date": "2026-03-30",
-      "type": "sell",
-      "price": 187.01,
-      "buyPrice": 100,
-      "shares": 9,
-      "pnl": "781.09",
-      "retencion": "0",
-      "fee": 1,
-      "portfolioType": "paper",
-      "source": "stop_loss",
-      "note": "Stop loss automático (paper)"
-    },
-    {
       "id": 1774477306485,
       "ticker": "CVX",
       "date": "2026-03-25",
@@ -636,5 +621,5 @@
     "retencionesPendientes": 0,
     "year": 2026
   },
-  "updatedAt": "2026-03-30T10:42:51.766Z"
+  "updatedAt": "2026-03-30T12:28:04.587Z"
 }
