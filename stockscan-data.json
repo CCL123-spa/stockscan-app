@@ -617,7 +617,7 @@
       "shares": 26,
       "buyDate": "2026-03-31",
       "initialStop": 34.2,
-      "highWaterMark": 38,
+      "highWaterMark": 47.23,
       "addedAt": 1774951710537,
       "portfolioType": "paper"
     }
@@ -666,5 +666,5 @@
     "retencionesPendientes": 0,
     "year": 2026
   },
-  "updatedAt": "2026-03-31T10:08:30.543Z"
+  "updatedAt": "2026-03-31T10:08:37.702Z"
 }
