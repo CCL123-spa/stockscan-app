@@ -1,6 +1,21 @@
 {
   "diary": [
     {
+      "id": 1774952238338,
+      "ticker": "BAC",
+      "date": "2026-03-31",
+      "type": "sell",
+      "price": 42.51,
+      "buyPrice": 38,
+      "shares": 26,
+      "pnl": "115.26",
+      "retencion": "0",
+      "fee": 1,
+      "portfolioType": "paper",
+      "source": "stop_loss",
+      "note": "Stop loss automático (paper)"
+    },
+    {
       "id": 1774951710542,
       "ticker": "BAC",
       "date": "2026-03-31",
@@ -610,24 +625,13 @@
     "define-exit": "2026-03-24T22:53:18.204Z"
   },
   "portfolio": [],
-  "paperPortfolio": [
-    {
-      "ticker": "BAC",
-      "buyPrice": 38,
-      "shares": 26,
-      "buyDate": "2026-03-31",
-      "initialStop": 34.2,
-      "highWaterMark": 47.23,
-      "addedAt": 1774951710537,
-      "portfolioType": "paper"
-    }
-  ],
+  "paperPortfolio": [],
   "paperSettings": {
     "initialCapital": 10000,
     "spentCapital": 0,
-    "closedPnl": 796.1899999999999,
-    "closedTrades": 3,
-    "closedWins": 2
+    "closedPnl": 911.4499999999999,
+    "closedTrades": 4,
+    "closedWins": 3
   },
   "realFunds": {
     "cash": 0,
@@ -666,5 +670,6 @@
     "retencionesPendientes": 0,
     "year": 2026
   },
-  "updatedAt": "2026-03-31T10:08:37.702Z"
+  "priceCache": {},
+  "updatedAt": "2026-03-31T10:17:18.343Z"
 }
