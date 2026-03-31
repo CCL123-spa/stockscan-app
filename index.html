@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.41</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.41</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.42</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.42</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2582,7 +2582,7 @@ async function fetchRealData(ticker, range = '1y', proxyTickerOverride) {
   const keyParam    = polygonKey ? `&apikey=${encodeURIComponent(polygonKey)}` : '';
   const url = `${proxyBase}/quote?ticker=${encodeURIComponent(proxyTicker)}&range=${range}&interval=1d${keyParam}`;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
+  const timer = setTimeout(() => controller.abort(), 20000);
   try {
     const res  = await fetch(url, { signal: controller.signal });
     clearTimeout(timer);
@@ -2664,39 +2664,17 @@ async function runScan() {
   const total  = stocks.length;
 
   if (USE_REAL_DATA) {
-    tx.textContent = 'Conectando con el servidor…';
-
-    // Wake-up: esperar a que el proxy esté listo antes de escanear
-    const proxyBase  = localStorage.getItem('stockscan_proxy_url') || PROXY_URL;
-    const polygonKey = localStorage.getItem('polygon_api_key') || '';
-    const keyParam   = polygonKey ? `?apikey=${encodeURIComponent(polygonKey)}` : '';
-    const pingUrl    = `${proxyBase}/quote?ticker=AAPL&range=5d&interval=1d${polygonKey ? '&apikey=' + encodeURIComponent(polygonKey) : ''}`;
-
-    let proxyReady = false;
-    for (let attempt = 0; attempt < 5 && !proxyReady; attempt++) {
-      try {
-        const r = await fetch(pingUrl, { signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined });
-        if (r.ok) { proxyReady = true; }
-        else { await new Promise(r => setTimeout(r, 3000)); }
-      } catch(e) {
-        tx.textContent = `Esperando servidor… (${(attempt+1)*8}s)`;
-        await new Promise(r => setTimeout(r, 3000));
-      }
-    }
-
-    if (!proxyReady) {
-      tx.textContent = 'Servidor no disponible — usando caché';
-      await new Promise(r => setTimeout(r, 1500));
-    } else {
-      tx.textContent = 'Servidor listo. Analizando…';
-    }
-
+    tx.textContent = 'Obteniendo datos reales…';
+    let done = 0;
+    const BATCH = 4;
     const scanResults = [];
-    for (let i = 0; i < stocks.length; i++) {
-      const result = await fetchStockReal(stocks[i]);
-      scanResults.push(result);
-      pf.style.width = ((i + 1) / total * 100) + '%';
-      tx.textContent = `Analizando… ${i + 1}/${total}`;
+    for (let i = 0; i < stocks.length; i += BATCH) {
+      const batch = stocks.slice(i, i + BATCH);
+      const batchResults = await Promise.all(batch.map(s => fetchStockReal(s)));
+      scanResults.push(...batchResults);
+      done += batch.length;
+      pf.style.width = (done / total * 100) + '%';
+      tx.textContent = `Analizando… ${done}/${total}`;
       results = [...scanResults];
       renderList(applyFilters(results));
     }
