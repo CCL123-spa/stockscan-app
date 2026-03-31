@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.42</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.42</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.38</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.38</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2623,12 +2623,12 @@ async function fetchStockReal(stock) {
     savePriceToCache(stock.t, indicators.price);
     return { ...stock, ...indicators, realData: true };
   } catch (err) {
-    // Fallo — usar priceCache si existe
+    // Fallo — usar priceCache persistente si existe, luego PRICES como último recurso
     const cached = getPriceCacheInfo(stock.t);
     if (cached) {
       return { ...stock, price: cached.price, chg: 0, rsi: 50, mv: 1, ms: 0, golden: false, aboveMa50: true, score: 0, hist: 0, sig: 'neutral', realData: false, fromCache: true, cacheInfo: cached };
     }
-    return { ...stock, price: null, rsi: 50, mv: 1, ms: 0, golden: false, aboveMa50: true, score: 0, hist: 0, sig: 'neutral', realData: false };
+    return { ...stock, price: PRICES[stock.t] || null, ...genTech(stock.t), realData: false };
   }
 }
 
