@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.36</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.36</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.38</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.38</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2633,7 +2633,7 @@ async function fetchStockReal(stock, retry = false) {
     if (cached) {
       return { ...stock, price: cached.price, chg: 0, rsi: 50, mv: 1, ms: 0, golden: false, aboveMa50: true, score: 0, hist: 0, sig: 'neutral', realData: false, fromCache: true, cacheInfo: cached };
     }
-    return { ...stock, price: null, realData: false };
+    return { ...stock, price: null, rsi: 50, mv: 1, ms: 0, golden: false, aboveMa50: true, score: 0, hist: 0, sig: 'neutral', realData: false };
   }
 }
 
@@ -2671,8 +2671,9 @@ async function runScan() {
   if (USE_REAL_DATA) {
     tx.textContent = 'Obteniendo datos reales…';
     let done = 0;
-    // Procesamos en lotes de 4 para no saturar el proxy
-    const BATCH = 4;
+    // Lotes de 2 con 800ms entre lotes para no saturar el proxy free tier
+    const BATCH = 2;
+    const DELAY = 800;
     const scanResults = [];
     for (let i = 0; i < stocks.length; i += BATCH) {
       const batch = stocks.slice(i, i + BATCH);
@@ -2681,6 +2682,10 @@ async function runScan() {
       done += batch.length;
       pf.style.width = (done / total * 100) + '%';
       tx.textContent = `Analizando… ${done}/${total}`;
+      // Renderizar parcialmente para que el usuario vea progreso
+      results = [...scanResults];
+      renderList(applyFilters(results));
+      if (i + BATCH < stocks.length) await new Promise(r => setTimeout(r, DELAY));
     }
     results = scanResults;
   } else {
@@ -2742,6 +2747,10 @@ function renderList(data) {
     if (s.fromCache && s.cacheInfo) return `<span style="color:var(--orange);font-size:0.75rem">` + (['ibex','eurostoxx'].includes(m)?p.toFixed(2)+' €':'$ '+p.toFixed(2)) + `</span><span style="font-size:0.45rem;color:var(--orange);margin-left:3px">⏱</span>`;
     return (['ibex','eurostoxx'].includes(m)?p.toFixed(2)+' €':'$ '+p.toFixed(2));
   };
+  const fmtBadge=(s)=>{
+    if (!s.realData) return `<span style="background:var(--card2);color:var(--text3);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:0.6rem;font-family:'DM Mono',monospace">sin análisis</span>`;
+    return `<div class="sig-badge ${s.sig}">${sigLabels[s.sig]}</div>`;
+  };
 
   el.innerHTML = data.map((s,i)=>{
     const dots=[1,2,3,4,5].map(n=>`<div class="sdot ${n<=s.score?(s.score>=3?'on-buy':'on-sell'):''}"></div>`).join('');
@@ -2757,7 +2766,7 @@ function renderList(data) {
       </div>
       <div class="stock-right">
         <div class="stock-price">${fmtPrice(s)}</div>
-        <div class="sig-badge ${s.sig}">${sigLabels[s.sig]}</div>
+        ${fmtBadge(s)}
         <div class="score-dots">${dots}</div>
       </div>
     </div>`;
