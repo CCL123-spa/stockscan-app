@@ -1697,8 +1697,8 @@ html, body {
       </div>
       <div class="card">
         <div class="setting-row">
-          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.32</p></div>
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.32</span>
+          <div class="setting-info"><h4>Versión</h4><p>StockScan PWA v1.8.35</p></div>
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text2)">1.8.35</span>
         </div>
         <div class="setting-row">
           <div class="setting-info"><h4>Datos</h4><p>Polygon.io vía proxy propio</p></div>
@@ -2220,7 +2220,8 @@ html, body {
     </div>
 
     <div class="field-label">Precio de entrada</div>
-    <input class="field-input" id="input-price" type="number" placeholder="Ej: 150.00" step="0.01" min="0" oninput="calcRisk()">
+    <input class="field-input" id="input-price" type="number" placeholder="Introduce el precio real del broker" step="0.01" min="0" oninput="calcRisk()">
+    <div id="input-price-warning" style="display:none;font-family:'DM Mono',monospace;font-size:0.58rem;padding:6px 10px;border-radius:7px;margin-bottom:10px;line-height:1.5"></div>
 
     <div class="field-label">Stop loss inicial</div>
     <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:14px">
@@ -2458,6 +2459,31 @@ let activeFilters = new Set();
 let realDataCache = {}; // ticker → { candles, expiry }
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutos
 
+// ── Caché persistente de últimos precios reales ───────────────────────────────
+// Almacena el último precio real descargado del proxy con su timestamp
+let priceCache = JSON.parse(localStorage.getItem('stockscan_price_cache') || '{}');
+// { "CVX": { price: 155.3, ts: 1711234567890 }, ... }
+
+function savePriceToCache(ticker, price) {
+  priceCache[ticker] = { price, ts: Date.now() };
+  localStorage.setItem('stockscan_price_cache', JSON.stringify(priceCache));
+}
+
+function getPriceCacheInfo(ticker) {
+  const cached = priceCache[ticker];
+  if (!cached) return null;
+  const d = new Date(cached.ts);
+  const dateStr = d.toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit' });
+  const timeStr = d.toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
+  const minsAgo = Math.round((Date.now() - cached.ts) / 60000);
+  const ageStr  = minsAgo < 60
+    ? 'hace ' + minsAgo + ' min'
+    : minsAgo < 1440
+    ? 'hace ' + Math.round(minsAgo/60) + 'h'
+    : dateStr + ' ' + timeStr;
+  return { price: cached.price, dateStr, timeStr, ageStr, ts: cached.ts };
+}
+
 // ── SEEDED RNG ──────────────────────────────────────────────────────────────
 function rng(seed) {
   let s = seed;
@@ -2594,6 +2620,7 @@ async function fetchStockReal(stock) {
     const data = await fetchRealData(stock.t);
     if (!data.candles || data.candles.length < 30) throw new Error('Datos insuficientes');
     const indicators = calcIndicators(data.candles);
+    savePriceToCache(stock.t, indicators.price); // guardar precio real en caché persistente
     return { ...stock, ...indicators, realData: true };
   } catch (err) {
     console.warn(`[${stock.t}] Fallback a datos simulados:`, err.message);
@@ -2699,7 +2726,12 @@ function renderList(data) {
   }
 
   const sigLabels={'strong-buy':'COMPRA ✦','buy':'COMPRA','neutral':'NEUTRAL','sell':'VENTA'};
-  const fmtPrice=(p,m)=>(['ibex','eurostoxx'].includes(m)?p.toFixed(2)+' €':'$ '+p.toFixed(2));
+  const fmtPrice=(s)=>{
+    const m=s.m;
+    const p=s.price;
+    if (!s.realData) return `<span style="color:var(--text3);font-size:0.7rem">sin precio real</span>`;
+    return (['ibex','eurostoxx'].includes(m)?p.toFixed(2)+' €':'$ '+p.toFixed(2));
+  };
 
   el.innerHTML = data.map((s,i)=>{
     const dots=[1,2,3,4,5].map(n=>`<div class="sdot ${n<=s.score?(s.score>=3?'on-buy':'on-sell'):''}"></div>`).join('');
@@ -2714,7 +2746,7 @@ function renderList(data) {
         </div>
       </div>
       <div class="stock-right">
-        <div class="stock-price">${fmtPrice(s.price,s.m)}</div>
+        <div class="stock-price">${fmtPrice(s)}</div>
         <div class="sig-badge ${s.sig}">${sigLabels[s.sig]}</div>
         <div class="score-dots">${dots}</div>
       </div>
@@ -3859,6 +3891,7 @@ function setLocalData(data) {
   if (data.paperSettings)  { paperSettings  = data.paperSettings;  localStorage.setItem('stockscan_paper_settings',  JSON.stringify(paperSettings)); }
   if (data.realFunds)      { realFunds      = data.realFunds;       localStorage.setItem('stockscan_real_funds',      JSON.stringify(realFunds)); }
   if (data.taxData)        { taxData        = data.taxData;         localStorage.setItem('stockscan_tax_data',        JSON.stringify(taxData)); }
+  if (data.priceCache)     { priceCache     = data.priceCache;      localStorage.setItem('stockscan_price_cache',     JSON.stringify(priceCache)); }
 }
 
 async function loadFromGitHub() {
@@ -3933,7 +3966,7 @@ async function saveToGitHub(silent = false, knownSha = null) {
   const repo  = localStorage.getItem('gh_repo') || 'CCL123-spa/stockscan-app';
   const statusEl = document.getElementById('diary-sync-status');
 
-  const dataToSave = { diary: diaryEntries, guide: guideProgress, portfolio, paperPortfolio, paperSettings, realFunds, taxData, updatedAt: new Date().toISOString() };
+  const dataToSave = { diary: diaryEntries, guide: guideProgress, portfolio, paperPortfolio, paperSettings, realFunds, taxData, priceCache, updatedAt: new Date().toISOString() };
   setLocalData(dataToSave);
 
   if (!token) {
@@ -4657,6 +4690,7 @@ function navigate(id, el) {
                 const closes = data.candles.map(c => c.c);
                 const last   = closes[closes.length - 1];
                 const prev   = closes[closes.length - 2] || last;
+                savePriceToCache(t, last); // guardar en caché persistente
                 // Añadir a results para que getTechData lo encuentre
                 const existing = results.find(r => r.t === t);
                 if (existing) {
@@ -6287,10 +6321,10 @@ function openSheet(ticker) {
 
     <!-- BOTONES AÑADIR A CARTERA -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-      <button onclick="closeSheet();activePortfolioTab='real';openAddSheet('${s.t}',${s.price})" style="padding:13px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">
+      <button onclick="closeSheet();activePortfolioTab='real';openAddSheet('${s.t}',${s.realData ? s.price : null})" style="padding:13px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">
         💼 Cartera Real
       </button>
-      <button onclick="closeSheet();activePortfolioTab='paper';openAddSheet('${s.t}',${s.price})" style="padding:13px;background:var(--purple);color:var(--bg);border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">
+      <button onclick="closeSheet();activePortfolioTab='paper';openAddSheet('${s.t}',${s.realData ? s.price : null})" style="padding:13px;background:var(--purple);color:var(--bg);border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">
         🎮 Paper
       </button>
     </div>
@@ -6434,6 +6468,7 @@ function refreshPortfolioPrices() {
           const closes = data.candles.map(c => c.c);
           const last   = closes[closes.length - 1];
           const prev   = closes[closes.length - 2] || last;
+          savePriceToCache(t, last); // guardar en caché persistente
           // Actualizar o añadir en results
           const scanRes = results.find(r => r.t === t);
           if (scanRes) {
@@ -6579,13 +6614,21 @@ function saveRiskSettings() {
 // ── Datos técnicos ────────────────────────────────────────────────────────────
 function getTechData(ticker) {
   const live = results.find(r => r.t === ticker);
-  if (live) return { rsi:live.rsi, macd:live.mv>live.ms?'alcista':'bajista', ma:live.golden?'golden cross':'death cross', aboveMa50:live.aboveMa50, score:live.score, price:live.price, chg:live.chg };
-  const seed = ticker.split('').reduce((a,c)=>a+c.charCodeAt(0),0)*31;
-  const r = rng(seed);
-  const rsi=Math.round(22+r()*58), macdBull=r()>0.45, golden=r()>0.4, aboveMa50=r()>0.45;
-  const price = +((PRICES[ticker]||100)*(0.92+r()*0.16)).toFixed(2);
-  let score=0; if(rsi<50)score++; if(rsi<35)score++; if(macdBull)score++; if(aboveMa50)score++; if(golden)score++;
-  return { rsi, macd:macdBull?'alcista':'bajista', ma:golden?'golden cross':'death cross', aboveMa50, score, price, chg:+((r()-0.45)*5).toFixed(2) };
+  if (live) return { rsi:live.rsi, macd:live.mv>live.ms?'alcista':'bajista', ma:live.golden?'golden cross':'death cross', aboveMa50:live.aboveMa50, score:live.score, price:live.price, chg:live.chg, stale:false, cacheInfo:null };
+
+  // Sin datos en memory — buscar en priceCache persistente
+  const cached = getPriceCacheInfo(ticker);
+  if (cached) {
+    // Precio en caché: usar para cálculos pero marcar como stale
+    const seed = ticker.split('').reduce((a,c)=>a+c.charCodeAt(0),0)*31;
+    const r = rng(seed);
+    const rsi=Math.round(22+r()*58), macdBull=r()>0.45, golden=r()>0.4, aboveMa50=r()>0.45;
+    let score=0; if(rsi<50)score++; if(rsi<35)score++; if(macdBull)score++; if(aboveMa50)score++; if(golden)score++;
+    return { rsi, macd:macdBull?'alcista':'bajista', ma:golden?'golden cross':'death cross', aboveMa50, score, price:cached.price, chg:0, stale:true, cacheInfo:cached };
+  }
+
+  // Sin ningún dato — devolver precio null
+  return { rsi:50, macd:'neutral', ma:'—', aboveMa50:true, score:0, price:null, chg:0, stale:true, cacheInfo:null, noData:true };
 }
 
 // ── Trailing stop dinámico ────────────────────────────────────────────────────
@@ -6800,6 +6843,28 @@ function renderPortfolio() {
   let totalAlerts=0,alertBanners='',cards='',totalValue=0,totalCost=0;
   activePort.forEach((pos,idx)=>{
     const ev=evaluateAlerts(pos), tech=ev.tech, cur=tech.price;
+
+    // Si no hay precio real, mostrar tarjeta con aviso
+    if (cur === null) {
+      const cacheInfo = tech.cacheInfo;
+      const noDataMsg = cacheInfo
+        ? `⚠️ Precio no actualizado · último: ${cacheInfo.price.toFixed(2)} (${cacheInfo.ageStr})`
+        : '⚠️ Sin precio — pulsa ↺ para actualizar';
+      cards+=`<div class="port-card" style="animation-delay:${idx*0.05}s;opacity:0.7" onclick="openPosSheet(${idx})">
+        <div class="port-card-top">
+          <div class="port-avatar">${pos.ticker.length>4?pos.ticker.slice(0,3):pos.ticker}</div>
+          <div class="port-main">
+            <div class="port-ticker">${pos.ticker} ⏳</div>
+            <div class="port-name">${pos.shares} acc. · entrada ${pos.buyPrice}</div>
+          </div>
+          <div class="port-right" style="text-align:right">
+            <div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--orange)">${noDataMsg}</div>
+          </div>
+        </div>
+      </div>`;
+      return;
+    }
+
     const trail=calcTrailingStop(pos,cur);
     const pnlPct=(((cur-pos.buyPrice)/pos.buyPrice)*100).toFixed(1);
     const pnlEur=((cur-pos.buyPrice)*pos.shares).toFixed(0);
@@ -6809,6 +6874,10 @@ function renderPortfolio() {
       if(activePortfolioTab==='paper') paperPortfolio[idx].highWaterMark=cur; else portfolio[idx].highWaterMark=cur;
       if(activePortfolioTab==='paper') savePaperPortfolio(); else savePortfolio();
     }
+    // Indicador de precio stale (de caché, no en tiempo real)
+    const staleTag = tech.stale && tech.cacheInfo
+      ? `<span style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--orange);margin-left:4px" title="Precio de caché · ${tech.cacheInfo.ageStr}">⏱ ${tech.cacheInfo.ageStr}</span>`
+      : '';
     // Alertas
     if(cur<=trail.trailingStop){
       totalAlerts++;
@@ -6831,7 +6900,7 @@ function renderPortfolio() {
       <div class="port-card-top" onclick="openPosSheet(${idx})">
         <div class="port-avatar">${pos.ticker.length>4?pos.ticker.slice(0,3):pos.ticker}</div>
         <div class="port-main">
-          <div class="port-ticker">${pos.ticker} ${icon}</div>
+          <div class="port-ticker">${pos.ticker} ${icon}${staleTag}</div>
           <div class="port-name">${pos.shares} acc. · entrada ${pos.buyPrice} · stop <span style="color:${cur<=trail.trailingStop?'var(--red)':cur<pos.buyPrice?'var(--orange)':'var(--green)'}">${trail.trailingStop}</span></div>
         </div>
         <div class="port-right">
@@ -7242,13 +7311,46 @@ function openAddSheet(ticker, price) {
   if(riskSettings.capital) document.getElementById('input-capital').value=riskSettings.capital;
   document.getElementById('input-broker-fee').value=riskSettings.brokerFee||1;
   document.getElementById('input-ticker').value=ticker||'';
-  document.getElementById('input-price').value=price||'';
   document.getElementById('input-stop').value='';
   const sharesInput=document.getElementById('input-shares');
   sharesInput.value=''; sharesInput._manualEdit=false;
   document.getElementById('input-date').value=new Date().toISOString().slice(0,10);
   document.getElementById('risk-calc').style.display='none';
-  if(ticker&&price) { setTimeout(()=>calcRisk(),50); }
+
+  const priceField = document.getElementById('input-price');
+  const priceWarning = document.getElementById('input-price-warning');
+
+  if (ticker) {
+    const liveResult = results.find(r => r.t === ticker);
+    const cached     = getPriceCacheInfo(ticker);
+    const finalPrice = liveResult ? liveResult.price : (cached ? cached.price : null);
+    const isReal     = !!liveResult;
+    const isCache    = !liveResult && !!cached;
+
+    priceField.value = finalPrice || '';
+    if (priceWarning) {
+      if (isReal) {
+        priceWarning.textContent = '✅ Precio real del mercado';
+        priceWarning.style.cssText = 'display:block;font-family:\'DM Mono\',monospace;font-size:0.58rem;padding:6px 10px;border-radius:7px;margin-bottom:10px;line-height:1.5;background:rgba(34,211,160,0.1);border:1px solid rgba(34,211,160,0.3);color:var(--green)';
+        priceField.style.borderColor = 'var(--green)';
+        setTimeout(() => { priceWarning.style.display = 'none'; priceField.style.borderColor = ''; }, 3000);
+      } else if (isCache) {
+        priceWarning.textContent = '⚠️ Último precio conocido (' + cached.ageStr + ') — verifica el precio real en tu broker antes de confirmar';
+        priceWarning.style.cssText = 'display:block;font-family:\'DM Mono\',monospace;font-size:0.58rem;padding:6px 10px;border-radius:7px;margin-bottom:10px;line-height:1.5;background:rgba(245,158,42,0.1);border:1px solid rgba(245,158,42,0.3);color:var(--orange)';
+        priceField.style.borderColor = 'var(--orange)';
+      } else {
+        priceWarning.textContent = '❌ Sin precio disponible — el servidor no responde. Introduce el precio real del broker';
+        priceWarning.style.cssText = 'display:block;font-family:\'DM Mono\',monospace;font-size:0.58rem;padding:6px 10px;border-radius:7px;margin-bottom:10px;line-height:1.5;background:rgba(245,86,74,0.1);border:1px solid rgba(245,86,74,0.3);color:var(--red)';
+        priceField.style.borderColor = 'var(--red)';
+        priceField.placeholder = 'Introduce el precio real del broker';
+      }
+    }
+    if (finalPrice) setTimeout(()=>calcRisk(), 50);
+  } else {
+    priceField.value = '';
+    if (priceWarning) priceWarning.style.display = 'none';
+  }
+
   document.getElementById('addOverlay').classList.add('open');
   document.getElementById('addSheet').classList.add('open');
   document.body.style.overflow='hidden';
@@ -7263,8 +7365,37 @@ function closeAddSheet(){
 
 function setTicker(t){
   document.getElementById('input-ticker').value=t;
-  const p=PRICES[t];
-  if(p&&!document.getElementById('input-price').value){document.getElementById('input-price').value=p;setStopPct(0.08);}
+  const liveResult = results.find(r => r.t === t);
+  const cached     = getPriceCacheInfo(t);
+  const priceField = document.getElementById('input-price');
+  const priceWarning = document.getElementById('input-price-warning');
+
+  if (liveResult) {
+    priceField.value = liveResult.price;
+    priceField.style.borderColor = 'var(--green)';
+    if (priceWarning) {
+      priceWarning.textContent = '✅ Precio real del mercado';
+      priceWarning.style.cssText = 'display:block;font-family:\'DM Mono\',monospace;font-size:0.58rem;padding:6px 10px;border-radius:7px;margin-bottom:10px;line-height:1.5;background:rgba(34,211,160,0.1);border:1px solid rgba(34,211,160,0.3);color:var(--green)';
+      setTimeout(() => { priceWarning.style.display = 'none'; priceField.style.borderColor = ''; }, 3000);
+    }
+    setStopPct(0.08);
+  } else if (cached) {
+    priceField.value = cached.price;
+    priceField.style.borderColor = 'var(--orange)';
+    if (priceWarning) {
+      priceWarning.textContent = '⚠️ Último precio conocido (' + cached.ageStr + ') — verifica en tu broker antes de confirmar';
+      priceWarning.style.cssText = 'display:block;font-family:\'DM Mono\',monospace;font-size:0.58rem;padding:6px 10px;border-radius:7px;margin-bottom:10px;line-height:1.5;background:rgba(245,158,42,0.1);border:1px solid rgba(245,158,42,0.3);color:var(--orange)';
+    }
+    setStopPct(0.08);
+  } else {
+    priceField.value = '';
+    priceField.placeholder = 'Sin precio — introduce el precio del broker';
+    priceField.style.borderColor = 'var(--red)';
+    if (priceWarning) {
+      priceWarning.textContent = '❌ Sin precio disponible — servidor no responde. Introduce el precio real del broker';
+      priceWarning.style.cssText = 'display:block;font-family:\'DM Mono\',monospace;font-size:0.58rem;padding:6px 10px;border-radius:7px;margin-bottom:10px;line-height:1.5;background:rgba(245,86,74,0.1);border:1px solid rgba(245,86,74,0.3);color:var(--red)';
+    }
+  }
   document.getElementById('input-price').focus();
 }
 
